@@ -64,13 +64,8 @@ using (var scope = app.Services.CreateScope())
 await app.Services.SeedRolesAndAdminAsync(builder.Configuration);
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseCors("ReactDev");
 
