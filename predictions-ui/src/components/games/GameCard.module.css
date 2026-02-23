@@ -1,0 +1,148 @@
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dateCol {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  min-width: 150px;
+  flex-shrink: 0;
+}
+
+.homeTeam {
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: right;
+  min-width: 80px;
+}
+
+.awayTeam {
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: left;
+  min-width: 80px;
+}
+
+.vs {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  width: 40px;
+  text-align: center;
+}
+
+.score {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  width: 40px;
+  text-align: center;
+}
+
+.predictionCol {
+  display: flex;
+  align-items: center;
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.predictionScore {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.inlineForm {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.inlineForm input {
+  width: 48px;
+  text-align: center;
+  padding: 0.3rem 0.4rem;
+  font-size: 0.85rem;
+}
+
+.predictBtn {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+.predictBtn:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.predictBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.editPredBtn {
+  background: none;
+  color: var(--color-primary);
+  padding: 0 0.4rem;
+  font-size: 0.8rem;
+  margin-left: 0.4rem;
+}
+
+.editPredBtn:hover {
+  text-decoration: underline;
+}
+
+.cancelEditBtn {
+  background-color: var(--color-border);
+  color: var(--color-text);
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+.status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+  min-width: 70px;
+  text-align: center;
+}
+
+.statusFinal {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.statusLive {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.statusUpcoming {
+  background-color: #f1f5f9;
+  color: var(--color-text-secondary);
+}
+
+.actionsCol {
+  flex-shrink: 0;
+  min-width: 120px;
+}
+
+.viewLink {
+  font-size: 0.8rem;
+}

@@ -1,0 +1,45 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getTournaments } from '../../api/tournamentApi';
+import type { TournamentResponse } from '../../types';
+import styles from './TournamentListPage.module.css';
+
+export default function TournamentListPage() {
+  const [tournaments, setTournaments] = useState<TournamentResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    getTournaments()
+      .then(setTournaments)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div className={styles.loading}>Loading tournaments...</div>;
+
+  return (
+    <div>
+      <div className={styles.header}>
+        <h1>Tournaments</h1>
+      </div>
+      {tournaments.length === 0 ? (
+        <div className={styles.empty}>No tournaments yet.</div>
+      ) : (
+        <div className={styles.grid}>
+          {tournaments.map((t) => (
+            <div
+              key={t.id}
+              className={styles.card}
+              onClick={() => navigate(`/tournaments/${t.id}`)}
+            >
+              <div className={styles.cardName}>{t.name}</div>
+              <div className={styles.cardDate}>
+                Created {new Date(t.createdAt).toLocaleDateString()}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

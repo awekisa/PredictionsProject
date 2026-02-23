@@ -1,0 +1,27 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+nul
+
+# EF Core
+# (migrations are committed)
+
+# Frontend
+predictions-ui/node_modules/
+predictions-ui/dist/
+
+# Environment / secrets
+predictions-ui/.env
+predictions-ui/.env.local
+predictions-ui/.env.*.local
+PredictionsAPI/appsettings.Development.json
+
+# Claude Code
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
