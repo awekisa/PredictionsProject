@@ -8,7 +8,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1rem;
 }
 
@@ -47,4 +47,14 @@
   text-align: center;
   color: var(--color-text-secondary);
   padding: 3rem 0;
+}
+
+@media (max-width: 640px) {
+  .header h1 {
+    font-size: 1.25rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }

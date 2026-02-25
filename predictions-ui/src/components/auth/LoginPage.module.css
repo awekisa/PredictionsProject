@@ -4,6 +4,7 @@
   justify-content: center;
   min-height: 100vh;
   background-color: var(--color-bg);
+  padding: 1rem;
 }
 
 .card {
@@ -71,4 +72,10 @@
   margin-top: 1rem;
   font-size: 0.85rem;
   color: var(--color-text-secondary);
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 1.75rem 1.25rem;
+  }
 }

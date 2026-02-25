@@ -3,6 +3,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.5rem;
+  gap: 1rem;
 }
 
 .header h1 {
@@ -13,6 +14,7 @@
   background-color: var(--color-primary);
   color: white;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .createBtn:hover {
@@ -23,12 +25,14 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .actions {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .editBtn {
@@ -64,6 +68,7 @@
   align-items: center;
   justify-content: center;
   z-index: 100;
+  padding: 1rem;
 }
 
 .formCard {
@@ -122,4 +127,14 @@
   text-align: center;
   color: var(--color-text-secondary);
   padding: 2rem 0;
+}
+
+@media (max-width: 640px) {
+  .header h1 {
+    font-size: 1.25rem;
+  }
+
+  .formCard {
+    padding: 1.5rem;
+  }
 }

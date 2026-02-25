@@ -54,9 +54,12 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
 
   return (
     <div className={styles.card}>
-      <div className={styles.row}>
+      <div className={styles.metaRow}>
         <span className={styles.dateCol}>{startTime.toLocaleString()}</span>
+        <span className={`${styles.status} ${statusClass}`}>{statusLabel}</span>
+      </div>
 
+      <div className={styles.matchRow}>
         <span className={styles.homeTeam}>{game.homeTeam}</span>
         {hasResult ? (
           <span className={styles.score}>
@@ -66,8 +69,10 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
           <span className={styles.vs}>vs</span>
         )}
         <span className={styles.awayTeam}>{game.awayTeam}</span>
+      </div>
 
-        <span className={styles.predictionCol}>
+      <div className={styles.bottomRow}>
+        <div className={styles.predictionCol}>
           {myPrediction && !editing && (
             <>
               <span className={styles.predictionScore}>
@@ -113,17 +118,15 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
               )}
             </form>
           )}
-        </span>
+        </div>
 
-        <span className={`${styles.status} ${statusClass}`}>{statusLabel}</span>
-
-        <span className={styles.actionsCol}>
+        <div className={styles.actionsCol}>
           {hasStarted && (
             <Link className={styles.viewLink} to={`/games/${game.id}/predictions`}>
               View predictions
             </Link>
           )}
-        </span>
+        </div>
       </div>
     </div>
   );

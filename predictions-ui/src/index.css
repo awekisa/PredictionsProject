@@ -28,6 +28,8 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
 }
 
 a {
@@ -47,6 +49,7 @@ button {
   border: none;
   border-radius: var(--radius);
   transition: background-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
 }
 
 input,
@@ -83,4 +86,12 @@ th {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+@media (max-width: 640px) {
+  th,
+  td {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+  }
 }
