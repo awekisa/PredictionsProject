@@ -42,7 +42,7 @@ public class GameService : IGameService
             TournamentId = tournamentId,
             HomeTeam = request.HomeTeam,
             AwayTeam = request.AwayTeam,
-            StartTime = request.StartTime
+            StartTime = DateTime.SpecifyKind(request.StartTime, DateTimeKind.Utc)
         };
 
         _context.Games.Add(game);
@@ -60,7 +60,7 @@ public class GameService : IGameService
 
         game.HomeTeam = request.HomeTeam;
         game.AwayTeam = request.AwayTeam;
-        game.StartTime = request.StartTime;
+        game.StartTime = DateTime.SpecifyKind(request.StartTime, DateTimeKind.Utc);
 
         await _context.SaveChangesAsync();
 

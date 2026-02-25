@@ -52,7 +52,12 @@ export default function AdminGamesPage() {
     setEditingGameId(g.id);
     setHomeTeam(g.homeTeam);
     setAwayTeam(g.awayTeam);
-    setStartTime(g.startTime.slice(0, 16));
+    // Convert UTC time from API to local time for the datetime-local input
+    const d = new Date(g.startTime);
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+    setStartTime(local);
     setFormMode('game');
   };
 
@@ -65,7 +70,8 @@ export default function AdminGamesPage() {
 
   const handleGameSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const data = { homeTeam, awayTeam, startTime };
+    // Convert local datetime-local value to UTC ISO string before sending
+    const data = { homeTeam, awayTeam, startTime: new Date(startTime).toISOString() };
     if (editingGameId) {
       await adminGameApi.update(tId, editingGameId, data);
     } else {
