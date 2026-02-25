@@ -1,7 +1,8 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as adminTournamentApi from '../../api/adminTournamentApi';
 import type { TournamentResponse } from '../../types';
+import ConfirmDialog from '../common/ConfirmDialog';
 import styles from './AdminTournamentsPage.module.css';
 
 export default function AdminTournamentsPage() {
@@ -10,7 +11,9 @@ export default function AdminTournamentsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [name, setName] = useState('');
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
   const navigate = useNavigate();
+  const formOpenedAt = useRef(0);
 
   const load = () => {
     setLoading(true);
@@ -22,15 +25,22 @@ export default function AdminTournamentsPage() {
   }, []);
 
   const openCreate = () => {
+    formOpenedAt.current = Date.now();
     setEditingId(null);
     setName('');
     setShowForm(true);
   };
 
   const openEdit = (t: TournamentResponse) => {
+    formOpenedAt.current = Date.now();
     setEditingId(t.id);
     setName(t.name);
     setShowForm(true);
+  };
+
+  const handleOverlayClick = () => {
+    if (Date.now() - formOpenedAt.current < 300) return;
+    setShowForm(false);
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -45,8 +55,8 @@ export default function AdminTournamentsPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete this tournament? All games and predictions will be removed.')) return;
     await adminTournamentApi.remove(id);
+    setPendingDeleteId(null);
     load();
   };
 
@@ -86,7 +96,7 @@ export default function AdminTournamentsPage() {
                     <button className={styles.editBtn} onClick={() => openEdit(t)}>
                       Edit
                     </button>
-                    <button className={styles.deleteBtn} onClick={() => handleDelete(t.id)}>
+                    <button className={styles.deleteBtn} onClick={() => setPendingDeleteId(t.id)}>
                       Delete
                     </button>
                   </div>
@@ -97,8 +107,16 @@ export default function AdminTournamentsPage() {
         </table>
       </div>
 
+      {pendingDeleteId !== null && (
+        <ConfirmDialog
+          message="Delete this tournament? All games and predictions will be removed."
+          onConfirm={() => handleDelete(pendingDeleteId)}
+          onCancel={() => setPendingDeleteId(null)}
+        />
+      )}
+
       {showForm && (
-        <div className={styles.formOverlay} onClick={() => setShowForm(false)}>
+        <div className={styles.formOverlay} onClick={handleOverlayClick}>
           <div className={styles.formCard} onClick={(e) => e.stopPropagation()}>
             <h2>{editingId ? 'Edit Tournament' : 'New Tournament'}</h2>
             <form onSubmit={handleSubmit}>

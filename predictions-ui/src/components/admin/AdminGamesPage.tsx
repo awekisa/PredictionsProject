@@ -1,7 +1,8 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import * as adminGameApi from '../../api/adminGameApi';
 import type { GameResponse } from '../../types';
+import ConfirmDialog from '../common/ConfirmDialog';
 import styles from './AdminGamesPage.module.css';
 
 type FormMode = 'none' | 'game' | 'result';
@@ -14,6 +15,8 @@ export default function AdminGamesPage() {
 
   const [formMode, setFormMode] = useState<FormMode>('none');
   const [editingGameId, setEditingGameId] = useState<number | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const formOpenedAt = useRef(0);
 
   // Game form fields
   const [homeTeam, setHomeTeam] = useState('');
@@ -39,6 +42,7 @@ export default function AdminGamesPage() {
   };
 
   const openCreateGame = () => {
+    formOpenedAt.current = Date.now();
     setEditingGameId(null);
     setHomeTeam('');
     setAwayTeam('');
@@ -47,6 +51,7 @@ export default function AdminGamesPage() {
   };
 
   const openEditGame = (g: GameResponse) => {
+    formOpenedAt.current = Date.now();
     setEditingGameId(g.id);
     setHomeTeam(g.homeTeam);
     setAwayTeam(g.awayTeam);
@@ -55,10 +60,16 @@ export default function AdminGamesPage() {
   };
 
   const openSetResult = (g: GameResponse) => {
+    formOpenedAt.current = Date.now();
     setEditingGameId(g.id);
     setHomeGoals(g.homeGoals?.toString() ?? '');
     setAwayGoals(g.awayGoals?.toString() ?? '');
     setFormMode('result');
+  };
+
+  const handleOverlayClick = () => {
+    if (Date.now() - formOpenedAt.current < 300) return;
+    closeForm();
   };
 
   const handleGameSubmit = async (e: FormEvent) => {
@@ -85,8 +96,8 @@ export default function AdminGamesPage() {
   };
 
   const handleDelete = async (gameId: number) => {
-    if (!confirm('Delete this game and all its predictions?')) return;
     await adminGameApi.remove(tId, gameId);
+    setPendingDeleteId(null);
     load();
   };
 
@@ -135,7 +146,7 @@ export default function AdminGamesPage() {
                     <button className={styles.editBtn} onClick={() => openEditGame(g)}>
                       Edit
                     </button>
-                    <button className={styles.deleteBtn} onClick={() => handleDelete(g.id)}>
+                    <button className={styles.deleteBtn} onClick={() => setPendingDeleteId(g.id)}>
                       Delete
                     </button>
                   </div>
@@ -146,8 +157,16 @@ export default function AdminGamesPage() {
         </table>
       </div>
 
+      {pendingDeleteId !== null && (
+        <ConfirmDialog
+          message="Delete this game and all its predictions?"
+          onConfirm={() => handleDelete(pendingDeleteId)}
+          onCancel={() => setPendingDeleteId(null)}
+        />
+      )}
+
       {formMode === 'game' && (
-        <div className={styles.formOverlay} onClick={closeForm}>
+        <div className={styles.formOverlay} onClick={handleOverlayClick}>
           <div className={styles.formCard} onClick={(e) => e.stopPropagation()}>
             <h2>{editingGameId ? 'Edit Game' : 'New Game'}</h2>
             <form onSubmit={handleGameSubmit}>
@@ -191,7 +210,7 @@ export default function AdminGamesPage() {
       )}
 
       {formMode === 'result' && (
-        <div className={styles.formOverlay} onClick={closeForm}>
+        <div className={styles.formOverlay} onClick={handleOverlayClick}>
           <div className={styles.formCard} onClick={(e) => e.stopPropagation()}>
             <h2>Set Game Result</h2>
             <form onSubmit={handleResultSubmit}>
