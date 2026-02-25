@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getTournaments } from '../../api/tournamentApi';
 import type { TournamentResponse } from '../../types';
+import { formatDate } from '../../utils/formatDate';
 import styles from './TournamentListPage.module.css';
 
 export default function TournamentListPage() {
@@ -34,7 +35,7 @@ export default function TournamentListPage() {
             >
               <div className={styles.cardName}>{t.name}</div>
               <div className={styles.cardDate}>
-                Created {new Date(t.createdAt).toLocaleDateString()}
+                Created {formatDate(t.createdAt)}
               </div>
             </div>
           ))}

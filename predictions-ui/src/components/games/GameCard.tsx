@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { placePrediction } from '../../api/predictionApi';
 import type { GameResponse, PredictionResponse } from '../../types';
+import { formatDateTime } from '../../utils/formatDate';
 import styles from './GameCard.module.css';
 
 interface Props {
@@ -55,7 +56,7 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
   return (
     <div className={styles.card}>
       <div className={styles.metaRow}>
-        <span className={styles.dateCol}>{startTime.toLocaleString()}</span>
+        <span className={styles.dateCol}>{formatDateTime(startTime)}</span>
         <span className={`${styles.status} ${statusClass}`}>{statusLabel}</span>
       </div>
 

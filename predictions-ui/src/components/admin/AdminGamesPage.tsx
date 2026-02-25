@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import * as adminGameApi from '../../api/adminGameApi';
 import type { GameResponse } from '../../types';
 import ConfirmDialog from '../common/ConfirmDialog';
+import { formatDateTime } from '../../utils/formatDate';
 import styles from './AdminGamesPage.module.css';
 
 type FormMode = 'none' | 'game' | 'result';
@@ -129,7 +130,7 @@ export default function AdminGamesPage() {
               <tr key={g.id}>
                 <td>{g.homeTeam}</td>
                 <td>{g.awayTeam}</td>
-                <td>{new Date(g.startTime).toLocaleString()}</td>
+                <td>{formatDateTime(g.startTime)}</td>
                 <td className={styles.scoreCell}>
                   {g.homeGoals !== null ? `${g.homeGoals} - ${g.awayGoals}` : '-'}
                 </td>

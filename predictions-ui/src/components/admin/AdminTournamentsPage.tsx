@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import * as adminTournamentApi from '../../api/adminTournamentApi';
 import type { TournamentResponse } from '../../types';
 import ConfirmDialog from '../common/ConfirmDialog';
+import { formatDate } from '../../utils/formatDate';
 import styles from './AdminTournamentsPage.module.css';
 
 export default function AdminTournamentsPage() {
@@ -76,7 +77,7 @@ export default function AdminTournamentsPage() {
             {tournaments.map((t) => (
               <tr key={t.id}>
                 <td>{t.name}</td>
-                <td>{new Date(t.createdAt).toLocaleDateString()}</td>
+                <td>{formatDate(t.createdAt)}</td>
                 <td>
                   <div className={styles.actions}>
                     <button

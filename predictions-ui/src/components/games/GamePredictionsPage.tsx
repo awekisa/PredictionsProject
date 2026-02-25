@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getGamePredictions } from '../../api/gameApi';
 import type { PredictionResponse } from '../../types';
+import { formatDateTime } from '../../utils/formatDate';
 import styles from './GamePredictionsPage.module.css';
 
 export default function GamePredictionsPage() {
@@ -54,7 +55,7 @@ export default function GamePredictionsPage() {
                   <td>
                     {p.homeGoals} - {p.awayGoals}
                   </td>
-                  <td>{new Date(p.createdAt).toLocaleString()}</td>
+                  <td>{formatDateTime(p.createdAt)}</td>
                 </tr>
               ))}
             </tbody>
