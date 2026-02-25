@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as adminTournamentApi from '../../api/adminTournamentApi';
 import type { TournamentResponse } from '../../types';
@@ -13,7 +13,6 @@ export default function AdminTournamentsPage() {
   const [name, setName] = useState('');
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
   const navigate = useNavigate();
-  const formOpenedAt = useRef(0);
 
   const load = () => {
     setLoading(true);
@@ -25,22 +24,15 @@ export default function AdminTournamentsPage() {
   }, []);
 
   const openCreate = () => {
-    formOpenedAt.current = Date.now();
     setEditingId(null);
     setName('');
     setShowForm(true);
   };
 
   const openEdit = (t: TournamentResponse) => {
-    formOpenedAt.current = Date.now();
     setEditingId(t.id);
     setName(t.name);
     setShowForm(true);
-  };
-
-  const handleOverlayClick = () => {
-    if (Date.now() - formOpenedAt.current < 300) return;
-    setShowForm(false);
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -116,8 +108,8 @@ export default function AdminTournamentsPage() {
       )}
 
       {showForm && (
-        <div className={styles.formOverlay} onClick={handleOverlayClick}>
-          <div className={styles.formCard} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.formOverlay}>
+          <div className={styles.formCard}>
             <h2>{editingId ? 'Edit Tournament' : 'New Tournament'}</h2>
             <form onSubmit={handleSubmit}>
               <div>

@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import styles from './ConfirmDialog.module.css';
 
 interface Props {
@@ -8,16 +7,9 @@ interface Props {
 }
 
 export default function ConfirmDialog({ message, onConfirm, onCancel }: Props) {
-  const openedAt = useRef(Date.now());
-
-  const handleOverlayClick = () => {
-    if (Date.now() - openedAt.current < 300) return;
-    onCancel();
-  };
-
   return (
-    <div className={styles.overlay} onClick={handleOverlayClick}>
-      <div className={styles.card} onClick={(e) => e.stopPropagation()}>
+    <div className={styles.overlay}>
+      <div className={styles.card}>
         <p className={styles.message}>{message}</p>
         <div className={styles.actions}>
           <button className={styles.cancelBtn} onClick={onCancel}>
