@@ -65,8 +65,9 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  overflow-y: auto;
   z-index: 100;
   padding: 1rem;
 }
@@ -78,6 +79,7 @@
   box-shadow: var(--shadow-md);
   width: 100%;
   max-width: 420px;
+  margin: auto 0;
 }
 
 .formCard h2 {
