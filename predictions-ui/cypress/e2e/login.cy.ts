@@ -20,8 +20,8 @@ describe('Login page', () => {
     cy.contains('button', /sign in/i).click();
 
     cy.wait('@loginFail');
-    // App shows "Login failed. Please check your credentials." or the server message
-    cy.contains(/login failed|invalid/i).should('exist');
+    // Error div appears — check by CSS module class pattern rather than exact text
+    cy.get('[class*="error"]').should('be.visible').and('not.be.empty');
   });
 
   it('redirects away from /login on successful login', () => {

@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useState, type ReactNode } from 'react';
 import type { AuthResponse } from '../types';
 
 interface User {
@@ -51,24 +51,37 @@ function isTokenExpired(token: string): boolean {
   return Date.now() / 1000 > exp;
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-
-  useEffect(() => {
+function initUserFromStorage(): User | null {
+  try {
     const storedToken = localStorage.getItem('token');
     if (storedToken && !isTokenExpired(storedToken)) {
-      const storedEmail = localStorage.getItem('userEmail') || '';
-      const storedName = localStorage.getItem('userDisplayName') || '';
+      const email = localStorage.getItem('userEmail') || '';
+      const displayName = localStorage.getItem('userDisplayName') || '';
       const role = getRoleFromToken(storedToken);
-      setToken(storedToken);
-      setUser({ email: storedEmail, displayName: storedName, role });
-    } else {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userEmail');
-      localStorage.removeItem('userDisplayName');
+      return { email, displayName, role };
     }
-  }, []);
+  } catch {
+    // ignore malformed token
+  }
+  localStorage.removeItem('token');
+  localStorage.removeItem('userEmail');
+  localStorage.removeItem('userDisplayName');
+  return null;
+}
+
+function initTokenFromStorage(): string | null {
+  try {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken && !isTokenExpired(storedToken)) return storedToken;
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(initUserFromStorage);
+  const [token, setToken] = useState<string | null>(initTokenFromStorage);
 
   const handleAuthResponse = (response: AuthResponse) => {
     const role = getRoleFromToken(response.token);
