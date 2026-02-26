@@ -20,10 +20,11 @@ describe('Login page', () => {
     cy.contains('button', /sign in/i).click();
 
     cy.wait('@loginFail');
+    // App shows "Login failed. Please check your credentials." or the server message
     cy.contains(/login failed|invalid/i).should('exist');
   });
 
-  it('redirects to home on successful login', () => {
+  it('redirects away from /login on successful login', () => {
     cy.intercept('POST', '**/api/auth/login', {
       statusCode: 200,
       body: {
@@ -33,7 +34,7 @@ describe('Login page', () => {
       },
     }).as('loginOk');
 
-    cy.intercept('GET', '**/api/tournaments', { statusCode: 200, body: [] }).as('getTournaments');
+    cy.intercept('GET', '**/api/tournaments', { statusCode: 200, body: [] });
 
     cy.get('input[type="email"]').type('user@test.com');
     cy.get('input[type="password"]').type('Password123!');
@@ -45,8 +46,8 @@ describe('Login page', () => {
 });
 
 function buildFakeJwt(role: string): string {
-  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
   const exp = Math.floor(Date.now() / 1000) + 3600;
+  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
   const body = btoa(
     JSON.stringify({
       sub: 'uid1',
