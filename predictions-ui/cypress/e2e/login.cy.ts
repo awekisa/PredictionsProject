@@ -4,27 +4,26 @@ describe('Login page', () => {
   });
 
   it('shows login form', () => {
-    cy.get('input[type="email"], input[placeholder*="email" i], input[name="email"]')
-      .should('exist');
+    cy.get('input[type="email"]').should('exist');
     cy.get('input[type="password"]').should('exist');
-    cy.contains('button', /log in|sign in/i).should('exist');
+    cy.contains('button', /sign in/i).should('exist');
   });
 
   it('shows error on invalid credentials', () => {
     cy.intercept('POST', '**/api/auth/login', {
       statusCode: 401,
-      body: { message: 'Invalid credentials' },
+      body: 'Invalid credentials',
     }).as('loginFail');
 
-    cy.get('input[type="email"], input[name="email"]').type('bad@test.com');
+    cy.get('input[type="email"]').type('bad@test.com');
     cy.get('input[type="password"]').type('wrongpassword');
-    cy.contains('button', /log in|sign in/i).click();
+    cy.contains('button', /sign in/i).click();
 
     cy.wait('@loginFail');
-    cy.contains(/invalid|incorrect|wrong|failed/i).should('exist');
+    cy.contains(/login failed|invalid/i).should('exist');
   });
 
-  it('redirects to tournaments on successful login', () => {
+  it('redirects to home on successful login', () => {
     cy.intercept('POST', '**/api/auth/login', {
       statusCode: 200,
       body: {
@@ -34,12 +33,14 @@ describe('Login page', () => {
       },
     }).as('loginOk');
 
-    cy.get('input[type="email"], input[name="email"]').type('user@test.com');
+    cy.intercept('GET', '**/api/tournaments', { statusCode: 200, body: [] }).as('getTournaments');
+
+    cy.get('input[type="email"]').type('user@test.com');
     cy.get('input[type="password"]').type('Password123!');
-    cy.contains('button', /log in|sign in/i).click();
+    cy.contains('button', /sign in/i).click();
 
     cy.wait('@loginOk');
-    cy.url().should('include', '/tournaments');
+    cy.url().should('not.include', '/login');
   });
 });
 

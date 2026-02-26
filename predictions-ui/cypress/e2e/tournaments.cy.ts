@@ -8,9 +8,9 @@ describe('Tournament list', () => {
       ],
     }).as('getTournaments');
 
-    cy.visit('/');
+    cy.visit('/login');
     cy.loginAs('User');
-    cy.visit('/tournaments');
+    cy.visit('/');
     cy.wait('@getTournaments');
   });
 
@@ -25,10 +25,9 @@ describe('Tournament list', () => {
       body: { id: 1, name: 'Premier League', createdAt: '2025-01-01T00:00:00Z' },
     }).as('getTournament');
 
-    cy.intercept('GET', '**/api/tournaments/1/games*', {
-      statusCode: 200,
-      body: [],
-    }).as('getGames');
+    cy.intercept('GET', '**/api/tournaments/1/games', { statusCode: 200, body: [] }).as('getGames');
+    cy.intercept('GET', '**/api/tournaments/1/my-predictions', { statusCode: 200, body: [] });
+    cy.intercept('GET', '**/api/tournaments/1/standings', { statusCode: 200, body: [] });
 
     cy.contains('Premier League').click();
     cy.url().should('include', '/tournaments/1');
@@ -37,14 +36,11 @@ describe('Tournament list', () => {
 
 describe('Tournament list - empty state', () => {
   it('shows empty message when no tournaments', () => {
-    cy.intercept('GET', '**/api/tournaments', {
-      statusCode: 200,
-      body: [],
-    }).as('getEmpty');
+    cy.intercept('GET', '**/api/tournaments', { statusCode: 200, body: [] }).as('getEmpty');
 
-    cy.visit('/');
+    cy.visit('/login');
     cy.loginAs('User');
-    cy.visit('/tournaments');
+    cy.visit('/');
     cy.wait('@getEmpty');
 
     cy.contains(/no tournaments/i).should('exist');
