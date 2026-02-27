@@ -14,20 +14,22 @@ function buildFakeJwt(role: 'User' | 'Admin'): string {
   return `${header}.${body}.fakesig`;
 }
 
-// Visits a URL with auth pre-set in localStorage BEFORE React mounts,
-// so AuthProvider reads the token correctly on the initial render.
+// Sets auth in localStorage then navigates to the target URL.
+// Visiting /login first establishes the origin so localStorage is writable,
+// then cy.visit(url) triggers a fresh navigation where AuthProvider's lazy
+// useState initializer reads the token synchronously before React renders.
 Cypress.Commands.add('visitAuthenticated', (url: string, role: 'User' | 'Admin' = 'User') => {
   const token = buildFakeJwt(role);
   const email = role === 'Admin' ? 'admin@test.com' : 'user@test.com';
   const displayName = role === 'Admin' ? 'Admin User' : 'Test User';
 
-  cy.visit(url, {
-    onBeforeLoad(win) {
-      win.localStorage.setItem('token', token);
-      win.localStorage.setItem('userEmail', email);
-      win.localStorage.setItem('userDisplayName', displayName);
-    },
+  cy.visit('/login');
+  cy.window().then((win) => {
+    win.localStorage.setItem('token', token);
+    win.localStorage.setItem('userEmail', email);
+    win.localStorage.setItem('userDisplayName', displayName);
   });
+  cy.visit(url);
 });
 
 declare global {
