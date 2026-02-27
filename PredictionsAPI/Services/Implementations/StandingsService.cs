@@ -21,11 +21,11 @@ public class StandingsService : IStandingsService
             .Select(g => new { g.Id, g.HomeGoals, g.AwayGoals })
             .ToListAsync();
 
-        var gameIds = gamesWithResults.Select(g => g.Id).ToHashSet();
+        var finishedGameIds = gamesWithResults.Select(g => g.Id).ToHashSet();
 
         var allTournamentPredictions = await _context.Predictions
             .Include(p => p.User)
-            .Where(p => p.Game.TournamentId == tournamentId && gameIds.Contains(p.GameId))
+            .Where(p => p.Game.TournamentId == tournamentId)
             .ToListAsync();
 
         var gameResults = gamesWithResults.ToDictionary(g => g.Id);
@@ -40,7 +40,8 @@ public class StandingsService : IStandingsService
 
                 foreach (var prediction in group)
                 {
-                    if (!gameResults.TryGetValue(prediction.GameId, out var result))
+                    if (!finishedGameIds.Contains(prediction.GameId) ||
+                        !gameResults.TryGetValue(prediction.GameId, out var result))
                         continue;
 
                     int resultHome = result.HomeGoals!.Value;

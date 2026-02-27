@@ -127,9 +127,9 @@ public class StandingsServiceTests
     }
 
     [Fact]
-    public async Task GamesWithoutResult_AreNotCounted()
+    public async Task GamesWithoutResult_ShowPlayerWithZeroPoints()
     {
-        var db = DbContextFactory.Create(nameof(GamesWithoutResult_AreNotCounted));
+        var db = DbContextFactory.Create(nameof(GamesWithoutResult_ShowPlayerWithZeroPoints));
         var user = DbContextFactory.MakeUser("u1", "Alice");
         var tournament = DbContextFactory.MakeTournament(1);
         // Game has no result yet
@@ -145,8 +145,11 @@ public class StandingsServiceTests
         var service = new StandingsService(db);
         var standings = await service.GetStandingsAsync(1);
 
-        // User has a prediction but no game result → not in standings
-        standings.Should().BeEmpty();
+        // User appears with 0 pts until the game gets a result
+        standings.Should().HaveCount(1);
+        standings[0].UserDisplayName.Should().Be("Alice");
+        standings[0].Points.Should().Be(0);
+        standings[0].TotalPredictions.Should().Be(1);
     }
 
     [Fact]
