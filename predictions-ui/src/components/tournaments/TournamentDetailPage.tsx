@@ -33,7 +33,7 @@ export default function TournamentDetailPage() {
       getTournament(tournamentId),
       getGames(tournamentId),
       getMyPredictions(tournamentId),
-      getStandings(tournamentId),
+      getStandings(tournamentId).catch(() => [] as typeof standings),
     ])
       .then(([t, g, p, s]) => {
         setTournament(t);

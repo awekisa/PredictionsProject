@@ -41,19 +41,28 @@ jobs:
           cache: 'npm'
           cache-dependency-path: predictions-ui/package-lock.json
 
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('predictions-ui/package-lock.json') }}
+
       - name: Install dependencies
         working-directory: predictions-ui
         run: npm ci
 
-      - name: Start dev server and run Cypress
-        uses: cypress-io/github-action@v6
-        with:
-          working-directory: predictions-ui
-          install: false
-          start: npm run dev
-          wait-on: 'http://localhost:5173'
-          wait-on-timeout: 60
-          browser: chrome
+      - name: Verify Cypress
+        working-directory: predictions-ui
+        run: npx cypress install && npx cypress verify
+
+      - name: Run Cypress E2E tests
+        working-directory: predictions-ui
+        run: |
+          npm run dev &
+          echo "Waiting for dev server..."
+          timeout 60 bash -c 'until curl -sf http://localhost:5173 > /dev/null; do sleep 1; done'
+          echo "Dev server ready"
+          npx cypress run --browser chrome
         env:
           VITE_API_URL: http://localhost:5039/api
 
