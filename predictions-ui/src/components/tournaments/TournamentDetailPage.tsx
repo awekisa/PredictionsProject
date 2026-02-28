@@ -15,6 +15,7 @@ import StandingsTable from '../standings/StandingsTable';
 import styles from './TournamentDetailPage.module.css';
 
 type SortOption = 'date' | 'homeTeam' | 'awayTeam';
+type FilterOption = 'today' | 'week' | 'all';
 
 export default function TournamentDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +27,7 @@ export default function TournamentDetailPage() {
   const [activeTab, setActiveTab] = useState<'games' | 'standings'>('games');
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortOption>('date');
+  const [filter, setFilter] = useState<FilterOption>('today');
 
   const loadData = () => {
     setLoading(true);
@@ -48,21 +50,37 @@ export default function TournamentDetailPage() {
     loadData();
   }, [tournamentId]);
 
-  const sortedGames = useMemo(() => {
-    const sorted = [...games];
+  const filteredAndSortedGames = useMemo(() => {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const endOfToday = new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000);
+    const endOfWeek = new Date(startOfToday.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    const filtered = games.filter((g) => {
+      const t = new Date(g.startTime);
+      if (filter === 'today') return t >= startOfToday && t < endOfToday;
+      if (filter === 'week') return t >= startOfToday && t < endOfWeek;
+      return true;
+    });
+
     switch (sortBy) {
       case 'date':
-        sorted.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+        // upcoming first for today/week, newest first for all
+        filtered.sort((a, b) =>
+          filter === 'all'
+            ? new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+            : new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+        );
         break;
       case 'homeTeam':
-        sorted.sort((a, b) => a.homeTeam.localeCompare(b.homeTeam));
+        filtered.sort((a, b) => a.homeTeam.localeCompare(b.homeTeam));
         break;
       case 'awayTeam':
-        sorted.sort((a, b) => a.awayTeam.localeCompare(b.awayTeam));
+        filtered.sort((a, b) => a.awayTeam.localeCompare(b.awayTeam));
         break;
     }
-    return sorted;
-  }, [games, sortBy]);
+    return filtered;
+  }, [games, sortBy, filter]);
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
   if (!tournament) return <div className={styles.empty}>Tournament not found.</div>;
@@ -92,18 +110,29 @@ export default function TournamentDetailPage() {
         <>
           {games.length > 0 && (
             <div className={styles.sortBar}>
-              <label>Sort by:</label>
+              <div className={styles.filterGroup}>
+                {(['today', 'week', 'all'] as FilterOption[]).map((f) => (
+                  <button
+                    key={f}
+                    className={filter === f ? styles.filterBtnActive : styles.filterBtn}
+                    onClick={() => setFilter(f)}
+                  >
+                    {f === 'today' ? 'Today' : f === 'week' ? 'Next 7 days' : 'All'}
+                  </button>
+                ))}
+              </div>
+              <label>Sort:</label>
               <select value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)}>
-                <option value="date">Start Date (newest)</option>
+                <option value="date">Date</option>
                 <option value="homeTeam">Home Team (A-Z)</option>
                 <option value="awayTeam">Away Team (A-Z)</option>
               </select>
             </div>
           )}
-          {games.length === 0 ? (
-            <div className={styles.empty}>No games yet.</div>
+          {filteredAndSortedGames.length === 0 ? (
+            <div className={styles.empty}>No games for this period.</div>
           ) : (
-            sortedGames.map((game) => (
+            filteredAndSortedGames.map((game) => (
               <GameCard
                 key={game.id}
                 game={game}

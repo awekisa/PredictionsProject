@@ -54,6 +54,43 @@
   flex-wrap: wrap;
 }
 
+.filterGroup {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.filterBtn,
+.filterBtnActive {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: 0;
+  background: none;
+  color: var(--color-text-secondary);
+  border: none;
+  border-right: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.filterBtn:last-child,
+.filterBtnActive:last-child {
+  border-right: none;
+}
+
+.filterBtnActive {
+  background: var(--color-primary);
+  color: white;
+}
+
+.filterBtn:hover:not(.filterBtnActive) {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
 .sortBar label {
   font-size: 0.85rem;
   color: var(--color-text-secondary);
