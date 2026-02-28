@@ -27,20 +27,23 @@ public class FootballApiClient
 
         var response = await _http.GetAsync($"leagues?search={Uri.EscapeDataString(query)}");
         CaptureRateLimitHeaders(response);
+        var content = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
         {
-            var body = await response.Content.ReadAsStringAsync();
             _logger.LogError("API-Football SearchLeagues failed: HTTP {StatusCode} – {Body}",
-                (int)response.StatusCode, body);
+                (int)response.StatusCode, content);
             response.EnsureSuccessStatusCode();
         }
 
-        var content = await response.Content.ReadAsStringAsync();
         var wrapper = JsonSerializer.Deserialize<FootballApiWrapper<FootballLeagueDto>>(content, _jsonOptions);
         var results = wrapper?.Response ?? [];
 
-        _logger.LogInformation("API-Football: SearchLeagues returned {Count} league(s)", results.Count);
+        if (results.Count == 0)
+            _logger.LogWarning("API-Football SearchLeagues returned 0 results. Raw response: {Body}", content);
+        else
+            _logger.LogInformation("API-Football: SearchLeagues returned {Count} league(s)", results.Count);
+
         return results;
     }
 
@@ -51,20 +54,24 @@ public class FootballApiClient
 
         var response = await _http.GetAsync($"fixtures?league={leagueId}&season={season}");
         CaptureRateLimitHeaders(response);
+        var content = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
         {
-            var body = await response.Content.ReadAsStringAsync();
             _logger.LogError("API-Football GetFixtures failed: HTTP {StatusCode} – {Body}",
-                (int)response.StatusCode, body);
+                (int)response.StatusCode, content);
             response.EnsureSuccessStatusCode();
         }
 
-        var content = await response.Content.ReadAsStringAsync();
         var wrapper = JsonSerializer.Deserialize<FootballApiWrapper<FootballFixtureDto>>(content, _jsonOptions);
         var results = wrapper?.Response ?? [];
 
-        _logger.LogInformation("API-Football: GetFixtures returned {Count} fixture(s)", results.Count);
+        if (results.Count == 0)
+            _logger.LogWarning("API-Football GetFixtures returned 0 fixtures for league {LeagueId} season {Season}. Raw response: {Body}",
+                leagueId, season, content);
+        else
+            _logger.LogInformation("API-Football: GetFixtures returned {Count} fixture(s)", results.Count);
+
         return results;
     }
 
