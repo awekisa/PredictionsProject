@@ -1,8 +1,8 @@
 import apiClient from './apiClient';
 import type { ImportLeagueRequest, LeagueSearchResult, TournamentResponse } from '../types';
 
-export const searchLeagues = (query: string) =>
-  apiClient.get<LeagueSearchResult[]>(`/admin/football/leagues?search=${encodeURIComponent(query)}`).then(r => r.data);
+export const getCompetitions = () =>
+  apiClient.get<LeagueSearchResult[]>('/admin/football/leagues').then(r => r.data);
 
 export const importLeague = (req: ImportLeagueRequest) =>
   apiClient.post<{ tournament: TournamentResponse; gamesImported: number }>('/admin/football/import', req).then(r => r.data);

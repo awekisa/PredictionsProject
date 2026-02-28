@@ -10,11 +10,6 @@ namespace PredictionsAPI.Services.Implementations;
 
 public class FootballSyncService : IFootballSyncService
 {
-    private static readonly HashSet<string> FinishedStatuses = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "FT", "AET", "PEN"
-    };
-
     private readonly FootballApiClient _apiClient;
     private readonly AppDbContext _context;
 
@@ -24,33 +19,36 @@ public class FootballSyncService : IFootballSyncService
         _context = context;
     }
 
-    public async Task<List<LeagueSearchResult>> SearchLeaguesAsync(string query)
+    public async Task<List<LeagueSearchResult>> GetCompetitionsAsync()
     {
-        var leagues = await _apiClient.SearchLeaguesAsync(query);
+        var competitions = await _apiClient.GetCompetitionsAsync();
 
-        return leagues.Select(l => new LeagueSearchResult
+        return competitions.Select(c =>
         {
-            LeagueId = l.League.Id,
-            Name = l.League.Name,
-            Country = l.Country.Name,
-            Type = l.League.Type,
-            Logo = l.League.Logo,
-            Seasons = l.Seasons
-                .Select(s => s.Year)
-                .OrderByDescending(y => y)
-                .ToList()
+            var currentYear = c.CurrentSeason?.StartDate is { Length: >= 4 } s
+                ? int.Parse(s[..4])
+                : DateTime.UtcNow.Year;
+
+            return new LeagueSearchResult
+            {
+                LeagueId = c.Id,
+                Name = c.Name,
+                Country = c.Area.Name,
+                Type = c.Type,
+                Logo = c.Emblem,
+                Seasons = Enumerable.Range(0, 4).Select(i => currentYear - i).ToList()
+            };
         }).ToList();
     }
 
     public async Task<ImportLeagueResponse> ImportLeagueAsync(ImportLeagueRequest request)
     {
-        var fixtures = await _apiClient.GetFixturesAsync(request.LeagueId, request.Season);
+        var matches = await _apiClient.GetMatchesAsync(request.LeagueId, request.Season);
 
-        var existingFixtureIdsList = await _context.Games
+        var existingFixtureIds = (await _context.Games
             .Where(g => g.ExternalFixtureId != null)
             .Select(g => g.ExternalFixtureId!.Value)
-            .ToListAsync();
-        var existingFixtureIds = existingFixtureIdsList.ToHashSet();
+            .ToListAsync()).ToHashSet();
 
         var tournament = new Tournament
         {
@@ -63,21 +61,19 @@ public class FootballSyncService : IFootballSyncService
         _context.Tournaments.Add(tournament);
 
         int gamesImported = 0;
-        foreach (var fixture in fixtures)
+        foreach (var match in matches)
         {
-            if (existingFixtureIds.Contains(fixture.Fixture.Id))
+            if (existingFixtureIds.Contains(match.Id))
                 continue;
 
-            var game = new Game
+            _context.Games.Add(new Game
             {
                 Tournament = tournament,
-                HomeTeam = fixture.Teams.Home.Name,
-                AwayTeam = fixture.Teams.Away.Name,
-                StartTime = fixture.Fixture.Date.ToUniversalTime(),
-                ExternalFixtureId = fixture.Fixture.Id
-            };
-
-            _context.Games.Add(game);
+                HomeTeam = match.HomeTeam.ShortName ?? match.HomeTeam.Name,
+                AwayTeam = match.AwayTeam.ShortName ?? match.AwayTeam.Name,
+                StartTime = match.UtcDate,
+                ExternalFixtureId = match.Id
+            });
             gamesImported++;
         }
 
@@ -106,13 +102,13 @@ public class FootballSyncService : IFootballSyncService
         if (tournament is null || tournament.ExternalLeagueId is null || tournament.ExternalSeason is null)
             return 0;
 
-        var fixtures = await _apiClient.GetFixturesAsync(
+        var matches = await _apiClient.GetMatchesAsync(
             tournament.ExternalLeagueId.Value,
             tournament.ExternalSeason.Value);
 
-        var finishedFixtures = fixtures
-            .Where(f => FinishedStatuses.Contains(f.Fixture.Status.Short))
-            .ToDictionary(f => f.Fixture.Id);
+        var finishedMatches = matches
+            .Where(m => m.Status == "FINISHED")
+            .ToDictionary(m => m.Id);
 
         int updated = 0;
 
@@ -121,11 +117,11 @@ public class FootballSyncService : IFootballSyncService
             if (game.ExternalFixtureId is null)
                 continue;
 
-            if (!finishedFixtures.TryGetValue(game.ExternalFixtureId.Value, out var fixture))
+            if (!finishedMatches.TryGetValue(game.ExternalFixtureId.Value, out var match))
                 continue;
 
-            var newHome = fixture.Goals.Home;
-            var newAway = fixture.Goals.Away;
+            var newHome = match.Score.FullTime.Home;
+            var newAway = match.Score.FullTime.Away;
 
             if (game.IsFinished && game.HomeGoals == newHome && game.AwayGoals == newAway)
                 continue;

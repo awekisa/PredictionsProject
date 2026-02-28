@@ -1,70 +1,59 @@
-using System.Text.Json;
-
 namespace PredictionsAPI.FootballApi;
 
-public class FootballApiWrapper<T>
+// GET /v4/competitions
+public class FootballDataCompetitionsResponse
 {
-    public List<T> Response { get; set; } = new();
-    public JsonElement Errors { get; set; }
+    public List<FootballDataCompetitionDto> Competitions { get; set; } = new();
 }
 
-public class FootballLeagueDto
-{
-    public FootballLeagueInfo League { get; set; } = null!;
-    public FootballCountryInfo Country { get; set; } = null!;
-    public List<FootballSeasonInfo> Seasons { get; set; } = new();
-}
-
-public class FootballLeagueInfo
+public class FootballDataCompetitionDto
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
-    public string? Logo { get; set; }
+    public string? Emblem { get; set; }
+    public FootballDataAreaDto Area { get; set; } = new();
+    public FootballDataSeasonDto? CurrentSeason { get; set; }
 }
 
-public class FootballCountryInfo
+public class FootballDataAreaDto
 {
     public string Name { get; set; } = string.Empty;
 }
 
-public class FootballSeasonInfo
+public class FootballDataSeasonDto
 {
-    public int Year { get; set; }
-    public bool Current { get; set; }
+    public string StartDate { get; set; } = string.Empty;
 }
 
-public class FootballFixtureDto
+// GET /v4/competitions/{id}/matches
+public class FootballDataMatchesResponse
 {
-    public FootballFixtureInfo Fixture { get; set; } = null!;
-    public FootballTeamsInfo Teams { get; set; } = null!;
-    public FootballGoalsInfo Goals { get; set; } = null!;
+    public List<FootballDataMatchDto> Matches { get; set; } = new();
 }
 
-public class FootballFixtureInfo
+public class FootballDataMatchDto
 {
     public int Id { get; set; }
-    public DateTime Date { get; set; }
-    public FootballStatusInfo Status { get; set; } = null!;
+    public DateTime UtcDate { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public FootballDataTeamDto HomeTeam { get; set; } = new();
+    public FootballDataTeamDto AwayTeam { get; set; } = new();
+    public FootballDataScoreDto Score { get; set; } = new();
 }
 
-public class FootballStatusInfo
-{
-    public string Short { get; set; } = string.Empty;
-}
-
-public class FootballTeamsInfo
-{
-    public FootballTeamInfo Home { get; set; } = null!;
-    public FootballTeamInfo Away { get; set; } = null!;
-}
-
-public class FootballTeamInfo
+public class FootballDataTeamDto
 {
     public string Name { get; set; } = string.Empty;
+    public string? ShortName { get; set; }
 }
 
-public class FootballGoalsInfo
+public class FootballDataScoreDto
+{
+    public FootballDataGoalsDto FullTime { get; set; } = new();
+}
+
+public class FootballDataGoalsDto
 {
     public int? Home { get; set; }
     public int? Away { get; set; }

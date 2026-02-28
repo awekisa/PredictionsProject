@@ -28,12 +28,9 @@ public class AdminFootballController : ControllerBase
     }
 
     [HttpGet("leagues")]
-    public async Task<IActionResult> SearchLeagues([FromQuery] string search)
+    public async Task<IActionResult> GetCompetitions()
     {
-        if (string.IsNullOrWhiteSpace(search))
-            return BadRequest("search query is required");
-
-        var results = await _footballSyncService.SearchLeaguesAsync(search);
+        var results = await _footballSyncService.GetCompetitionsAsync();
         return Ok(results);
     }
 

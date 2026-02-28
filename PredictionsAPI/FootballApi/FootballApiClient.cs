@@ -21,105 +21,85 @@ public class FootballApiClient
         _logger = logger;
     }
 
-    public async Task<List<FootballLeagueDto>> SearchLeaguesAsync(string query)
+    public async Task<List<FootballDataCompetitionDto>> GetCompetitionsAsync()
     {
-        _logger.LogInformation("API-Football: searching leagues for '{Query}'", query);
+        _logger.LogInformation("football-data.org: fetching available competitions");
 
-        var response = await _http.GetAsync($"leagues?search={Uri.EscapeDataString(query)}");
+        var response = await _http.GetAsync("competitions");
         CaptureRateLimitHeaders(response);
         var content = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
         {
-            _logger.LogError("API-Football SearchLeagues failed: HTTP {StatusCode} – {Body}",
-                (int)response.StatusCode, content);
-            response.EnsureSuccessStatusCode();
+            var msg = TryExtractMessage(content) ?? content;
+            _logger.LogError("football-data.org GetCompetitions failed: HTTP {StatusCode} – {Message}",
+                (int)response.StatusCode, msg);
+            throw new InvalidOperationException($"football-data.org error: {msg}");
         }
 
-        var wrapper = JsonSerializer.Deserialize<FootballApiWrapper<FootballLeagueDto>>(content, _jsonOptions);
-        ThrowIfApiError(wrapper?.Errors, content);
-        var results = wrapper?.Response ?? [];
+        var wrapper = JsonSerializer.Deserialize<FootballDataCompetitionsResponse>(content, _jsonOptions);
+        var results = wrapper?.Competitions ?? [];
 
-        if (results.Count == 0)
-            _logger.LogWarning("API-Football SearchLeagues returned 0 results. Raw response: {Body}", content);
-        else
-            _logger.LogInformation("API-Football: SearchLeagues returned {Count} league(s)", results.Count);
-
+        _logger.LogInformation("football-data.org: GetCompetitions returned {Count} competition(s)", results.Count);
         return results;
     }
 
-    public async Task<List<FootballFixtureDto>> GetFixturesAsync(int leagueId, int season)
+    public async Task<List<FootballDataMatchDto>> GetMatchesAsync(int competitionId, int season)
     {
-        _logger.LogInformation("API-Football: fetching fixtures for league {LeagueId} season {Season}",
-            leagueId, season);
+        _logger.LogInformation("football-data.org: fetching matches for competition {CompetitionId} season {Season}",
+            competitionId, season);
 
-        var response = await _http.GetAsync($"fixtures?league={leagueId}&season={season}");
+        var response = await _http.GetAsync($"competitions/{competitionId}/matches?season={season}");
         CaptureRateLimitHeaders(response);
         var content = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
         {
-            _logger.LogError("API-Football GetFixtures failed: HTTP {StatusCode} – {Body}",
-                (int)response.StatusCode, content);
-            response.EnsureSuccessStatusCode();
+            var msg = TryExtractMessage(content) ?? content;
+            _logger.LogError("football-data.org GetMatches failed: HTTP {StatusCode} – {Message}",
+                (int)response.StatusCode, msg);
+            throw new InvalidOperationException($"football-data.org error: {msg}");
         }
 
-        var wrapper = JsonSerializer.Deserialize<FootballApiWrapper<FootballFixtureDto>>(content, _jsonOptions);
-        ThrowIfApiError(wrapper?.Errors, content);
-        var results = wrapper?.Response ?? [];
+        var wrapper = JsonSerializer.Deserialize<FootballDataMatchesResponse>(content, _jsonOptions);
+        var results = wrapper?.Matches ?? [];
 
         if (results.Count == 0)
-            _logger.LogWarning("API-Football GetFixtures returned 0 fixtures for league {LeagueId} season {Season}. Raw response: {Body}",
-                leagueId, season, content);
+            _logger.LogWarning(
+                "football-data.org GetMatches returned 0 matches for competition {CompetitionId} season {Season}. Raw: {Body}",
+                competitionId, season, content);
         else
-            _logger.LogInformation("API-Football: GetFixtures returned {Count} fixture(s)", results.Count);
+            _logger.LogInformation("football-data.org: GetMatches returned {Count} match(es)", results.Count);
 
         return results;
     }
 
-    private void ThrowIfApiError(System.Text.Json.JsonElement? errors, string rawBody)
+    private static string? TryExtractMessage(string content)
     {
-        // API-Football returns errors as an object {"field":"message"} or an empty array [] when clean
-        if (errors is { } e && e.ValueKind == System.Text.Json.JsonValueKind.Object)
+        try
         {
-            var msg = e.ToString();
-            _logger.LogError("API-Football returned error in response body: {Errors}", msg);
-            throw new InvalidOperationException($"API-Football error: {msg}");
+            using var doc = JsonDocument.Parse(content);
+            if (doc.RootElement.TryGetProperty("message", out var msg))
+                return msg.GetString();
         }
+        catch { }
+        return null;
     }
 
     private void CaptureRateLimitHeaders(HttpResponseMessage response)
     {
-        int? limit = null;
-        int? remaining = null;
-
-        if (response.Headers.TryGetValues("x-ratelimit-requests-limit", out var limitValues) &&
-            int.TryParse(limitValues.FirstOrDefault(), out var l))
+        // football-data.org free plan: 10 requests/minute
+        if (response.Headers.TryGetValues("X-Requests-Available-Minute", out var values) &&
+            int.TryParse(values.FirstOrDefault(), out var available))
         {
-            limit = l;
-        }
+            _statusStore.Update(10, available);
 
-        if (response.Headers.TryGetValues("x-ratelimit-requests-remaining", out var remainingValues) &&
-            int.TryParse(remainingValues.FirstOrDefault(), out var r))
-        {
-            remaining = r;
-        }
-
-        if (limit.HasValue && remaining.HasValue)
-        {
-            _statusStore.Update(limit, remaining);
-
-            if (remaining.Value <= 10)
-            {
+            if (available <= 2)
                 _logger.LogWarning(
-                    "API-Football rate limit critically low: {Remaining}/{Limit} daily requests remaining",
-                    remaining.Value, limit.Value);
-            }
+                    "football-data.org rate limit low: {Available}/10 requests remaining this minute", available);
             else
-            {
-                _logger.LogInformation("API-Football rate limit: {Remaining}/{Limit} daily requests remaining",
-                    remaining.Value, limit.Value);
-            }
+                _logger.LogInformation(
+                    "football-data.org rate limit: {Available}/10 requests remaining this minute", available);
         }
     }
 }

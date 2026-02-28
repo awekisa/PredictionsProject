@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as adminTournamentApi from '../../api/adminTournamentApi';
 import * as footballApi from '../../api/footballApi';
@@ -18,8 +18,9 @@ export default function AdminTournamentsPage() {
   // Import modal state
   const [showImport, setShowImport] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [allCompetitions, setAllCompetitions] = useState<LeagueSearchResult[]>([]);
   const [searchResults, setSearchResults] = useState<LeagueSearchResult[]>([]);
-  const [searching, setSearching] = useState(false);
+  const [loadingCompetitions, setLoadingCompetitions] = useState(false);
   const [selectedLeague, setSelectedLeague] = useState<LeagueSearchResult | null>(null);
   const [importSeason, setImportSeason] = useState<number | ''>('');
   const [importName, setImportName] = useState('');
@@ -33,7 +34,6 @@ export default function AdminTournamentsPage() {
   // API rate-limit status
   const [apiStatus, setApiStatus] = useState<{ requestsLimit: number | null; requestsRemaining: number | null } | null>(null);
 
-  const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
 
   const load = () => {
@@ -81,7 +81,7 @@ export default function AdminTournamentsPage() {
 
   // ── Import modal ──────────────────────────────────────────────────────────
 
-  const openImport = () => {
+  const openImport = async () => {
     setSearchQuery('');
     setSearchResults([]);
     setSelectedLeague(null);
@@ -89,22 +89,33 @@ export default function AdminTournamentsPage() {
     setImportName('');
     setImportError(null);
     setShowImport(true);
+    setLoadingCompetitions(true);
+    try {
+      const results = await footballApi.getCompetitions();
+      setAllCompetitions(results);
+      setSearchResults(results);
+      refreshApiStatus();
+    } catch {
+      setImportError('Failed to load competitions. Check server logs.');
+    } finally {
+      setLoadingCompetitions(false);
+    }
   };
 
   const handleSearchChange = (q: string) => {
     setSearchQuery(q);
     setSelectedLeague(null);
-    if (searchDebounce.current) clearTimeout(searchDebounce.current);
-    if (!q.trim()) { setSearchResults([]); return; }
-    searchDebounce.current = setTimeout(async () => {
-      setSearching(true);
-      try {
-        const results = await footballApi.searchLeagues(q);
-        setSearchResults(results);
-      } finally {
-        setSearching(false);
-      }
-    }, 400);
+    if (!q.trim()) {
+      setSearchResults(allCompetitions);
+      return;
+    }
+    const lower = q.toLowerCase();
+    setSearchResults(
+      allCompetitions.filter(c =>
+        c.name.toLowerCase().includes(lower) ||
+        c.country.toLowerCase().includes(lower)
+      )
+    );
   };
 
   const selectLeague = (league: LeagueSearchResult) => {
@@ -170,7 +181,7 @@ export default function AdminTournamentsPage() {
                   ? styles.apiQuotaWarn
                   : styles.apiQuotaOk
             }>
-              {apiStatus.requestsRemaining}/{apiStatus.requestsLimit} API req left today
+              {apiStatus.requestsRemaining}/{apiStatus.requestsLimit} API req/min
             </span>
           )}
           <button className={styles.importBtn} onClick={openImport}>
@@ -290,7 +301,7 @@ export default function AdminTournamentsPage() {
                   placeholder="e.g. Premier League"
                   autoFocus
                 />
-                {searching && <div className={styles.searchHint}>Searching…</div>}
+                {loadingCompetitions && <div className={styles.searchHint}>Loading competitions…</div>}
                 {searchResults.length > 0 && (
                   <ul className={styles.suggestions}>
                     {searchResults.map((r) => (
