@@ -6,6 +6,6 @@ namespace PredictionsAPI.Services.Interfaces;
 public interface IFootballSyncService
 {
     Task<List<LeagueSearchResult>> SearchLeaguesAsync(string query);
-    Task<TournamentResponse> ImportLeagueAsync(ImportLeagueRequest request);
+    Task<ImportLeagueResponse> ImportLeagueAsync(ImportLeagueRequest request);
     Task<int> SyncScoresAsync(int tournamentId);
 }

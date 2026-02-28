@@ -27,6 +27,7 @@ export default function AdminTournamentsPage() {
 
   // Sync state: tournamentId → status message
   const [syncMessages, setSyncMessages] = useState<Record<number, string>>({});
+  const [importMessage, setImportMessage] = useState<string | null>(null);
 
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
@@ -109,12 +110,14 @@ export default function AdminTournamentsPage() {
     if (!selectedLeague || importSeason === '') return;
     setImporting(true);
     try {
-      await footballApi.importLeague({
+      const { gamesImported } = await footballApi.importLeague({
         leagueId: selectedLeague.leagueId,
         season: Number(importSeason),
         name: importName
       });
       setShowImport(false);
+      setImportMessage(`Import complete: ${gamesImported} game${gamesImported === 1 ? '' : 's'} imported.`);
+      setTimeout(() => setImportMessage(null), 5000);
       load();
     } finally {
       setImporting(false);
@@ -150,6 +153,10 @@ export default function AdminTournamentsPage() {
           </button>
         </div>
       </div>
+
+      {importMessage && (
+        <div className={styles.importMessage}>{importMessage}</div>
+      )}
 
       <div className={styles.tableWrap}>
         <table>

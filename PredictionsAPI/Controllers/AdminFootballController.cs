@@ -30,8 +30,8 @@ public class AdminFootballController : ControllerBase
     [HttpPost("import")]
     public async Task<IActionResult> ImportLeague([FromBody] ImportLeagueRequest request)
     {
-        var tournament = await _footballSyncService.ImportLeagueAsync(request);
-        return Ok(tournament);
+        var result = await _footballSyncService.ImportLeagueAsync(request);
+        return Ok(result);
     }
 
     [HttpPost("tournaments/{id:int}/sync-scores")]

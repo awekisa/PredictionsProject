@@ -42,7 +42,7 @@ public class FootballSyncService : IFootballSyncService
         }).ToList();
     }
 
-    public async Task<TournamentResponse> ImportLeagueAsync(ImportLeagueRequest request)
+    public async Task<ImportLeagueResponse> ImportLeagueAsync(ImportLeagueRequest request)
     {
         var fixtures = await _apiClient.GetFixturesAsync(request.LeagueId, request.Season);
 
@@ -62,6 +62,7 @@ public class FootballSyncService : IFootballSyncService
 
         _context.Tournaments.Add(tournament);
 
+        int gamesImported = 0;
         foreach (var fixture in fixtures)
         {
             if (existingFixtureIds.Contains(fixture.Fixture.Id))
@@ -77,17 +78,22 @@ public class FootballSyncService : IFootballSyncService
             };
 
             _context.Games.Add(game);
+            gamesImported++;
         }
 
         await _context.SaveChangesAsync();
 
-        return new TournamentResponse
+        return new ImportLeagueResponse
         {
-            Id = tournament.Id,
-            Name = tournament.Name,
-            CreatedAt = tournament.CreatedAt,
-            ExternalLeagueId = tournament.ExternalLeagueId,
-            ExternalSeason = tournament.ExternalSeason
+            Tournament = new TournamentResponse
+            {
+                Id = tournament.Id,
+                Name = tournament.Name,
+                CreatedAt = tournament.CreatedAt,
+                ExternalLeagueId = tournament.ExternalLeagueId,
+                ExternalSeason = tournament.ExternalSeason
+            },
+            GamesImported = gamesImported
         };
     }
 
