@@ -1,5 +1,5 @@
-const futureTime = new Date(Date.now() + 86400000).toISOString();
-const pastTime = new Date(Date.now() - 86400000).toISOString();
+const futureTime = new Date(Date.now() + 3600000).toISOString();  // 1 hour from now (today)
+const pastTime = new Date(Date.now() - 3600000).toISOString();    // 1 hour ago (today)
 
 const tournament = { id: 1, name: 'Test Cup', createdAt: '2025-01-01T00:00:00Z' };
 
