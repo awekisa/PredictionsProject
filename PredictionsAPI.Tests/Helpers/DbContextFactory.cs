@@ -49,7 +49,8 @@ public static class DbContextFactory
             AwayTeam = "Away FC",
             StartTime = startTime,
             HomeGoals = homeGoals,
-            AwayGoals = awayGoals
+            AwayGoals = awayGoals,
+            IsFinished = homeGoals.HasValue && awayGoals.HasValue
         };
     }
 
