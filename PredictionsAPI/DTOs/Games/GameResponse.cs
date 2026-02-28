@@ -15,4 +15,6 @@ public class GameResponse
     public int? HomeGoals { get; set; }
 
     public int? AwayGoals { get; set; }
+
+    public bool IsFinished { get; set; }
 }

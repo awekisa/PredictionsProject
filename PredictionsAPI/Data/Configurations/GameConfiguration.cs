@@ -22,5 +22,9 @@ public class GameConfiguration : IEntityTypeConfiguration<Game>
             .WithOne(p => p.Game)
             .HasForeignKey(p => p.GameId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(g => g.ExternalFixtureId)
+            .IsUnique()
+            .HasFilter("\"ExternalFixtureId\" IS NOT NULL");
     }
 }

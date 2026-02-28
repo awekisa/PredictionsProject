@@ -16,6 +16,10 @@ public class Game
 
     public int? AwayGoals { get; set; }
 
+    public bool IsFinished { get; set; }
+
+    public int? ExternalFixtureId { get; set; }
+
     public Tournament Tournament { get; set; } = null!;
 
     public ICollection<Prediction> Predictions { get; set; } = new List<Prediction>();

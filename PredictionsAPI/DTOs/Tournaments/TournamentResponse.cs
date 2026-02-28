@@ -7,4 +7,8 @@ public class TournamentResponse
     public string Name { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }
+
+    public int? ExternalLeagueId { get; set; }
+
+    public int? ExternalSeason { get; set; }
 }

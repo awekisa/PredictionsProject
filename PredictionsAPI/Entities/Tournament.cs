@@ -8,5 +8,9 @@ public class Tournament
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public int? ExternalLeagueId { get; set; }
+
+    public int? ExternalSeason { get; set; }
+
     public ICollection<Game> Games { get; set; } = new List<Game>();
 }
