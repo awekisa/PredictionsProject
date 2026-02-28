@@ -69,6 +69,8 @@ public class TournamentService : ITournamentService
     {
         Id = t.Id,
         Name = t.Name,
-        CreatedAt = t.CreatedAt
+        CreatedAt = t.CreatedAt,
+        ExternalLeagueId = t.ExternalLeagueId,
+        ExternalSeason = t.ExternalSeason
     };
 }

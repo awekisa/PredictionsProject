@@ -19,6 +19,23 @@ export interface TournamentResponse {
   id: number;
   name: string;
   createdAt: string;
+  externalLeagueId: number | null;
+  externalSeason: number | null;
+}
+
+export interface LeagueSearchResult {
+  leagueId: number;
+  name: string;
+  country: string;
+  type: string;
+  logo?: string;
+  seasons: number[];
+}
+
+export interface ImportLeagueRequest {
+  leagueId: number;
+  season: number;
+  name: string;
 }
 
 export interface CreateTournamentRequest {
@@ -37,6 +54,7 @@ export interface GameResponse {
   startTime: string;
   homeGoals: number | null;
   awayGoals: number | null;
+  isFinished: boolean;
 }
 
 export interface CreateGameRequest {

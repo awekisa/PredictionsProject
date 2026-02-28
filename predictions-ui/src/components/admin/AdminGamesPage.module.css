@@ -70,6 +70,19 @@
   font-weight: 600;
 }
 
+.ftBadge {
+  display: inline-block;
+  padding: 0.1rem 0.3rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  background-color: var(--color-success);
+  color: white;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-right: 0.3rem;
+  letter-spacing: 0.03em;
+}
+
 .formOverlay {
   position: fixed;
   inset: 0;

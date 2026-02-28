@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PredictionsAPI.Data;
 using PredictionsAPI.Entities;
+using PredictionsAPI.FootballApi;
 using PredictionsAPI.Services.Implementations;
 using PredictionsAPI.Services.Interfaces;
 
@@ -59,6 +60,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGameService, GameService>();
         services.AddScoped<IPredictionService, PredictionService>();
         services.AddScoped<IStandingsService, StandingsService>();
+
+        // Football API
+        services.AddHttpClient<FootballApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["FootballApi:BaseUrl"]!);
+            client.DefaultRequestHeaders.Add("x-apisports-key", configuration["FootballApi:ApiKey"]);
+        });
+        services.AddScoped<IFootballSyncService, FootballSyncService>();
 
         return services;
     }

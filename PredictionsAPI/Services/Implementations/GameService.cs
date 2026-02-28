@@ -90,6 +90,7 @@ public class GameService : IGameService
 
         game.HomeGoals = request.HomeGoals;
         game.AwayGoals = request.AwayGoals;
+        game.IsFinished = true;
 
         await _context.SaveChangesAsync();
 
@@ -104,6 +105,7 @@ public class GameService : IGameService
         AwayTeam = g.AwayTeam,
         StartTime = g.StartTime,
         HomeGoals = g.HomeGoals,
-        AwayGoals = g.AwayGoals
+        AwayGoals = g.AwayGoals,
+        IsFinished = g.IsFinished
     };
 }

@@ -17,7 +17,7 @@ public class StandingsService : IStandingsService
     public async Task<List<StandingEntryResponse>> GetStandingsAsync(int tournamentId)
     {
         var gamesWithResults = await _context.Games
-            .Where(g => g.TournamentId == tournamentId && g.HomeGoals.HasValue && g.AwayGoals.HasValue)
+            .Where(g => g.TournamentId == tournamentId && g.IsFinished && g.HomeGoals.HasValue && g.AwayGoals.HasValue)
             .Select(g => new { g.Id, g.HomeGoals, g.AwayGoals })
             .ToListAsync();
 

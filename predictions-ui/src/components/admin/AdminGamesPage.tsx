@@ -132,13 +132,20 @@ export default function AdminGamesPage() {
                 <td>{g.awayTeam}</td>
                 <td>{formatDateTime(g.startTime)}</td>
                 <td className={styles.scoreCell}>
-                  {g.homeGoals !== null ? `${g.homeGoals} - ${g.awayGoals}` : '-'}
+                  {g.isFinished
+                    ? <><span className={styles.ftBadge}>FT</span> {g.homeGoals} – {g.awayGoals}</>
+                    : g.homeGoals !== null ? `${g.homeGoals} – ${g.awayGoals}` : '–'}
                 </td>
                 <td>
                   <div className={styles.actions}>
-                    {new Date() >= new Date(g.startTime) && (
+                    {!g.isFinished && new Date() >= new Date(g.startTime) && (
                       <button className={styles.resultBtn} onClick={() => openSetResult(g)}>
                         Set Result
+                      </button>
+                    )}
+                    {g.isFinished && (
+                      <button className={styles.resultBtn} onClick={() => openSetResult(g)}>
+                        Edit Result
                       </button>
                     )}
                     <button className={styles.editBtn} onClick={() => openEditGame(g)}>
