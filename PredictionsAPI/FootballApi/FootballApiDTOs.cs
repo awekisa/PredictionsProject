@@ -44,7 +44,7 @@ public class FootballDataMatchDto
 
 public class FootballDataTeamDto
 {
-    public string Name { get; set; } = string.Empty;
+    public string? Name { get; set; }
     public string? ShortName { get; set; }
 }
 

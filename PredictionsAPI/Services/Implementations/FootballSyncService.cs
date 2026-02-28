@@ -66,11 +66,18 @@ public class FootballSyncService : IFootballSyncService
             if (existingFixtureIds.Contains(match.Id))
                 continue;
 
+            var homeTeam = match.HomeTeam.ShortName ?? match.HomeTeam.Name;
+            var awayTeam = match.AwayTeam.ShortName ?? match.AwayTeam.Name;
+
+            // Skip fixtures where teams are not yet determined (e.g. cup knockout placeholders)
+            if (string.IsNullOrEmpty(homeTeam) || string.IsNullOrEmpty(awayTeam))
+                continue;
+
             _context.Games.Add(new Game
             {
                 Tournament = tournament,
-                HomeTeam = match.HomeTeam.ShortName ?? match.HomeTeam.Name,
-                AwayTeam = match.AwayTeam.ShortName ?? match.AwayTeam.Name,
+                HomeTeam = homeTeam,
+                AwayTeam = awayTeam,
                 StartTime = match.UtcDate,
                 ExternalFixtureId = match.Id
             });
