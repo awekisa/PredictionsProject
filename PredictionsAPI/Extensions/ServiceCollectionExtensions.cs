@@ -62,6 +62,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStandingsService, StandingsService>();
 
         // Football API
+        services.AddSingleton<FootballApiStatusStore>();
         services.AddHttpClient<FootballApiClient>(client =>
         {
             client.BaseAddress = new Uri(configuration["FootballApi:BaseUrl"]!);

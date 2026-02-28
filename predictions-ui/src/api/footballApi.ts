@@ -9,3 +9,6 @@ export const importLeague = (req: ImportLeagueRequest) =>
 
 export const syncScores = (tournamentId: number) =>
   apiClient.post<{ updated: number }>(`/admin/football/tournaments/${tournamentId}/sync-scores`).then(r => r.data);
+
+export const getStatus = () =>
+  apiClient.get<{ requestsLimit: number | null; requestsRemaining: number | null }>('/admin/football/status').then(r => r.data);

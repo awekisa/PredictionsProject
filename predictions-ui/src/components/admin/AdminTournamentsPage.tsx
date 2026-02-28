@@ -29,6 +29,9 @@ export default function AdminTournamentsPage() {
   const [syncMessages, setSyncMessages] = useState<Record<number, string>>({});
   const [importMessage, setImportMessage] = useState<string | null>(null);
 
+  // API rate-limit status
+  const [apiStatus, setApiStatus] = useState<{ requestsLimit: number | null; requestsRemaining: number | null } | null>(null);
+
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
 
@@ -37,8 +40,13 @@ export default function AdminTournamentsPage() {
     adminTournamentApi.getAll().then(setTournaments).finally(() => setLoading(false));
   };
 
+  const refreshApiStatus = () => {
+    footballApi.getStatus().then(setApiStatus).catch(() => {});
+  };
+
   useEffect(() => {
     load();
+    refreshApiStatus();
   }, []);
 
   const openCreate = () => {
@@ -119,6 +127,7 @@ export default function AdminTournamentsPage() {
       setImportMessage(`Import complete: ${gamesImported} game${gamesImported === 1 ? '' : 's'} imported.`);
       setTimeout(() => setImportMessage(null), 5000);
       load();
+      refreshApiStatus();
     } finally {
       setImporting(false);
     }
@@ -132,6 +141,7 @@ export default function AdminTournamentsPage() {
       const { updated } = await footballApi.syncScores(id);
       setSyncMessages(prev => ({ ...prev, [id]: `${updated} game${updated === 1 ? '' : 's'} updated` }));
       if (updated > 0) load();
+      refreshApiStatus();
     } catch {
       setSyncMessages(prev => ({ ...prev, [id]: 'Sync failed' }));
     }
@@ -145,6 +155,17 @@ export default function AdminTournamentsPage() {
       <div className={styles.header}>
         <h1>Manage Tournaments</h1>
         <div className={styles.headerActions}>
+          {apiStatus?.requestsRemaining != null && (
+            <span className={
+              apiStatus.requestsRemaining <= 10
+                ? styles.apiQuotaDanger
+                : apiStatus.requestsRemaining <= 25
+                  ? styles.apiQuotaWarn
+                  : styles.apiQuotaOk
+            }>
+              {apiStatus.requestsRemaining}/{apiStatus.requestsLimit} API req left today
+            </span>
+          )}
           <button className={styles.importBtn} onClick={openImport}>
             Import from API
           </button>

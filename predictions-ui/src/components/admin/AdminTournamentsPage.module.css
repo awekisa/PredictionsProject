@@ -126,6 +126,31 @@
   white-space: nowrap;
 }
 
+.apiQuotaOk,
+.apiQuotaWarn,
+.apiQuotaDanger {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+
+.apiQuotaOk {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.apiQuotaWarn {
+  background-color: #fef9c3;
+  color: #854d0e;
+}
+
+.apiQuotaDanger {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
 .importMessage {
   background-color: #dcfce7;
   color: #166534;
