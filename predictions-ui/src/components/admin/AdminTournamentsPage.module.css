@@ -151,6 +151,15 @@
   color: #991b1b;
 }
 
+.importError {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius);
+  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+}
+
 .importMessage {
   background-color: #dcfce7;
   color: #166534;

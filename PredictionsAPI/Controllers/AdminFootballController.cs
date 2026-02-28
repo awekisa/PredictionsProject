@@ -40,8 +40,15 @@ public class AdminFootballController : ControllerBase
     [HttpPost("import")]
     public async Task<IActionResult> ImportLeague([FromBody] ImportLeagueRequest request)
     {
-        var result = await _footballSyncService.ImportLeagueAsync(request);
-        return Ok(result);
+        try
+        {
+            var result = await _footballSyncService.ImportLeagueAsync(request);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPost("tournaments/{id:int}/sync-scores")]

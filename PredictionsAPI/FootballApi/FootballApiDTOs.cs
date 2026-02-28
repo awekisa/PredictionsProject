@@ -1,8 +1,11 @@
+using System.Text.Json;
+
 namespace PredictionsAPI.FootballApi;
 
 public class FootballApiWrapper<T>
 {
     public List<T> Response { get; set; } = new();
+    public JsonElement Errors { get; set; }
 }
 
 public class FootballLeagueDto

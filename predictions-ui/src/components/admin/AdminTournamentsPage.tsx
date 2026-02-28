@@ -24,6 +24,7 @@ export default function AdminTournamentsPage() {
   const [importSeason, setImportSeason] = useState<number | ''>('');
   const [importName, setImportName] = useState('');
   const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
 
   // Sync state: tournamentId → status message
   const [syncMessages, setSyncMessages] = useState<Record<number, string>>({});
@@ -86,6 +87,7 @@ export default function AdminTournamentsPage() {
     setSelectedLeague(null);
     setImportSeason('');
     setImportName('');
+    setImportError(null);
     setShowImport(true);
   };
 
@@ -117,6 +119,7 @@ export default function AdminTournamentsPage() {
     e.preventDefault();
     if (!selectedLeague || importSeason === '') return;
     setImporting(true);
+    setImportError(null);
     try {
       const { gamesImported } = await footballApi.importLeague({
         leagueId: selectedLeague.leagueId,
@@ -128,6 +131,10 @@ export default function AdminTournamentsPage() {
       setTimeout(() => setImportMessage(null), 5000);
       load();
       refreshApiStatus();
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+        ?? 'Import failed. Check server logs for details.';
+      setImportError(msg);
     } finally {
       setImporting(false);
     }
@@ -320,6 +327,10 @@ export default function AdminTournamentsPage() {
                     />
                   </div>
                 </>
+              )}
+
+              {importError && (
+                <div className={styles.importError}>{importError}</div>
               )}
 
               <div className={styles.formActions}>

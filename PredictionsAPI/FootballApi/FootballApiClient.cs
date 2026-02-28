@@ -37,6 +37,7 @@ public class FootballApiClient
         }
 
         var wrapper = JsonSerializer.Deserialize<FootballApiWrapper<FootballLeagueDto>>(content, _jsonOptions);
+        ThrowIfApiError(wrapper?.Errors, content);
         var results = wrapper?.Response ?? [];
 
         if (results.Count == 0)
@@ -64,6 +65,7 @@ public class FootballApiClient
         }
 
         var wrapper = JsonSerializer.Deserialize<FootballApiWrapper<FootballFixtureDto>>(content, _jsonOptions);
+        ThrowIfApiError(wrapper?.Errors, content);
         var results = wrapper?.Response ?? [];
 
         if (results.Count == 0)
@@ -73,6 +75,17 @@ public class FootballApiClient
             _logger.LogInformation("API-Football: GetFixtures returned {Count} fixture(s)", results.Count);
 
         return results;
+    }
+
+    private void ThrowIfApiError(System.Text.Json.JsonElement? errors, string rawBody)
+    {
+        // API-Football returns errors as an object {"field":"message"} or an empty array [] when clean
+        if (errors is { } e && e.ValueKind == System.Text.Json.JsonValueKind.Object)
+        {
+            var msg = e.ToString();
+            _logger.LogError("API-Football returned error in response body: {Errors}", msg);
+            throw new InvalidOperationException($"API-Football error: {msg}");
+        }
     }
 
     private void CaptureRateLimitHeaders(HttpResponseMessage response)
