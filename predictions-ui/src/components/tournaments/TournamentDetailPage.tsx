@@ -88,6 +88,9 @@ export default function TournamentDetailPage() {
   return (
     <div>
       <div className={styles.header}>
+        {tournament.emblemUrl && (
+          <img src={tournament.emblemUrl} alt="" className={styles.emblem} />
+        )}
         <h1>{tournament.name}</h1>
       </div>
 

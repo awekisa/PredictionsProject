@@ -44,6 +44,25 @@ public class FootballApiClient
         return results;
     }
 
+    public async Task<FootballDataCompetitionDto?> GetCompetitionAsync(int competitionId)
+    {
+        _logger.LogInformation("football-data.org: fetching competition {CompetitionId}", competitionId);
+
+        var response = await _http.GetAsync($"competitions/{competitionId}");
+        CaptureRateLimitHeaders(response);
+        var content = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var msg = TryExtractMessage(content) ?? content;
+            _logger.LogWarning("football-data.org GetCompetition failed: HTTP {StatusCode} – {Message}",
+                (int)response.StatusCode, msg);
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<FootballDataCompetitionDto>(content, _jsonOptions);
+    }
+
     public async Task<List<FootballDataMatchDto>> GetMatchesAsync(int competitionId, int season)
     {
         _logger.LogInformation("football-data.org: fetching matches for competition {CompetitionId} season {Season}",

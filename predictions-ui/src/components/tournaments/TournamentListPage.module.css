@@ -26,6 +26,13 @@
   border-color: var(--color-primary);
 }
 
+.emblem {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+}
+
 .cardName {
   font-weight: 600;
   font-size: 1.05rem;

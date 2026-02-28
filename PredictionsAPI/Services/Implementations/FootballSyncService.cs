@@ -50,12 +50,15 @@ public class FootballSyncService : IFootballSyncService
             .Select(g => g.ExternalFixtureId!.Value)
             .ToListAsync()).ToHashSet();
 
+        var competition = await _apiClient.GetCompetitionAsync(request.LeagueId);
+
         var tournament = new Tournament
         {
             Name = request.Name,
             CreatedAt = DateTime.UtcNow,
             ExternalLeagueId = request.LeagueId,
-            ExternalSeason = request.Season
+            ExternalSeason = request.Season,
+            EmblemUrl = competition?.Emblem
         };
 
         _context.Tournaments.Add(tournament);
@@ -79,7 +82,9 @@ public class FootballSyncService : IFootballSyncService
                 HomeTeam = homeTeam,
                 AwayTeam = awayTeam,
                 StartTime = match.UtcDate,
-                ExternalFixtureId = match.Id
+                ExternalFixtureId = match.Id,
+                HomeCrestUrl = match.HomeTeam.Crest,
+                AwayCrestUrl = match.AwayTeam.Crest
             });
             gamesImported++;
         }
@@ -94,7 +99,8 @@ public class FootballSyncService : IFootballSyncService
                 Name = tournament.Name,
                 CreatedAt = tournament.CreatedAt,
                 ExternalLeagueId = tournament.ExternalLeagueId,
-                ExternalSeason = tournament.ExternalSeason
+                ExternalSeason = tournament.ExternalSeason,
+                EmblemUrl = tournament.EmblemUrl
             },
             GamesImported = gamesImported
         };

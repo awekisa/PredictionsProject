@@ -31,6 +31,10 @@
   font-size: 0.95rem;
   text-align: right;
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
 }
 
 .awayTeam {
@@ -38,6 +42,16 @@
   font-size: 0.95rem;
   text-align: left;
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.crest {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .vs {

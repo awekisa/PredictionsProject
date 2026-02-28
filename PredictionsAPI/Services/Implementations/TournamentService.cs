@@ -71,6 +71,7 @@ public class TournamentService : ITournamentService
         Name = t.Name,
         CreatedAt = t.CreatedAt,
         ExternalLeagueId = t.ExternalLeagueId,
-        ExternalSeason = t.ExternalSeason
+        ExternalSeason = t.ExternalSeason,
+        EmblemUrl = t.EmblemUrl
     };
 }

@@ -106,6 +106,8 @@ public class GameService : IGameService
         StartTime = g.StartTime,
         HomeGoals = g.HomeGoals,
         AwayGoals = g.AwayGoals,
-        IsFinished = g.IsFinished
+        IsFinished = g.IsFinished,
+        HomeCrestUrl = g.HomeCrestUrl,
+        AwayCrestUrl = g.AwayCrestUrl
     };
 }

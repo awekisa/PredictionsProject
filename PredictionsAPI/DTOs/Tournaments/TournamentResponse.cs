@@ -11,4 +11,6 @@ public class TournamentResponse
     public int? ExternalLeagueId { get; set; }
 
     public int? ExternalSeason { get; set; }
+
+    public string? EmblemUrl { get; set; }
 }

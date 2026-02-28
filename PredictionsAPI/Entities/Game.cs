@@ -20,6 +20,10 @@ public class Game
 
     public int? ExternalFixtureId { get; set; }
 
+    public string? HomeCrestUrl { get; set; }
+
+    public string? AwayCrestUrl { get; set; }
+
     public Tournament Tournament { get; set; } = null!;
 
     public ICollection<Prediction> Predictions { get; set; } = new List<Prediction>();

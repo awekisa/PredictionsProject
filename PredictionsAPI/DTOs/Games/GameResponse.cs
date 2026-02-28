@@ -17,4 +17,8 @@ public class GameResponse
     public int? AwayGoals { get; set; }
 
     public bool IsFinished { get; set; }
+
+    public string? HomeCrestUrl { get; set; }
+
+    public string? AwayCrestUrl { get; set; }
 }

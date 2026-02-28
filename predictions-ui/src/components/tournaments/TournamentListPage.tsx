@@ -33,6 +33,9 @@ export default function TournamentListPage() {
               className={styles.card}
               onClick={() => navigate(`/tournaments/${t.id}`)}
             >
+              {t.emblemUrl && (
+                <img src={t.emblemUrl} alt="" className={styles.emblem} />
+              )}
               <div className={styles.cardName}>{t.name}</div>
               <div className={styles.cardDate}>
                 Created {formatDate(t.createdAt)}

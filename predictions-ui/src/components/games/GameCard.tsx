@@ -61,7 +61,12 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
       </div>
 
       <div className={styles.matchRow}>
-        <span className={styles.homeTeam}>{game.homeTeam}</span>
+        <span className={styles.homeTeam}>
+          {game.homeCrestUrl && (
+            <img src={game.homeCrestUrl} alt="" className={styles.crest} />
+          )}
+          {game.homeTeam}
+        </span>
         {hasResult ? (
           <span className={styles.score}>
             {game.homeGoals} - {game.awayGoals}
@@ -69,7 +74,12 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
         ) : (
           <span className={styles.vs}>vs</span>
         )}
-        <span className={styles.awayTeam}>{game.awayTeam}</span>
+        <span className={styles.awayTeam}>
+          {game.awayTeam}
+          {game.awayCrestUrl && (
+            <img src={game.awayCrestUrl} alt="" className={styles.crest} />
+          )}
+        </span>
       </div>
 
       <div className={styles.bottomRow}>

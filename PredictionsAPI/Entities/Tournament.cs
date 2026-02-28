@@ -12,5 +12,7 @@ public class Tournament
 
     public int? ExternalSeason { get; set; }
 
+    public string? EmblemUrl { get; set; }
+
     public ICollection<Game> Games { get; set; } = new List<Game>();
 }

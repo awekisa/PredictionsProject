@@ -21,6 +21,7 @@ export interface TournamentResponse {
   createdAt: string;
   externalLeagueId: number | null;
   externalSeason: number | null;
+  emblemUrl: string | null;
 }
 
 export interface LeagueSearchResult {
@@ -55,6 +56,8 @@ export interface GameResponse {
   homeGoals: number | null;
   awayGoals: number | null;
   isFinished: boolean;
+  homeCrestUrl: string | null;
+  awayCrestUrl: string | null;
 }
 
 export interface CreateGameRequest {
