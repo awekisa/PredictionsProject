@@ -78,9 +78,9 @@ jobs:
         run: |
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.RENDER_DEPLOY_HOOK_URL }}")
           echo "Render deploy hook HTTP status: $HTTP_CODE"
-          echo "$HTTP_CODE" | grep -qE '^(200|201)' \
+          echo "$HTTP_CODE" | grep -qE '^(2[0-9][0-9])' \
             && echo "Render deploy triggered" \
-            || (echo "Render deploy failed (expected 200/201, got $HTTP_CODE)" && exit 1)
+            || (echo "Render deploy failed (expected 2xx, got $HTTP_CODE)" && exit 1)
 
   # ─── Job 4: Deploy to Vercel (frontend) ────────────────────────────────────
   deploy-frontend:
