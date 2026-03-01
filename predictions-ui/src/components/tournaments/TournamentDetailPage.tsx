@@ -170,11 +170,12 @@ export default function TournamentDetailPage() {
                 ))
               )}
             </div>
-            {(footballStandingsLoading || footballStandings) && (
+            {(footballStandingsLoading || tournament?.externalLeagueId) && (
               <div className={styles.standingsSidebar}>
                 <FootballStandingsPanel
                   standings={footballStandings}
                   loading={footballStandingsLoading}
+                  hasExternalLeague={!!tournament?.externalLeagueId}
                 />
               </div>
             )}

@@ -5,6 +5,7 @@ import styles from './FootballStandingsPanel.module.css';
 interface Props {
   standings: CompetitionStandingsResponse | null;
   loading: boolean;
+  hasExternalLeague: boolean;
 }
 
 function groupLabel(group: string | null): string {
@@ -54,11 +55,19 @@ function StandingsTable({ group }: { group: StandingGroupResponse }) {
   );
 }
 
-export default function FootballStandingsPanel({ standings, loading }: Props) {
+export default function FootballStandingsPanel({ standings, loading, hasExternalLeague }: Props) {
   const [selectedGroup, setSelectedGroup] = useState(0);
 
   if (loading) return <div className={styles.panel}><div className={styles.shimmer} /></div>;
-  if (!standings) return null;
+  if (!standings) {
+    if (!hasExternalLeague) return null;
+    return (
+      <div className={styles.panel}>
+        <h3 className={styles.title}>League Table</h3>
+        <p className={styles.unavailable}>Standings not available for this competition.</p>
+      </div>
+    );
+  }
 
   const groups = standings.groups;
   if (groups.length === 0) return null;
@@ -87,7 +96,9 @@ export default function FootballStandingsPanel({ standings, loading }: Props) {
         </div>
       )}
 
-      <StandingsTable group={activeGroup} />
+      <div className={styles.tableWrapper}>
+        <StandingsTable group={activeGroup} />
+      </div>
     </div>
   );
 }

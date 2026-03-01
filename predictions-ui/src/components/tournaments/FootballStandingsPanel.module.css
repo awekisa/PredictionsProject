@@ -49,6 +49,17 @@
   color: var(--color-text);
 }
 
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.unavailable {
+  padding: 0.75rem;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;

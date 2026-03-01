@@ -111,8 +111,27 @@ public class FootballApiClient
         }
 
         var wrapper = JsonSerializer.Deserialize<FootballDataStandingsResponse>(content, _jsonOptions);
+        var all = wrapper?.Standings ?? [];
+
+        _logger.LogInformation(
+            "football-data.org GetStandings: {Total} standing group(s) returned (stages: {Stages})",
+            all.Count,
+            string.Join(", ", all.Select(s => $"{s.Stage}/{s.Type}/{s.Group ?? "null"}")));
+
         // Only return TOTAL type (excludes HOME/AWAY splits)
-        return wrapper?.Standings.Where(s => s.Type == "TOTAL").ToList() ?? [];
+        var total = all.Where(s => s.Type == "TOTAL").ToList();
+
+        if (total.Count == 0 && all.Count > 0)
+            _logger.LogWarning(
+                "football-data.org GetStandings: no TOTAL entries found. Types present: {Types}. Raw: {Body}",
+                string.Join(", ", all.Select(s => s.Type).Distinct()),
+                content[..Math.Min(500, content.Length)]);
+        else if (total.Count == 0)
+            _logger.LogWarning(
+                "football-data.org GetStandings: 0 standings returned for competition {CompetitionId} season {Season}. Raw: {Body}",
+                competitionId, season, content[..Math.Min(500, content.Length)]);
+
+        return total;
     }
 
     private static string? TryExtractMessage(string content)
