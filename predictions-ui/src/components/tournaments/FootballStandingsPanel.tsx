@@ -20,6 +20,16 @@ function groupLabel(group: string | null): string {
 function StandingsTable({ group }: { group: StandingGroupResponse }) {
   return (
     <table className={styles.table}>
+      <colgroup>
+        <col className={styles.colPos} />
+        <col className={styles.colTeam} />
+        <col className={styles.colNum} />
+        <col className={styles.colNum} />
+        <col className={styles.colNum} />
+        <col className={styles.colNum} />
+        <col className={styles.colGd} />
+        <col className={styles.colPts} />
+      </colgroup>
       <thead>
         <tr>
           <th className={styles.thPos}>#</th>
@@ -36,11 +46,13 @@ function StandingsTable({ group }: { group: StandingGroupResponse }) {
         {group.table.map((row) => (
           <tr key={row.position}>
             <td className={styles.tdPos}>{row.position}</td>
-            <td className={styles.tdTeam}>
-              {row.teamCrest && (
-                <img src={row.teamCrest} alt="" className={styles.crest} />
-              )}
-              <span>{row.teamName}</span>
+            <td>
+              <div className={styles.teamCell}>
+                {row.teamCrest && (
+                  <img src={row.teamCrest} alt="" className={styles.crest} />
+                )}
+                <span className={styles.teamName}>{row.teamName}</span>
+              </div>
             </td>
             <td>{row.playedGames}</td>
             <td>{row.won}</td>

@@ -64,19 +64,25 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.78rem;
+  table-layout: fixed;
 }
 
+.colPos  { width: 22px; }
+.colTeam { /* takes remaining width */ }
+.colNum  { width: 24px; }
+.colGd   { width: 30px; }
+.colPts  { width: 30px; }
+
 .table th {
-  padding: 0.3rem 0.4rem;
+  padding: 0.25rem 0.3rem;
   text-align: center;
   font-weight: 600;
   color: var(--color-text-secondary);
   border-bottom: 1px solid var(--color-border);
-  white-space: nowrap;
 }
 
 .table td {
-  padding: 0.3rem 0.4rem;
+  padding: 0.25rem 0.3rem;
   text-align: center;
   border-bottom: 1px solid var(--color-border);
 }
@@ -91,27 +97,31 @@
 
 .thPos,
 .tdPos {
-  width: 24px;
   color: var(--color-text-secondary);
 }
 
 .thTeam {
   text-align: left !important;
-  padding-left: 0.5rem !important;
+  padding-left: 0.4rem !important;
 }
 
-.tdTeam {
-  text-align: left !important;
+.teamCell {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  padding-left: 0.5rem !important;
+  gap: 0.3rem;
+  padding-left: 0.1rem;
+  overflow: hidden;
+}
+
+.teamName {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .crest {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   object-fit: contain;
   flex-shrink: 0;
 }
