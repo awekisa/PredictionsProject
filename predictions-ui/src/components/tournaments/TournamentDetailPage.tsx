@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { getTournament } from '../../api/tournamentApi';
 import { getGames } from '../../api/gameApi';
 import { getMyPredictions } from '../../api/predictionApi';
@@ -19,35 +19,34 @@ type FilterOption = 'today' | 'week' | 'all';
 
 export default function TournamentDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const tournamentId = Number(id);
-  const [tournament, setTournament] = useState<TournamentResponse | null>(null);
+
+  const [tournament, setTournament] = useState<TournamentResponse | null>(
+    (location.state as { tournament?: TournamentResponse } | null)?.tournament ?? null
+  );
   const [games, setGames] = useState<GameResponse[]>([]);
   const [myPredictions, setMyPredictions] = useState<PredictionResponse[]>([]);
   const [standings, setStandings] = useState<StandingEntryResponse[]>([]);
   const [activeTab, setActiveTab] = useState<'games' | 'standings'>('games');
-  const [loading, setLoading] = useState(true);
+  const [gamesLoading, setGamesLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortOption>('date');
   const [filter, setFilter] = useState<FilterOption>('today');
 
-  const loadData = () => {
-    setLoading(true);
+  useEffect(() => {
+    setGamesLoading(true);
     Promise.all([
       getTournament(tournamentId),
       getGames(tournamentId),
       getMyPredictions(tournamentId),
-      getStandings(tournamentId).catch(() => [] as typeof standings),
-    ])
-      .then(([t, g, p, s]) => {
-        setTournament(t);
-        setGames(g);
-        setMyPredictions(p);
-        setStandings(s);
-      })
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    loadData();
+      getStandings(tournamentId).catch(() => [] as StandingEntryResponse[]),
+    ]).then(([t, g, p, s]) => {
+      setTournament(t);
+      setGames(g);
+      setMyPredictions(p);
+      setStandings(s);
+      setGamesLoading(false);
+    });
   }, [tournamentId]);
 
   const filteredAndSortedGames = useMemo(() => {
@@ -82,16 +81,15 @@ export default function TournamentDetailPage() {
     return filtered;
   }, [games, sortBy, filter]);
 
-  if (loading) return <div className={styles.loading}>Loading...</div>;
-  if (!tournament) return <div className={styles.empty}>Tournament not found.</div>;
+  if (!gamesLoading && !tournament) return <div className={styles.empty}>Tournament not found.</div>;
 
   return (
     <div>
       <div className={styles.header}>
-        {tournament.emblemUrl && (
+        {tournament?.emblemUrl && (
           <img src={tournament.emblemUrl} alt="" className={styles.emblem} />
         )}
-        <h1>{tournament.name}</h1>
+        <h1>{tournament?.name ?? ''}</h1>
       </div>
 
       <div className={styles.tabs}>
@@ -111,7 +109,7 @@ export default function TournamentDetailPage() {
 
       {activeTab === 'games' && (
         <>
-          {games.length > 0 && (
+          {!gamesLoading && games.length > 0 && (
             <div className={styles.sortBar}>
               <div className={styles.filterGroup}>
                 {(['today', 'week', 'all'] as FilterOption[]).map((f) => (
@@ -132,7 +130,9 @@ export default function TournamentDetailPage() {
               </select>
             </div>
           )}
-          {filteredAndSortedGames.length === 0 ? (
+          {gamesLoading ? (
+            <div className={styles.gamesLoading} />
+          ) : filteredAndSortedGames.length === 0 ? (
             <div className={styles.empty}>No games for this period.</div>
           ) : (
             filteredAndSortedGames.map((game) => (

@@ -31,7 +31,7 @@ export default function TournamentListPage() {
             <div
               key={t.id}
               className={styles.card}
-              onClick={() => navigate(`/tournaments/${t.id}`)}
+              onClick={() => navigate(`/tournaments/${t.id}`, { state: { tournament: t } })}
             >
               {t.emblemUrl && (
                 <img src={t.emblemUrl} alt="" className={styles.emblem} />

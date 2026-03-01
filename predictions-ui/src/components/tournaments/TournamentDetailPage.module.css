@@ -50,6 +50,20 @@
   padding: 2rem 0;
 }
 
+.gamesLoading {
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-primary) 50%, var(--color-border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 2px;
+  margin-bottom: 1rem;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 .empty {
   text-align: center;
   color: var(--color-text-secondary);
