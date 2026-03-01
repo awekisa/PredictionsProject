@@ -140,7 +140,17 @@ export default function TournamentDetailPage() {
                 key={game.id}
                 game={game}
                 myPrediction={myPredictions.find((p) => p.gameId === game.id) || null}
-                onPredictionPlaced={loadData}
+                onPredictionPlaced={(prediction) =>
+                  setMyPredictions((prev) => {
+                    const idx = prev.findIndex((p) => p.gameId === prediction.gameId);
+                    if (idx >= 0) {
+                      const next = [...prev];
+                      next[idx] = prediction;
+                      return next;
+                    }
+                    return [...prev, prediction];
+                  })
+                }
               />
             ))
           )}

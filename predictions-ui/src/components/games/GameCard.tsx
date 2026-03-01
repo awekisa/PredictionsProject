@@ -8,7 +8,7 @@ import styles from './GameCard.module.css';
 interface Props {
   game: GameResponse;
   myPrediction: PredictionResponse | null;
-  onPredictionPlaced: () => void;
+  onPredictionPlaced: (prediction: PredictionResponse) => void;
 }
 
 export default function GameCard({ game, myPrediction, onPredictionPlaced }: Props) {
@@ -42,12 +42,12 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
     e.preventDefault();
     setSubmitting(true);
     try {
-      await placePrediction(game.id, {
+      const prediction = await placePrediction(game.id, {
         homeGoals: Number(homeGoals),
         awayGoals: Number(awayGoals),
       });
       setEditing(false);
-      onPredictionPlaced();
+      onPredictionPlaced(prediction);
     } finally {
       setSubmitting(false);
     }
