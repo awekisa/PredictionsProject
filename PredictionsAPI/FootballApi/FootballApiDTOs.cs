@@ -59,3 +59,37 @@ public class FootballDataGoalsDto
     public int? Home { get; set; }
     public int? Away { get; set; }
 }
+
+// GET /v4/competitions/{id}/standings
+public class FootballDataStandingsResponse
+{
+    public List<FootballDataStandingDto> Standings { get; set; } = new();
+}
+
+public class FootballDataStandingDto
+{
+    public string Stage { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public string? Group { get; set; }
+    public List<FootballDataStandingRowDto> Table { get; set; } = new();
+}
+
+public class FootballDataStandingRowDto
+{
+    public int Position { get; set; }
+    public FootballDataStandingTeamDto Team { get; set; } = new();
+    public int PlayedGames { get; set; }
+    public int Won { get; set; }
+    public int Draw { get; set; }
+    public int Lost { get; set; }
+    public int GoalsFor { get; set; }
+    public int GoalsAgainst { get; set; }
+    public int GoalDifference { get; set; }
+    public int Points { get; set; }
+}
+
+public class FootballDataStandingTeamDto
+{
+    public string Name { get; set; } = string.Empty;
+    public string? Crest { get; set; }
+}

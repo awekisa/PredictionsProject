@@ -1,0 +1,123 @@
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+  margin: 0;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.groupTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+
+.groupTab,
+.groupTabActive {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: none;
+  border: none;
+  border-radius: 0;
+  border-right: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.groupTabActive {
+  background: var(--color-primary);
+  color: white;
+}
+
+.groupTab:hover:not(.groupTabActive) {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.table th {
+  padding: 0.3rem 0.4rem;
+  text-align: center;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 0.3rem 0.4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: var(--color-border);
+}
+
+.thPos,
+.tdPos {
+  width: 24px;
+  color: var(--color-text-secondary);
+}
+
+.thTeam {
+  text-align: left !important;
+  padding-left: 0.5rem !important;
+}
+
+.tdTeam {
+  text-align: left !important;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding-left: 0.5rem !important;
+  white-space: nowrap;
+}
+
+.crest {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.tdPts {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.shimmer {
+  height: 200px;
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-surface) 50%, var(--color-border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

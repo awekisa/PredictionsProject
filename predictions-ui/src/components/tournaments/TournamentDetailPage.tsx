@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { getTournament } from '../../api/tournamentApi';
+import { getTournament, getFootballStandings } from '../../api/tournamentApi';
 import { getGames } from '../../api/gameApi';
 import { getMyPredictions } from '../../api/predictionApi';
 import { getStandings } from '../../api/standingsApi';
@@ -9,9 +9,11 @@ import type {
   GameResponse,
   PredictionResponse,
   StandingEntryResponse,
+  CompetitionStandingsResponse,
 } from '../../types';
 import GameCard from '../games/GameCard';
 import StandingsTable from '../standings/StandingsTable';
+import FootballStandingsPanel from './FootballStandingsPanel';
 import styles from './TournamentDetailPage.module.css';
 
 type SortOption = 'date' | 'homeTeam' | 'awayTeam';
@@ -30,6 +32,8 @@ export default function TournamentDetailPage() {
   const [standings, setStandings] = useState<StandingEntryResponse[]>([]);
   const [activeTab, setActiveTab] = useState<'games' | 'standings'>('games');
   const [gamesLoading, setGamesLoading] = useState(true);
+  const [footballStandings, setFootballStandings] = useState<CompetitionStandingsResponse | null>(null);
+  const [footballStandingsLoading, setFootballStandingsLoading] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('date');
   const [filter, setFilter] = useState<FilterOption>('today');
 
@@ -46,6 +50,15 @@ export default function TournamentDetailPage() {
       setMyPredictions(p);
       setStandings(s);
       setGamesLoading(false);
+
+      // Fetch football standings only for imported tournaments
+      if (t?.externalLeagueId) {
+        setFootballStandingsLoading(true);
+        getFootballStandings(tournamentId).then((fs) => {
+          setFootballStandings(fs);
+          setFootballStandingsLoading(false);
+        });
+      }
     });
   }, [tournamentId]);
 
@@ -130,30 +143,42 @@ export default function TournamentDetailPage() {
               </select>
             </div>
           )}
-          {gamesLoading ? (
-            <div className={styles.gamesLoading} />
-          ) : filteredAndSortedGames.length === 0 ? (
-            <div className={styles.empty}>No games for this period.</div>
-          ) : (
-            filteredAndSortedGames.map((game) => (
-              <GameCard
-                key={game.id}
-                game={game}
-                myPrediction={myPredictions.find((p) => p.gameId === game.id) || null}
-                onPredictionPlaced={(prediction) =>
-                  setMyPredictions((prev) => {
-                    const idx = prev.findIndex((p) => p.gameId === prediction.gameId);
-                    if (idx >= 0) {
-                      const next = [...prev];
-                      next[idx] = prediction;
-                      return next;
+          <div className={styles.gamesLayout}>
+            <div className={styles.gamesList}>
+              {gamesLoading ? (
+                <div className={styles.gamesLoading} />
+              ) : filteredAndSortedGames.length === 0 ? (
+                <div className={styles.empty}>No games for this period.</div>
+              ) : (
+                filteredAndSortedGames.map((game) => (
+                  <GameCard
+                    key={game.id}
+                    game={game}
+                    myPrediction={myPredictions.find((p) => p.gameId === game.id) || null}
+                    onPredictionPlaced={(prediction) =>
+                      setMyPredictions((prev) => {
+                        const idx = prev.findIndex((p) => p.gameId === prediction.gameId);
+                        if (idx >= 0) {
+                          const next = [...prev];
+                          next[idx] = prediction;
+                          return next;
+                        }
+                        return [...prev, prediction];
+                      })
                     }
-                    return [...prev, prediction];
-                  })
-                }
-              />
-            ))
-          )}
+                  />
+                ))
+              )}
+            </div>
+            {(footballStandingsLoading || footballStandings) && (
+              <div className={styles.standingsSidebar}>
+                <FootballStandingsPanel
+                  standings={footballStandings}
+                  loading={footballStandingsLoading}
+                />
+              </div>
+            )}
+          </div>
         </>
       )}
 

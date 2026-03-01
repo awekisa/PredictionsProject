@@ -100,3 +100,27 @@ export interface StandingEntryResponse {
   correctScores: number;
   totalPredictions: number;
 }
+
+export interface StandingRowResponse {
+  position: number;
+  teamName: string;
+  teamCrest: string | null;
+  playedGames: number;
+  won: number;
+  draw: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  points: number;
+}
+
+export interface StandingGroupResponse {
+  stage: string;
+  group: string | null;
+  table: StandingRowResponse[];
+}
+
+export interface CompetitionStandingsResponse {
+  groups: StandingGroupResponse[];
+}

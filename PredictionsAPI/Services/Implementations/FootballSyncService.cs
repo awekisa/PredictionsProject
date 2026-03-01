@@ -106,6 +106,43 @@ public class FootballSyncService : IFootballSyncService
         };
     }
 
+    public async Task<CompetitionStandingsResponse?> GetCompetitionStandingsAsync(int tournamentId)
+    {
+        var tournament = await _context.Tournaments.FindAsync(tournamentId);
+        if (tournament?.ExternalLeagueId is null || tournament.ExternalSeason is null)
+            return null;
+
+        var standings = await _apiClient.GetStandingsAsync(
+            tournament.ExternalLeagueId.Value,
+            tournament.ExternalSeason.Value);
+
+        if (standings.Count == 0)
+            return null;
+
+        return new CompetitionStandingsResponse
+        {
+            Groups = standings.Select(s => new StandingGroupResponse
+            {
+                Stage = s.Stage,
+                Group = s.Group,
+                Table = s.Table.Select(r => new StandingRowResponse
+                {
+                    Position = r.Position,
+                    TeamName = r.Team.Name,
+                    TeamCrest = r.Team.Crest,
+                    PlayedGames = r.PlayedGames,
+                    Won = r.Won,
+                    Draw = r.Draw,
+                    Lost = r.Lost,
+                    GoalsFor = r.GoalsFor,
+                    GoalsAgainst = r.GoalsAgainst,
+                    GoalDifference = r.GoalDifference,
+                    Points = r.Points
+                }).ToList()
+            }).ToList()
+        };
+    }
+
     public async Task<int> SyncScoresAsync(int tournamentId)
     {
         var tournament = await _context.Tournaments

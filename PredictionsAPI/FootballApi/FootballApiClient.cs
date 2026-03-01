@@ -93,6 +93,28 @@ public class FootballApiClient
         return results;
     }
 
+    public async Task<List<FootballDataStandingDto>> GetStandingsAsync(int competitionId, int season)
+    {
+        _logger.LogInformation("football-data.org: fetching standings for competition {CompetitionId} season {Season}",
+            competitionId, season);
+
+        var response = await _http.GetAsync($"competitions/{competitionId}/standings?season={season}");
+        CaptureRateLimitHeaders(response);
+        var content = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var msg = TryExtractMessage(content) ?? content;
+            _logger.LogWarning("football-data.org GetStandings failed: HTTP {StatusCode} – {Message}",
+                (int)response.StatusCode, msg);
+            return [];
+        }
+
+        var wrapper = JsonSerializer.Deserialize<FootballDataStandingsResponse>(content, _jsonOptions);
+        // Only return TOTAL type (excludes HOME/AWAY splits)
+        return wrapper?.Standings.Where(s => s.Type == "TOTAL").ToList() ?? [];
+    }
+
     private static string? TryExtractMessage(string content)
     {
         try
