@@ -54,7 +54,7 @@ describe('Predictions - upcoming game', () => {
 
     cy.get('input[type="number"]').eq(0).clear().type('2');
     cy.get('input[type="number"]').eq(1).clear().type('1');
-    cy.contains('button', /predict/i).first().click();
+    cy.get('button[type="submit"]').click();
 
     cy.wait('@postPrediction');
   });
