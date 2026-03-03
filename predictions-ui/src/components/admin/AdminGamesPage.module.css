@@ -18,7 +18,7 @@
 
 .createBtn {
   background-color: var(--color-primary);
-  color: white;
+  color: #1a1a1a;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -136,7 +136,7 @@
 
 .saveBtn {
   background-color: var(--color-primary);
-  color: white;
+  color: #1a1a1a;
 }
 
 .saveBtn:hover {

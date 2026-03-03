@@ -7,15 +7,18 @@
 
 .header h1 {
   font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
 }
 
 .emblem {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
+/* Tabs */
 .tabs {
   display: flex;
   gap: 0;
@@ -44,12 +47,94 @@
   border-bottom-color: var(--color-primary);
 }
 
-.loading {
-  text-align: center;
-  color: var(--color-text-secondary);
-  padding: 2rem 0;
+/* Filter bar: grouped day buttons + standalone All */
+.filterBar {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
 }
 
+.filterGroup {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.filterBtn,
+.filterBtnActive {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.4rem 0.9rem;
+  background: none;
+  color: var(--color-text-secondary);
+  border: none;
+  border-right: 1px solid var(--color-border);
+  border-radius: 0;
+  cursor: pointer;
+  gap: 0.1rem;
+}
+
+.filterBtn:last-child,
+.filterBtnActive:last-child {
+  border-right: none;
+}
+
+.filterBtnActive {
+  background: var(--color-surface);
+  color: var(--color-primary);
+}
+
+.filterBtn:hover:not(.filterBtnActive) {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+}
+
+.filterLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.filterDate {
+  font-size: 0.68rem;
+  color: inherit;
+  opacity: 0.7;
+  line-height: 1;
+}
+
+/* Standalone All button */
+.filterAll,
+.filterAllActive {
+  padding: 0.4rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.filterAllActive {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #1a1a1a;
+}
+
+.filterAll:hover:not(.filterAllActive) {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+}
+
+/* Loading + states */
 .gamesLoading {
   height: 4px;
   background: linear-gradient(90deg, var(--color-border) 25%, var(--color-primary) 50%, var(--color-border) 75%);
@@ -70,62 +155,7 @@
   padding: 2rem 0;
 }
 
-.sortBar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-
-.filterGroup {
-  display: flex;
-  gap: 0;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.filterBtn,
-.filterBtnActive {
-  padding: 0.35rem 0.75rem;
-  font-size: 0.82rem;
-  font-weight: 500;
-  border-radius: 0;
-  background: none;
-  color: var(--color-text-secondary);
-  border: none;
-  border-right: 1px solid var(--color-border);
-  cursor: pointer;
-}
-
-.filterBtn:last-child,
-.filterBtnActive:last-child {
-  border-right: none;
-}
-
-.filterBtnActive {
-  background: var(--color-primary);
-  color: white;
-}
-
-.filterBtn:hover:not(.filterBtnActive) {
-  background: var(--color-border);
-  color: var(--color-text);
-}
-
-.sortBar label {
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-  font-weight: 500;
-}
-
-.sortBar select {
-  padding: 0.4rem 0.6rem;
-  font-size: 0.85rem;
-}
-
+/* Layout */
 .gamesLayout {
   display: grid;
   grid-template-columns: 1fr 360px;
@@ -158,7 +188,16 @@
   }
 
   .tab {
-    padding: 0.6rem 1rem;
+    padding: 0.6rem 0.85rem;
     font-size: 0.875rem;
+  }
+
+  .filterBar {
+    gap: 0.5rem;
+  }
+
+  .filterBtn,
+  .filterBtnActive {
+    padding: 0.4rem 0.6rem;
   }
 }

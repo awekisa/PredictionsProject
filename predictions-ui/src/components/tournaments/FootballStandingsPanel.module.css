@@ -41,7 +41,7 @@
 
 .groupTabActive {
   background: var(--color-primary);
-  color: white;
+  color: #1a1a1a;
 }
 
 .groupTab:hover:not(.groupTabActive) {

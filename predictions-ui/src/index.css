@@ -1,18 +1,18 @@
 :root {
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
-  --color-danger: #dc2626;
-  --color-danger-hover: #b91c1c;
-  --color-success: #16a34a;
+  --color-primary: #c9a020;
+  --color-primary-hover: #b8900f;
+  --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
+  --color-success: #22c55e;
   --color-warning: #f59e0b;
-  --color-bg: #f8fafc;
-  --color-surface: #ffffff;
-  --color-border: #e2e8f0;
-  --color-text: #1e293b;
-  --color-text-secondary: #64748b;
+  --color-bg: #2d2d2d;
+  --color-surface: #3a3a3a;
+  --color-border: #555;
+  --color-text: #f0f0f0;
+  --color-text-secondary: #9a9a9a;
   --radius: 8px;
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 html {
@@ -52,7 +52,7 @@ button {
   padding: 0.5rem 1rem;
   border: none;
   border-radius: var(--radius);
-  transition: background-color 0.15s;
+  transition: background-color 0.15s, color 0.15s;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
@@ -66,6 +66,8 @@ select {
   border-radius: var(--radius);
   outline: none;
   transition: border-color 0.15s;
+  background-color: var(--color-surface);
+  color: var(--color-text);
 }
 
 input:focus,
@@ -100,7 +102,6 @@ th {
     font-size: 0.85rem;
   }
 
-  /* Prevent iOS Safari from zooming in on focused inputs */
   input,
   select {
     font-size: 1rem;

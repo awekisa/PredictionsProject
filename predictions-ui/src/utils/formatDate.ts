@@ -12,6 +12,16 @@ export function formatDateTime(d: Date | string): string {
 }
 
 /**
+ * Format a Date as HH:MM in the user's local time.
+ */
+export function formatTime(d: Date | string): string {
+  const date = typeof d === 'string' ? new Date(d) : d;
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
+/**
  * Format a UTC date string as dd/MM/yyyy in the user's local time.
  */
 export function formatDate(d: Date | string): string {

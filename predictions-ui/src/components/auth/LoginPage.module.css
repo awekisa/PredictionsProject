@@ -44,7 +44,7 @@
 .submitBtn {
   width: 100%;
   background-color: var(--color-primary);
-  color: white;
+  color: #1a1a1a;
   padding: 0.65rem;
   font-weight: 600;
   margin-top: 0.5rem;
@@ -60,7 +60,8 @@
 }
 
 .error {
-  background-color: #fef2f2;
+  background-color: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
   color: var(--color-danger);
   padding: 0.5rem 0.75rem;
   border-radius: var(--radius);
