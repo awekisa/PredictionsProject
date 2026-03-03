@@ -54,7 +54,7 @@
   color: #1a1a1a;
 }
 
-/* Match row: flag | HOME TEAM | score/inputs | AWAY TEAM | flag */
+/* Match row: flag | HOME TEAM | score | AWAY TEAM | flag */
 .matchRow {
   display: flex;
   align-items: center;
@@ -107,28 +107,21 @@
   text-align: center;
 }
 
-/* Inline score inputs in the match row */
-.scoreInputs {
+/* Action row — inputs + predict button, or edit/view links — always centered */
+.actionRow {
   display: flex;
   align-items: center;
-  gap: 0.2rem;
-  flex-shrink: 0;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.1rem 0 0.4rem;
 }
 
-.scoreInputs input {
-  width: 42px;
+.actionRow input[type="number"] {
+  width: 48px;
   text-align: center;
-  padding: 0.25rem 0.2rem;
+  padding: 0.3rem 0.25rem;
   font-size: 0.9rem;
   font-weight: 600;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  color: var(--color-text);
-}
-
-.scoreInputs input:focus {
-  border-color: var(--color-primary);
 }
 
 .colon {
@@ -136,15 +129,6 @@
   font-size: 1rem;
   color: var(--color-text);
   flex-shrink: 0;
-}
-
-/* Action row — always centered */
-.actionRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.1rem 0 0.4rem;
 }
 
 .predictBtn {
