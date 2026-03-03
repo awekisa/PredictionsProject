@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../context/ThemeContext';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
   const { user, isAdmin, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -35,6 +37,9 @@ export default function Navbar() {
 
         <div className={styles.right}>
           <span className={styles.userName}>{user?.displayName}</span>
+          <button className={styles.themeBtn} onClick={toggleTheme} aria-label="Toggle theme">
+            {theme === 'dark' ? '☀' : '☾'}
+          </button>
           <button className={styles.logoutBtn} onClick={handleLogout}>
             Logout
           </button>
