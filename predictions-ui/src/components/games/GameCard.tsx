@@ -109,9 +109,14 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
       ) : (
         <div className={styles.actionRow}>
           {myPrediction && !hasStarted && (
-            <button className={styles.editBtn} onClick={openEdit}>
-              Edit
-            </button>
+            <>
+              <span className={styles.predictionScore}>
+                {myPrediction.homeGoals}:{myPrediction.awayGoals}
+              </span>
+              <button className={styles.editBtn} onClick={openEdit}>
+                Edit
+              </button>
+            </>
           )}
           {hasStarted && (
             <Link className={styles.viewLink} to={`/games/${game.id}/predictions`}>
