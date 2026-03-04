@@ -1,3 +1,19 @@
+@font-face {
+  font-family: 'Square721';
+  src: url('/fonts/Square721-Cn-BT-Roman.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Square721';
+  src: url('/fonts/Square721-Cn-BT-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root,
 html[data-theme="dark"] {
   --color-primary: #c9a020;

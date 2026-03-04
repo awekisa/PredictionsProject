@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import { placePrediction } from '../../api/predictionApi';
 import type { GameResponse, PredictionResponse } from '../../types';
 import { formatTime } from '../../utils/formatDate';
@@ -15,13 +14,12 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
   const [homeGoals, setHomeGoals] = useState('');
   const [awayGoals, setAwayGoals] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [editing, setEditing] = useState(false);
+  const [showInputs, setShowInputs] = useState(false);
 
   const now = new Date();
   const startTime = new Date(game.startTime);
   const hasStarted = now >= startTime;
   const hasResult = game.homeGoals !== null && game.awayGoals !== null;
-  const showForm = !hasStarted && (!myPrediction || editing);
 
   const statusLabel = hasResult ? 'Finished' : hasStarted ? 'Live' : 'Upcoming';
   const statusClass = hasResult
@@ -30,12 +28,18 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
       ? styles.statusLive
       : styles.statusUpcoming;
 
+  const openPredict = () => {
+    setHomeGoals('');
+    setAwayGoals('');
+    setShowInputs(true);
+  };
+
   const openEdit = () => {
     if (myPrediction) {
       setHomeGoals(String(myPrediction.homeGoals));
       setAwayGoals(String(myPrediction.awayGoals));
     }
-    setEditing(true);
+    setShowInputs(true);
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -46,85 +50,97 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
         homeGoals: Number(homeGoals),
         awayGoals: Number(awayGoals),
       });
-      setEditing(false);
+      setShowInputs(false);
       onPredictionPlaced(prediction);
     } finally {
       setSubmitting(false);
     }
   };
 
+  const scoreDisplay = hasResult
+    ? `${game.homeGoals} : ${game.awayGoals}`
+    : '0 : 0';
+
   return (
     <div className={styles.card}>
-      <div className={styles.timeRow}>
-        <span className={styles.timeBox}>{formatTime(startTime)}</span>
-        <span className={`${styles.status} ${statusClass}`}>{statusLabel}</span>
-      </div>
-
-      <div className={styles.matchRow}>
-        <span className={styles.homeTeam}>
-          {game.homeCrestUrl && (
-            <img src={game.homeCrestUrl} alt="" className={styles.crest} />
-          )}
-          {game.homeTeam}
-        </span>
-        <span className={styles.score}>
-          {hasResult ? `${game.homeGoals}:${game.awayGoals}` : '0:0'}
-        </span>
-        <span className={styles.awayTeam}>
-          {game.awayTeam}
-          {game.awayCrestUrl && (
-            <img src={game.awayCrestUrl} alt="" className={styles.crest} />
-          )}
-        </span>
-      </div>
-
-      {showForm ? (
-        <form className={styles.actionRow} onSubmit={handleSubmit}>
-          <input
-            type="number"
-            min="0"
-            placeholder="H"
-            value={homeGoals}
-            onChange={(e) => setHomeGoals(e.target.value)}
-            required
-          />
-          <span className={styles.colon}>:</span>
-          <input
-            type="number"
-            min="0"
-            placeholder="A"
-            value={awayGoals}
-            onChange={(e) => setAwayGoals(e.target.value)}
-            required
-          />
-          <button type="submit" className={styles.predictBtn} disabled={submitting}>
-            {submitting ? '...' : editing ? 'Update' : 'Predict'}
-          </button>
-          {editing && (
-            <button type="button" className={styles.cancelBtn} onClick={() => setEditing(false)}>
-              Cancel
+      {/* Row 1: action area (left) | time (center) | status badge (right) */}
+      <div className={styles.topRow}>
+        <div className={styles.actionArea}>
+          {/* No prediction yet, game not started */}
+          {!hasStarted && !myPrediction && !showInputs && (
+            <button className={styles.predictBtn} onClick={openPredict}>
+              Predict
             </button>
           )}
-        </form>
-      ) : (
-        <div className={styles.actionRow}>
-          {myPrediction && !hasStarted && (
+
+          {/* Score input form */}
+          {!hasStarted && showInputs && (
+            <form className={styles.inputForm} onSubmit={handleSubmit}>
+              <input
+                className={styles.scoreInput}
+                type="number"
+                min="0"
+                max="99"
+                value={homeGoals}
+                onChange={(e) => setHomeGoals(e.target.value)}
+                required
+              />
+              <span className={styles.inputColon}>:</span>
+              <input
+                className={styles.scoreInput}
+                type="number"
+                min="0"
+                max="99"
+                value={awayGoals}
+                onChange={(e) => setAwayGoals(e.target.value)}
+                required
+              />
+              <button type="submit" className={styles.setBtn} disabled={submitting}>
+                {submitting ? '…' : 'Set'}
+              </button>
+            </form>
+          )}
+
+          {/* Prediction placed, game not yet started */}
+          {myPrediction && !hasStarted && !showInputs && (
             <>
-              <span className={styles.predictionScore}>
-                {myPrediction.homeGoals}:{myPrediction.awayGoals}
+              <span className={styles.predictedBadge}>
+                Predicted: {myPrediction.homeGoals}:{myPrediction.awayGoals}
               </span>
               <button className={styles.editBtn} onClick={openEdit}>
                 Edit
               </button>
             </>
           )}
-          {hasStarted && (
-            <Link className={styles.viewLink} to={`/games/${game.id}/predictions`}>
-              View all predictions
-            </Link>
+
+          {/* Prediction placed, game started */}
+          {myPrediction && hasStarted && (
+            <span className={styles.predictedBadge}>
+              Predicted: {myPrediction.homeGoals}:{myPrediction.awayGoals}
+            </span>
           )}
         </div>
-      )}
+
+        <span className={styles.timeBox}>{formatTime(startTime)}</span>
+        <span className={`${styles.statusBadge} ${statusClass}`}>{statusLabel}</span>
+      </div>
+
+      {/* Row 2: HomeTeam + flag | score | flag + AwayTeam */}
+      <div className={styles.matchRow}>
+        <span className={styles.homeTeam}>
+          {game.homeTeam}
+          {game.homeCrestUrl && (
+            <img src={game.homeCrestUrl} alt="" className={styles.crest} />
+          )}
+        </span>
+        <span className={styles.score}>{scoreDisplay}</span>
+        <span className={styles.awayTeam}>
+          {game.awayCrestUrl && (
+            <img src={game.awayCrestUrl} alt="" className={styles.crest} />
+          )}
+          {game.awayTeam}
+        </span>
+      </div>
     </div>
   );
 }
