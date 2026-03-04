@@ -92,3 +92,39 @@ jobs:
             "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}" | grep -qE '^(200|201)' \
             && echo "Vercel deploy triggered" \
             || (echo "Vercel deploy failed" && exit 1)
+
+  # ─── Job 5: Notify Discord ──────────────────────────────────────────────────
+  notify-discord:
+    name: Notify Discord
+    needs: [deploy-backend, deploy-frontend]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Post release to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          # Extract changelog entry for this tag from CHANGELOG.md
+          # Looks for the section starting with "## 📦 vX.Y.Z" and grabs until next "---"
+          VERSION="${TAG#v}"
+          NOTES=$(awk "/^## 📦 v${VERSION}/,/^---/" CHANGELOG.md \
+            | sed '1d' | sed '/^---/d' | sed '/^$/d' | head -40)
+
+          if [ -z "$NOTES" ]; then
+            NOTES="No changelog entry found for ${TAG}."
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg content "## 📦 ${TAG} deployed
+${NOTES}" \
+            '{content: $content}')
+
+          curl -s -o /dev/null -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK_URL" | grep -qE '^(2[0-9][0-9])' \
+            && echo "Discord notified" \
+            || echo "Discord notify failed (non-fatal)"
