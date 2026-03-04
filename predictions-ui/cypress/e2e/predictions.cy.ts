@@ -37,7 +37,7 @@ describe('Predictions - upcoming game', () => {
   });
 
   it('shows prediction input fields after clicking Predict', () => {
-    cy.contains('button', /predict/i).click();
+    cy.get('[data-cy="predict-btn"]').click();
     cy.get('input[type="number"]').should('have.length.at.least', 2);
   });
 
@@ -53,7 +53,7 @@ describe('Predictions - upcoming game', () => {
       },
     }).as('postPrediction');
 
-    cy.contains('button', /predict/i).click();
+    cy.get('[data-cy="predict-btn"]').click();
     cy.get('input[type="number"]').eq(0).clear().type('2');
     cy.get('input[type="number"]').eq(1).clear().type('1');
     cy.get('button[type="submit"]').click();

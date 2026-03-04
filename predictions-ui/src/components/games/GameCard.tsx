@@ -68,7 +68,7 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
         <div className={styles.actionArea}>
           {/* No prediction yet, game not started */}
           {!hasStarted && !myPrediction && !showInputs && (
-            <button className={styles.predictBtn} onClick={openPredict}>
+            <button className={styles.predictBtn} onClick={openPredict} data-cy="predict-btn">
               Predict
             </button>
           )}
