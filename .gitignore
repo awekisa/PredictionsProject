@@ -21,6 +21,8 @@ PredictionsAPI/appsettings.Development.json
 
 # Claude Code
 .claude/
+CLAUDE.md
+.playwright-mcp/
 
 # OS
 .DS_Store
