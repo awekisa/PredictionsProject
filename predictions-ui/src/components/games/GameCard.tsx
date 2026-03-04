@@ -19,10 +19,10 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
   const now = new Date();
   const startTime = new Date(game.startTime);
   const hasStarted = now >= startTime;
-  const hasResult = game.homeGoals !== null && game.awayGoals !== null;
+  const hasScore = game.homeGoals !== null && game.awayGoals !== null;
 
-  const statusLabel = hasResult ? 'Finished' : hasStarted ? 'Live' : 'Upcoming';
-  const statusClass = hasResult
+  const statusLabel = game.isFinished ? 'Finished' : hasStarted ? 'Live' : 'Upcoming';
+  const statusClass = game.isFinished
     ? styles.statusFinished
     : hasStarted
       ? styles.statusLive
@@ -57,7 +57,7 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
     }
   };
 
-  const scoreDisplay = hasResult
+  const scoreDisplay = hasScore
     ? `${game.homeGoals} : ${game.awayGoals}`
     : '0 : 0';
 
