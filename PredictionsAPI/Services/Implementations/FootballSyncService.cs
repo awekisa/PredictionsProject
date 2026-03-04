@@ -156,8 +156,8 @@ public class FootballSyncService : IFootballSyncService
             tournament.ExternalLeagueId.Value,
             tournament.ExternalSeason.Value);
 
-        var finishedMatches = matches
-            .Where(m => m.Status == "FINISHED")
+        var activeMatches = matches
+            .Where(m => m.Status is "FINISHED" or "IN_PLAY" or "PAUSED" or "HALFTIME")
             .ToDictionary(m => m.Id);
 
         int updated = 0;
@@ -167,18 +167,19 @@ public class FootballSyncService : IFootballSyncService
             if (game.ExternalFixtureId is null)
                 continue;
 
-            if (!finishedMatches.TryGetValue(game.ExternalFixtureId.Value, out var match))
+            if (!activeMatches.TryGetValue(game.ExternalFixtureId.Value, out var match))
                 continue;
 
             var newHome = match.Score.FullTime.Home;
             var newAway = match.Score.FullTime.Away;
+            var isFinished = match.Status == "FINISHED";
 
-            if (game.IsFinished && game.HomeGoals == newHome && game.AwayGoals == newAway)
+            if (game.IsFinished == isFinished && game.HomeGoals == newHome && game.AwayGoals == newAway)
                 continue;
 
             game.HomeGoals = newHome;
             game.AwayGoals = newAway;
-            game.IsFinished = true;
+            game.IsFinished = isFinished;
             updated++;
         }
 
