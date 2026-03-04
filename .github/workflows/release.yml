@@ -117,10 +117,8 @@ jobs:
             NOTES="No changelog entry found for ${TAG}."
           fi
 
-          PAYLOAD=$(jq -n \
-            --arg content "## 📦 ${TAG} deployed
-${NOTES}" \
-            '{content: $content}')
+          MESSAGE="## 📦 ${TAG} deployed"$'\n'"${NOTES}"
+          PAYLOAD=$(jq -n --arg content "$MESSAGE" '{content: $content}')
 
           curl -s -o /dev/null -w "%{http_code}" \
             -H "Content-Type: application/json" \
