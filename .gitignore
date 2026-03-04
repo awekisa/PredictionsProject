@@ -24,6 +24,9 @@ PredictionsAPI/appsettings.Development.json
 CLAUDE.md
 .playwright-mcp/
 
+# Design assets
+designs/
+
 # OS
 .DS_Store
 Thumbs.db
