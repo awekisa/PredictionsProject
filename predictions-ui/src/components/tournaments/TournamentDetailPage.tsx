@@ -14,20 +14,29 @@ import type {
 import GameCard from '../games/GameCard';
 import StandingsTable from '../standings/StandingsTable';
 import FootballStandingsPanel from './FootballStandingsPanel';
-import { formatDate } from '../../utils/formatDate';
 import styles from './TournamentDetailPage.module.css';
 
-type FilterOption = 'yesterday' | 'today' | 'tomorrow' | 'week' | 'all';
+type FilterOption = number | 'week' | 'all'; // number = day offset from today (0=today, -1=yesterday, 1=tomorrow, …)
 
-function getFilterDates() {
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-  const startOfYesterday = new Date(startOfToday.getTime() - 24 * 60 * 60 * 1000);
-  const startOfTomorrow = new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000);
-  const endOfTomorrow = new Date(startOfTomorrow.getTime() + 24 * 60 * 60 * 1000);
-  const endOfToday = startOfTomorrow;
-  const endOfWeek = new Date(startOfToday.getTime() + 7 * 24 * 60 * 60 * 1000);
-  return { startOfToday, startOfYesterday, startOfTomorrow, endOfTomorrow, endOfToday, endOfWeek };
+function getDateRange(offset: number) {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() + offset);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+  return { start, end };
+}
+
+function getTabInfo(offset: number): { label: string; date: string } {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  let label: string;
+  if (offset === 0) label = 'Today';
+  else if (offset === -1) label = 'Yesterday';
+  else if (offset === 1) label = 'Tomorrow';
+  else label = d.toLocaleDateString('en-GB', { weekday: 'short' });
+  const date = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  return { label, date };
 }
 
 export default function TournamentDetailPage() {
@@ -45,7 +54,7 @@ export default function TournamentDetailPage() {
   const [gamesLoading, setGamesLoading] = useState(true);
   const [footballStandings, setFootballStandings] = useState<CompetitionStandingsResponse | null>(null);
   const [footballStandingsLoading, setFootballStandingsLoading] = useState(false);
-  const [filter, setFilter] = useState<FilterOption>('today');
+  const [filter, setFilter] = useState<FilterOption>(0);
 
   useEffect(() => {
     setGamesLoading(true);
@@ -72,19 +81,18 @@ export default function TournamentDetailPage() {
   }, [tournamentId]);
 
   const filteredGames = useMemo(() => {
-    const { startOfToday, startOfYesterday, startOfTomorrow, endOfTomorrow, endOfToday, endOfWeek } =
-      getFilterDates();
+let filtered: GameResponse[];
+    if (filter === 'all') {
+      filtered = [...games];
+    } else if (filter === 'week') {
+      const start = new Date(); start.setHours(0, 0, 0, 0);
+      const end = new Date(start); end.setDate(end.getDate() + 7);
+      filtered = games.filter((g) => { const t = new Date(g.startTime); return t >= start && t < end; });
+    } else {
+      const { start, end } = getDateRange(filter);
+      filtered = games.filter((g) => { const t = new Date(g.startTime); return t >= start && t < end; });
+    }
 
-    const filtered = games.filter((g) => {
-      const t = new Date(g.startTime);
-      if (filter === 'yesterday') return t >= startOfYesterday && t < startOfToday;
-      if (filter === 'today') return t >= startOfToday && t < endOfToday;
-      if (filter === 'tomorrow') return t >= startOfTomorrow && t < endOfTomorrow;
-      if (filter === 'week') return t >= startOfToday && t < endOfWeek;
-      return true;
-    });
-
-    // Upcoming first for day filters, newest first for 'all'
     filtered.sort((a, b) =>
       filter === 'all'
         ? new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
@@ -94,17 +102,7 @@ export default function TournamentDetailPage() {
     return filtered;
   }, [games, filter]);
 
-  // Dates for filter labels
-  const today = new Date();
-  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
-  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
-
-  const filterLabels: { key: FilterOption; label: string; date?: string }[] = [
-    { key: 'yesterday', label: 'Yesterday', date: formatDate(yesterday) },
-    { key: 'today', label: 'Today', date: formatDate(today) },
-    { key: 'tomorrow', label: 'Tomorrow', date: formatDate(tomorrow) },
-    { key: 'week', label: 'This Week' },
-  ];
+  const dayOffset = typeof filter === 'number' ? filter : 0;
 
   if (!gamesLoading && !tournament) return <div className={styles.empty}>Tournament not found.</div>;
 
@@ -137,17 +135,28 @@ export default function TournamentDetailPage() {
           {!gamesLoading && games.length > 0 && (
             <div className={styles.filterBar}>
               <div className={styles.filterGroup}>
-                {filterLabels.map(({ key, label, date }) => (
-                  <button
-                    key={key}
-                    className={filter === key ? styles.filterBtnActive : styles.filterBtn}
-                    onClick={() => setFilter(key)}
-                  >
-                    <span className={styles.filterLabel}>{label}</span>
-                    {date && <span className={styles.filterDate}>{date}</span>}
-                  </button>
-                ))}
+                {[-1, 0, 1].map((rel) => {
+                  const offset = dayOffset + rel;
+                  const { label, date } = getTabInfo(offset);
+                  const isActive = typeof filter === 'number' && filter === offset;
+                  return (
+                    <button
+                      key={rel}
+                      className={isActive ? styles.filterBtnActive : styles.filterBtn}
+                      onClick={() => setFilter(offset)}
+                    >
+                      <span className={styles.filterLabel}>{label}</span>
+                      <span className={styles.filterDate}>{date}</span>
+                    </button>
+                  );
+                })}
               </div>
+              <button
+                className={filter === 'week' ? styles.filterAllActive : styles.filterAll}
+                onClick={() => setFilter('week')}
+              >
+                This Week
+              </button>
               <button
                 className={filter === 'all' ? styles.filterAllActive : styles.filterAll}
                 onClick={() => setFilter('all')}

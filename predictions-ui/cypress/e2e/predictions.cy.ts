@@ -24,6 +24,7 @@ function visitTournament(games: object[]) {
   cy.intercept('GET', '**/api/tournaments/1/standings', { statusCode: 200, body: [] });
 
   cy.visitAuthenticated('/tournaments/1');
+  cy.contains('button', 'All').click(); // show all games regardless of day filter
 }
 
 describe('Predictions - upcoming game', () => {
