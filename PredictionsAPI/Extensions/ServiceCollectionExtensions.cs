@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using PredictionsAPI.Data;
 using PredictionsAPI.Entities;
 using PredictionsAPI.FootballApi;
+using PredictionsAPI.Services;
 using PredictionsAPI.Services.Implementations;
 using PredictionsAPI.Services.Interfaces;
 
@@ -69,6 +70,7 @@ public static class ServiceCollectionExtensions
             client.DefaultRequestHeaders.Add("X-Auth-Token", configuration["FootballApi:ApiKey"]);
         });
         services.AddScoped<IFootballSyncService, FootballSyncService>();
+        services.AddHostedService<ScoreSyncBackgroundService>();
 
         return services;
     }
