@@ -61,6 +61,15 @@ git tag v1.1.0 <commit-hash>
 git push origin v1.1.0
 ```
 
+## Autonomy
+- Run tests, scripts, and shell commands without asking for permission
+- Run frontend Cypress tests locally before every commit:
+  ```bash
+  cd predictions-ui && npm run dev & sleep 5 && npx cypress run --browser chrome
+  ```
+- Commit and push without asking for confirmation
+- Proceed with all local file edits without asking for confirmation
+
 ## Admin Credentials (default — change in production)
 - Email: admin@predictions.com
 - Password: Admin123!
