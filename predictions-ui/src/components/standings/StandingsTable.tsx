@@ -66,10 +66,10 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
             <tr>
               <th>#</th>
               <th>Player</th>
-              <th>Points</th>
-              <th>Correct Outcomes</th>
-              <th>Correct Scores</th>
-              <th>Total Predictions</th>
+              <th className={styles.centered}>Points</th>
+              <th className={styles.centered}>Correct Outcomes</th>
+              <th className={styles.centered}>Correct Scores</th>
+              <th className={styles.centered}>Total Predictions</th>
             </tr>
           </thead>
           <tbody>
@@ -77,7 +77,7 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
               <tr key={s.position}>
                 <td className={positionClass(s.position)}>{s.position}</td>
                 <td>{s.userDisplayName}</td>
-                <td>
+                <td className={styles.centered}>
                   <button
                     className={styles.cellLink}
                     onClick={() => openPanel(s.userDisplayName, 'all', 'All Scoring Predictions')}
@@ -85,7 +85,7 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
                     {s.points}
                   </button>
                 </td>
-                <td>
+                <td className={styles.centered}>
                   <button
                     className={styles.cellLink}
                     onClick={() => openPanel(s.userDisplayName, 'outcomes', 'Correct Outcomes (1 pt)')}
@@ -93,7 +93,7 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
                     {s.correctOutcomes}
                   </button>
                 </td>
-                <td>
+                <td className={styles.centered}>
                   <button
                     className={styles.cellLink}
                     onClick={() => openPanel(s.userDisplayName, 'scores', 'Correct Scores (3 pts)')}
@@ -101,7 +101,7 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
                     {s.correctScores}
                   </button>
                 </td>
-                <td>
+                <td className={styles.centered}>
                   <button
                     className={styles.cellLink}
                     onClick={() => openPanel(s.userDisplayName, 'total', 'All Predictions')}

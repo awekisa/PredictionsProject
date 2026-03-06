@@ -33,6 +33,11 @@
   padding: 2rem 0;
 }
 
+/* Centered numeric columns */
+.centered {
+  text-align: center;
+}
+
 /* Clickable cell values */
 .cellLink {
   background: none;
