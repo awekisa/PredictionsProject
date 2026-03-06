@@ -46,6 +46,9 @@ public class FootballSyncService : IFootballSyncService
 
     public async Task<ImportLeagueResponse> ImportLeagueAsync(ImportLeagueRequest request)
     {
+        _logger.LogInformation("Importing league {LeagueId} season {Season} as '{Name}'",
+            request.LeagueId, request.Season, request.Name);
+
         var matches = await _apiClient.GetMatchesAsync(request.LeagueId, request.Season);
 
         var existingFixtureIds = (await _context.Games
@@ -94,7 +97,19 @@ public class FootballSyncService : IFootballSyncService
             gamesImported++;
         }
 
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex)
+        {
+            _logger.LogError(ex, "Database error saving imported league {LeagueId} ({GamesCount} games)",
+                request.LeagueId, gamesImported);
+            throw;
+        }
+
+        _logger.LogInformation("Imported league {LeagueId}: {GamesCount} games added to tournament {TournamentId}",
+            request.LeagueId, gamesImported, tournament.Id);
 
         return new ImportLeagueResponse
         {
@@ -161,15 +176,6 @@ public class FootballSyncService : IFootballSyncService
             tournament.ExternalLeagueId.Value,
             tournament.ExternalSeason.Value);
 
-        if (matches.Count > 0)
-        {
-            var sample = matches[0];
-            _logger.LogInformation(
-                "SyncScores team sample: Home={{Name={HomeName}, ShortName={HomeShort}, Tla={HomeTla}}}, Away={{Name={AwayName}, ShortName={AwayShort}, Tla={AwayTla}}}",
-                sample.HomeTeam.Name, sample.HomeTeam.ShortName, sample.HomeTeam.Tla,
-                sample.AwayTeam.Name, sample.AwayTeam.ShortName, sample.AwayTeam.Tla);
-        }
-
         var allMatches = matches.ToDictionary(m => m.Id);
 
         var activeMatches = matches
@@ -216,7 +222,17 @@ public class FootballSyncService : IFootballSyncService
         }
 
         if (updated > 0)
-            await _context.SaveChangesAsync();
+        {
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Database error saving score sync for tournament {TournamentId}", tournamentId);
+                throw;
+            }
+        }
 
         return updated;
     }
