@@ -1,3 +1,19 @@
+## 📦 v0.2.1 — 6 Mar 2026
+
+> **Refreshed Card Design**
+> Updated colours and fonts across all game cards. Flags are now centred next to the score, team names on the outer edges. Upcoming games show "vs" instead of dashes. SET button is now gold, FINISHED badge is solid dark.
+
+> **Short Team Names on Mobile**
+> Standings drill-down panel shows three-letter abbreviations (e.g. ARS, MCI) on small screens to prevent overflow. Game cards always show full team names.
+
+> **Knockout Match Scoring**
+> Matches that go to extra time or penalties are now scored against the 90-minute result. A 1:1 draw that goes to penalties is evaluated as 1:1 for predictions.
+
+> **Standings Table Polish**
+> Numeric columns are centred. Standings drill-down panel properly truncates long team names.
+
+---
+
 ## 📦 v0.2.0 — 6 Mar 2026
 
 > **Redesigned Match Cards**
