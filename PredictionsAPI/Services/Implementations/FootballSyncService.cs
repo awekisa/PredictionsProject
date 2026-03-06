@@ -158,6 +158,8 @@ public class FootballSyncService : IFootballSyncService
             tournament.ExternalLeagueId.Value,
             tournament.ExternalSeason.Value);
 
+        var allMatches = matches.ToDictionary(m => m.Id);
+
         var activeMatches = matches
             .Where(m => m.Status is "FINISHED" or "IN_PLAY" or "PAUSED" or "HALFTIME")
             .ToDictionary(m => m.Id);
@@ -169,19 +171,24 @@ public class FootballSyncService : IFootballSyncService
             if (game.ExternalFixtureId is null)
                 continue;
 
+            // Backfill TLA short names from any match (not just active ones)
+            if ((game.HomeTeamShort is null || game.AwayTeamShort is null)
+                && allMatches.TryGetValue(game.ExternalFixtureId.Value, out var anyMatch))
+            {
+                if (game.HomeTeamShort is null && anyMatch.HomeTeam.Tla is not null)
+                {
+                    game.HomeTeamShort = anyMatch.HomeTeam.Tla;
+                    updated++;
+                }
+                if (game.AwayTeamShort is null && anyMatch.AwayTeam.Tla is not null)
+                {
+                    game.AwayTeamShort = anyMatch.AwayTeam.Tla;
+                    updated++;
+                }
+            }
+
             if (!activeMatches.TryGetValue(game.ExternalFixtureId.Value, out var match))
                 continue;
-
-            if (game.HomeTeamShort is null && match.HomeTeam.Tla is not null)
-            {
-                game.HomeTeamShort = match.HomeTeam.Tla;
-                updated++;
-            }
-            if (game.AwayTeamShort is null && match.AwayTeam.Tla is not null)
-            {
-                game.AwayTeamShort = match.AwayTeam.Tla;
-                updated++;
-            }
 
             var newHome = match.Score.FullTime.Home;
             var newAway = match.Score.FullTime.Away;
