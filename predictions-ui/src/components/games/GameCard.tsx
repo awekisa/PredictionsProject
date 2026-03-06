@@ -21,6 +21,13 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
   const hasStarted = now >= startTime;
   const hasScore = game.homeGoals !== null && game.awayGoals !== null;
 
+  const isCorrectPrediction =
+    myPrediction !== null &&
+    game.isFinished &&
+    hasScore &&
+    myPrediction.homeGoals === game.homeGoals &&
+    myPrediction.awayGoals === game.awayGoals;
+
   const statusLabel = game.isFinished ? 'Finished' : hasStarted ? 'Live' : 'Upcoming';
   const statusClass = game.isFinished
     ? styles.statusFinished
@@ -57,23 +64,21 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
     }
   };
 
-  const scoreDisplay = hasScore
-    ? `${game.homeGoals} : ${game.awayGoals}`
-    : '0 : 0';
+  const scoreDisplay = hasScore ? `${game.homeGoals} : ${game.awayGoals}` : '– : –';
 
   return (
     <div className={styles.card}>
-      {/* Row 1: action area (left) | time (center) | status badge (right) */}
+      {/* Row 1: action badge (left) | time (center) | status badge (right) */}
       <div className={styles.topRow}>
         <div className={styles.actionArea}>
-          {/* No prediction yet, game not started */}
+          {/* Upcoming: no prediction yet */}
           {!hasStarted && !myPrediction && !showInputs && (
-            <button className={styles.predictBtn} onClick={openPredict} data-cy="predict-btn">
+            <button className={styles.predictBadge} onClick={openPredict} data-cy="predict-btn">
               Predict
             </button>
           )}
 
-          {/* Score input form */}
+          {/* Upcoming: input form open */}
           {!hasStarted && showInputs && (
             <form className={styles.inputForm} onSubmit={handleSubmit}>
               <input
@@ -101,11 +106,11 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
             </form>
           )}
 
-          {/* Prediction placed, game not yet started */}
-          {myPrediction && !hasStarted && !showInputs && (
+          {/* Upcoming: prediction set, not editing */}
+          {!hasStarted && myPrediction && !showInputs && (
             <>
               <span className={styles.predictedBadge}>
-                Predicted: {myPrediction.homeGoals}:{myPrediction.awayGoals}
+                Predicted&nbsp; {myPrediction.homeGoals}:{myPrediction.awayGoals}
               </span>
               <button className={styles.editBtn} onClick={openEdit}>
                 Edit
@@ -113,11 +118,21 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
             </>
           )}
 
-          {/* Prediction placed, game started */}
-          {myPrediction && hasStarted && (
+          {/* Started: correct prediction */}
+          {hasStarted && isCorrectPrediction && (
+            <span className={styles.predictedCorrectBadge}>Predicted!</span>
+          )}
+
+          {/* Started: prediction exists but not correct (or game not finished yet) */}
+          {hasStarted && myPrediction && !isCorrectPrediction && (
             <span className={styles.predictedBadge}>
-              Predicted: {myPrediction.homeGoals}:{myPrediction.awayGoals}
+              Predicted&nbsp; {myPrediction.homeGoals}:{myPrediction.awayGoals}
             </span>
+          )}
+
+          {/* Started: no prediction */}
+          {hasStarted && !myPrediction && (
+            <span className={styles.noPredictionBadge}>No Prediction</span>
           )}
         </div>
 
