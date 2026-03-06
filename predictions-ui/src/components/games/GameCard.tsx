@@ -64,7 +64,7 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
     }
   };
 
-  const scoreDisplay = hasScore ? `${game.homeGoals} : ${game.awayGoals}` : '– : –';
+  const scoreDisplay = hasScore ? `${game.homeGoals} : ${game.awayGoals}` : 'vs';
 
   return (
     <div className={styles.card}>
@@ -140,22 +140,22 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
         <span className={`${styles.statusBadge} ${statusClass}`}>{statusLabel}</span>
       </div>
 
-      {/* Row 2: HomeTeam + flag | score | flag + AwayTeam */}
+      {/* Row 2: TeamName — Flag — score/vs — Flag — TeamName */}
       <div className={styles.matchRow}>
         <span className={styles.homeTeam}>
           <span className={styles.teamFull}>{game.homeTeam}</span>
           {game.homeTeamShort && (
             <span className={styles.teamShort}>{game.homeTeamShort}</span>
           )}
-          {game.homeCrestUrl && (
-            <img src={game.homeCrestUrl} alt="" className={styles.crest} />
-          )}
         </span>
+        {game.homeCrestUrl && (
+          <img src={game.homeCrestUrl} alt="" className={styles.homeCrest} />
+        )}
         <span className={styles.score}>{scoreDisplay}</span>
+        {game.awayCrestUrl && (
+          <img src={game.awayCrestUrl} alt="" className={styles.awayCrest} />
+        )}
         <span className={styles.awayTeam}>
-          {game.awayCrestUrl && (
-            <img src={game.awayCrestUrl} alt="" className={styles.crest} />
-          )}
           <span className={styles.teamFull}>{game.awayTeam}</span>
           {game.awayTeamShort && (
             <span className={styles.teamShort}>{game.awayTeamShort}</span>
