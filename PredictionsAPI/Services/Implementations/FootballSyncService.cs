@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using PredictionsAPI.Data;
 using PredictionsAPI.DTOs.Football;
 using PredictionsAPI.DTOs.Tournaments;
@@ -12,11 +13,13 @@ public class FootballSyncService : IFootballSyncService
 {
     private readonly FootballApiClient _apiClient;
     private readonly AppDbContext _context;
+    private readonly ILogger<FootballSyncService> _logger;
 
-    public FootballSyncService(FootballApiClient apiClient, AppDbContext context)
+    public FootballSyncService(FootballApiClient apiClient, AppDbContext context, ILogger<FootballSyncService> logger)
     {
         _apiClient = apiClient;
         _context = context;
+        _logger = logger;
     }
 
     public async Task<List<LeagueSearchResult>> GetCompetitionsAsync()
@@ -157,6 +160,15 @@ public class FootballSyncService : IFootballSyncService
         var matches = await _apiClient.GetMatchesAsync(
             tournament.ExternalLeagueId.Value,
             tournament.ExternalSeason.Value);
+
+        if (matches.Count > 0)
+        {
+            var sample = matches[0];
+            _logger.LogInformation(
+                "SyncScores team sample: Home={{Name={HomeName}, ShortName={HomeShort}, Tla={HomeTla}}}, Away={{Name={AwayName}, ShortName={AwayShort}, Tla={AwayTla}}}",
+                sample.HomeTeam.Name, sample.HomeTeam.ShortName, sample.HomeTeam.Tla,
+                sample.AwayTeam.Name, sample.AwayTeam.ShortName, sample.AwayTeam.Tla);
+        }
 
         var allMatches = matches.ToDictionary(m => m.Id);
 
