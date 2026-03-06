@@ -52,7 +52,9 @@ public class FootballDataTeamDto
 
 public class FootballDataScoreDto
 {
+    public string? Duration { get; set; }
     public FootballDataGoalsDto FullTime { get; set; } = new();
+    public FootballDataGoalsDto? RegularTime { get; set; }
 }
 
 public class FootballDataGoalsDto

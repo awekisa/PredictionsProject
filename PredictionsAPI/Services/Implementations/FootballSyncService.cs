@@ -208,8 +208,15 @@ public class FootballSyncService : IFootballSyncService
             if (!activeMatches.TryGetValue(game.ExternalFixtureId.Value, out var match))
                 continue;
 
-            var newHome = match.Score.FullTime.Home;
-            var newAway = match.Score.FullTime.Away;
+            // Use regularTime for knockout matches that went to extra time/penalties
+            // so predictions are scored against the 90-minute result
+            var scoreSource = match.Score.Duration is "EXTRA_TIME" or "PENALTY_SHOOTOUT"
+                && match.Score.RegularTime is not null
+                ? match.Score.RegularTime
+                : match.Score.FullTime;
+
+            var newHome = scoreSource.Home;
+            var newAway = scoreSource.Away;
             var isFinished = match.Status == "FINISHED";
 
             if (game.IsFinished == isFinished && game.HomeGoals == newHome && game.AwayGoals == newAway)
