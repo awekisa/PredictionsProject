@@ -97,8 +97,22 @@ export interface StandingEntryResponse {
   position: number;
   userDisplayName: string;
   points: number;
+  correctOutcomes: number;
   correctScores: number;
   totalPredictions: number;
+}
+
+export interface UserPredictionDetailResponse {
+  homeTeam: string;
+  awayTeam: string;
+  homeCrestUrl: string | null;
+  awayCrestUrl: string | null;
+  predictedHome: number;
+  predictedAway: number;
+  actualHome: number;
+  actualAway: number;
+  pointsEarned: number;
+  matchDate: string;
 }
 
 export interface StandingRowResponse {

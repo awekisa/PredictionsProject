@@ -22,4 +22,11 @@ public class StandingsController : ControllerBase
         var standings = await _standingsService.GetStandingsAsync(tournamentId);
         return Ok(standings);
     }
+
+    [HttpGet("{userDisplayName}/predictions")]
+    public async Task<IActionResult> GetUserPredictionDetails(int tournamentId, string userDisplayName, [FromQuery] string type = "all")
+    {
+        var details = await _standingsService.GetUserPredictionDetailsAsync(tournamentId, userDisplayName, type);
+        return Ok(details);
+    }
 }

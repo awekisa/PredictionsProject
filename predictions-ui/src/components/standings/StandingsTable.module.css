@@ -32,3 +32,145 @@
   color: var(--color-text-secondary);
   padding: 2rem 0;
 }
+
+/* Clickable cell values */
+.cellLink {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font: inherit;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cellLink:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Detail panel */
+.detailPanel {
+  margin-top: 0.75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.panelTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.panelClose {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 1.2rem;
+  padding: 0 0.3rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.panelClose:hover {
+  color: var(--color-text);
+}
+
+.panelLoading,
+.panelEmpty {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.panelList {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Detail row */
+.detailRow {
+  display: grid;
+  grid-template-columns: 55px 1fr auto 30px auto 1fr auto;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.8rem;
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailDate {
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.detailTeam {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.detailTeamRight {
+  justify-content: flex-end;
+}
+
+.detailCrest {
+  width: 18px;
+  height: 14px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.detailScore {
+  font-weight: 700;
+  font-family: 'Square721', sans-serif;
+  text-align: center;
+  min-width: 28px;
+}
+
+.detailVs {
+  color: var(--color-text-secondary);
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.detailPts3 {
+  font-weight: 700;
+  color: #49d300;
+  text-align: right;
+  min-width: 28px;
+}
+
+.detailPts1 {
+  font-weight: 700;
+  color: #d2a521;
+  text-align: right;
+  min-width: 28px;
+}
+
+.detailPts0 {
+  color: var(--color-text-secondary);
+  text-align: right;
+  min-width: 28px;
+}

@@ -16,7 +16,7 @@ import StandingsTable from '../standings/StandingsTable';
 import FootballStandingsPanel from './FootballStandingsPanel';
 import styles from './TournamentDetailPage.module.css';
 
-type FilterOption = number | 'week' | 'all'; // number = day offset from today (0=today, -1=yesterday, 1=tomorrow, …)
+type FilterOption = number | 'all'; // number = day offset from today (0=today, -1=yesterday, 1=tomorrow, …)
 
 function getDateRange(offset: number) {
   const start = new Date();
@@ -84,10 +84,6 @@ export default function TournamentDetailPage() {
 let filtered: GameResponse[];
     if (filter === 'all') {
       filtered = [...games];
-    } else if (filter === 'week') {
-      const start = new Date(); start.setHours(0, 0, 0, 0);
-      const end = new Date(start); end.setDate(end.getDate() + 7);
-      filtered = games.filter((g) => { const t = new Date(g.startTime); return t >= start && t < end; });
     } else {
       const { start, end } = getDateRange(filter);
       filtered = games.filter((g) => { const t = new Date(g.startTime); return t >= start && t < end; });
@@ -152,12 +148,6 @@ let filtered: GameResponse[];
                 })}
               </div>
               <button
-                className={filter === 'week' ? styles.filterAllActive : styles.filterAll}
-                onClick={() => setFilter('week')}
-              >
-                This Week
-              </button>
-              <button
                 className={filter === 'all' ? styles.filterAllActive : styles.filterAll}
                 onClick={() => setFilter('all')}
               >
@@ -205,7 +195,7 @@ let filtered: GameResponse[];
         </>
       )}
 
-      {activeTab === 'standings' && <StandingsTable standings={standings} />}
+      {activeTab === 'standings' && <StandingsTable standings={standings} tournamentId={tournamentId} />}
     </div>
   );
 }

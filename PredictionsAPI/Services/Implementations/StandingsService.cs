@@ -36,6 +36,7 @@ public class StandingsService : IStandingsService
             {
                 int points = 0;
                 int correctScores = 0;
+                int correctOutcomes = 0;
                 int totalPredictions = group.Count();
 
                 foreach (var prediction in group)
@@ -55,6 +56,7 @@ public class StandingsService : IStandingsService
                     else if (IsCorrectOutcome(resultHome, resultAway, prediction.HomeGoals, prediction.AwayGoals))
                     {
                         points += 1;
+                        correctOutcomes++;
                     }
                 }
 
@@ -63,6 +65,7 @@ public class StandingsService : IStandingsService
                     group.Key.DisplayName,
                     Points = points,
                     CorrectScores = correctScores,
+                    CorrectOutcomes = correctOutcomes,
                     TotalPredictions = totalPredictions
                 };
             })
@@ -80,11 +83,71 @@ public class StandingsService : IStandingsService
                 UserDisplayName = userStats[i].DisplayName,
                 Points = userStats[i].Points,
                 CorrectScores = userStats[i].CorrectScores,
+                CorrectOutcomes = userStats[i].CorrectOutcomes,
                 TotalPredictions = userStats[i].TotalPredictions
             });
         }
 
         return standings;
+    }
+
+    public async Task<List<UserPredictionDetailResponse>> GetUserPredictionDetailsAsync(int tournamentId, string userDisplayName, string type)
+    {
+        var predictions = await _context.Predictions
+            .Include(p => p.Game)
+            .Include(p => p.User)
+            .Where(p => p.Game.TournamentId == tournamentId && p.User.DisplayName == userDisplayName)
+            .ToListAsync();
+
+        var results = new List<UserPredictionDetailResponse>();
+
+        foreach (var p in predictions)
+        {
+            var game = p.Game;
+            bool isFinished = game.IsFinished && game.HomeGoals.HasValue && game.AwayGoals.HasValue;
+
+            int pointsEarned = 0;
+            int actualHome = 0;
+            int actualAway = 0;
+
+            if (isFinished)
+            {
+                actualHome = game.HomeGoals!.Value;
+                actualAway = game.AwayGoals!.Value;
+
+                if (IsCorrectScore(actualHome, actualAway, p.HomeGoals, p.AwayGoals))
+                    pointsEarned = 3;
+                else if (IsCorrectOutcome(actualHome, actualAway, p.HomeGoals, p.AwayGoals))
+                    pointsEarned = 1;
+            }
+
+            bool include = type switch
+            {
+                "scores" => pointsEarned == 3,
+                "outcomes" => pointsEarned == 1,
+                "all" => pointsEarned > 0,
+                "total" => true,
+                _ => pointsEarned > 0
+            };
+
+            if (!include) continue;
+
+            results.Add(new UserPredictionDetailResponse
+            {
+                HomeTeam = game.HomeTeam,
+                AwayTeam = game.AwayTeam,
+                HomeCrestUrl = game.HomeCrestUrl,
+                AwayCrestUrl = game.AwayCrestUrl,
+                PredictedHome = p.HomeGoals,
+                PredictedAway = p.AwayGoals,
+                ActualHome = actualHome,
+                ActualAway = actualAway,
+                PointsEarned = pointsEarned,
+                MatchDate = game.StartTime
+            });
+        }
+
+        return results.OrderByDescending(r => r.MatchDate).ToList();
     }
 
     private static bool IsCorrectScore(int resultHome, int resultAway, int predHome, int predAway)

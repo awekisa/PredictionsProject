@@ -10,5 +10,7 @@ public class StandingEntryResponse
 
     public int CorrectScores { get; set; }
 
+    public int CorrectOutcomes { get; set; }
+
     public int TotalPredictions { get; set; }
 }
