@@ -253,4 +253,9 @@
   .teamShort {
     display: inline;
   }
+
+  .crest {
+    width: 22px;
+    height: 16px;
+  }
 }
