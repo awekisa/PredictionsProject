@@ -134,7 +134,10 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
                   <span className={styles.detailDate}>{formatDate(d.matchDate)}</span>
                   <span className={styles.detailTeam}>
                     {d.homeCrestUrl && <img src={d.homeCrestUrl} alt="" className={styles.detailCrest} />}
-                    <span className={styles.detailTeamName}>{d.homeTeam}</span>
+                    <span className={styles.detailTeamName}>
+                      <span className={styles.teamFull}>{d.homeTeam}</span>
+                      {d.homeTeamShort && <span className={styles.teamShort}>{d.homeTeamShort}</span>}
+                    </span>
                   </span>
                   <span className={styles.detailScore}>
                     {d.predictedHome}:{d.predictedAway}
@@ -144,7 +147,10 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
                     {d.actualHome}:{d.actualAway}
                   </span>
                   <span className={`${styles.detailTeam} ${styles.detailTeamRight}`}>
-                    <span className={styles.detailTeamName}>{d.awayTeam}</span>
+                    <span className={styles.detailTeamName}>
+                      <span className={styles.teamFull}>{d.awayTeam}</span>
+                      {d.awayTeamShort && <span className={styles.teamShort}>{d.awayTeamShort}</span>}
+                    </span>
                     {d.awayCrestUrl && <img src={d.awayCrestUrl} alt="" className={styles.detailCrest} />}
                   </span>
                   <span

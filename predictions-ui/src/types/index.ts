@@ -58,6 +58,8 @@ export interface GameResponse {
   isFinished: boolean;
   homeCrestUrl: string | null;
   awayCrestUrl: string | null;
+  homeTeamShort: string | null;
+  awayTeamShort: string | null;
 }
 
 export interface CreateGameRequest {
@@ -107,6 +109,8 @@ export interface UserPredictionDetailResponse {
   awayTeam: string;
   homeCrestUrl: string | null;
   awayCrestUrl: string | null;
+  homeTeamShort: string | null;
+  awayTeamShort: string | null;
   predictedHome: number;
   predictedAway: number;
   actualHome: number;

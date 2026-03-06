@@ -6,6 +6,8 @@ public class UserPredictionDetailResponse
     public string AwayTeam { get; set; } = string.Empty;
     public string? HomeCrestUrl { get; set; }
     public string? AwayCrestUrl { get; set; }
+    public string? HomeTeamShort { get; set; }
+    public string? AwayTeamShort { get; set; }
     public int PredictedHome { get; set; }
     public int PredictedAway { get; set; }
     public int ActualHome { get; set; }

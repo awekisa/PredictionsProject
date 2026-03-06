@@ -143,7 +143,10 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
       {/* Row 2: HomeTeam + flag | score | flag + AwayTeam */}
       <div className={styles.matchRow}>
         <span className={styles.homeTeam}>
-          {game.homeTeam}
+          <span className={styles.teamFull}>{game.homeTeam}</span>
+          {game.homeTeamShort && (
+            <span className={styles.teamShort}>{game.homeTeamShort}</span>
+          )}
           {game.homeCrestUrl && (
             <img src={game.homeCrestUrl} alt="" className={styles.crest} />
           )}
@@ -153,7 +156,10 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
           {game.awayCrestUrl && (
             <img src={game.awayCrestUrl} alt="" className={styles.crest} />
           )}
-          {game.awayTeam}
+          <span className={styles.teamFull}>{game.awayTeam}</span>
+          {game.awayTeamShort && (
+            <span className={styles.teamShort}>{game.awayTeamShort}</span>
+          )}
         </span>
       </div>
     </div>

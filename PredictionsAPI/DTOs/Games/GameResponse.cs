@@ -21,4 +21,8 @@ public class GameResponse
     public string? HomeCrestUrl { get; set; }
 
     public string? AwayCrestUrl { get; set; }
+
+    public string? HomeTeamShort { get; set; }
+
+    public string? AwayTeamShort { get; set; }
 }

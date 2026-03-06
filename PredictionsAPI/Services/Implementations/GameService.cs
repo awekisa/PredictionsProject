@@ -108,6 +108,8 @@ public class GameService : IGameService
         AwayGoals = g.AwayGoals,
         IsFinished = g.IsFinished,
         HomeCrestUrl = g.HomeCrestUrl,
-        AwayCrestUrl = g.AwayCrestUrl
+        AwayCrestUrl = g.AwayCrestUrl,
+        HomeTeamShort = g.HomeTeamShort,
+        AwayTeamShort = g.AwayTeamShort
     };
 }

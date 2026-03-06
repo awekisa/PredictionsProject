@@ -24,6 +24,10 @@ public class Game
 
     public string? AwayCrestUrl { get; set; }
 
+    public string? HomeTeamShort { get; set; }
+
+    public string? AwayTeamShort { get; set; }
+
     public Tournament Tournament { get; set; } = null!;
 
     public ICollection<Prediction> Predictions { get; set; } = new List<Prediction>();

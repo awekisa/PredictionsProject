@@ -231,3 +231,26 @@
   letter-spacing: 0.05em;
   flex-shrink: 0;
 }
+
+/* Team name variants — full shown by default, short on mobile */
+.teamFull {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.teamShort {
+  display: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .teamFull {
+    display: none;
+  }
+
+  .teamShort {
+    display: inline;
+  }
+}

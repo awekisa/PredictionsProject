@@ -138,6 +138,8 @@ public class StandingsService : IStandingsService
                 AwayTeam = game.AwayTeam,
                 HomeCrestUrl = game.HomeCrestUrl,
                 AwayCrestUrl = game.AwayCrestUrl,
+                HomeTeamShort = game.HomeTeamShort,
+                AwayTeamShort = game.AwayTeamShort,
                 PredictedHome = p.HomeGoals,
                 PredictedAway = p.AwayGoals,
                 ActualHome = actualHome,

@@ -180,6 +180,15 @@
   min-width: 28px;
 }
 
+/* Team name variants — full shown by default, TLA on mobile */
+.teamFull {
+  /* shown by default */
+}
+
+.teamShort {
+  display: none;
+}
+
 @media (max-width: 480px) {
   .detailRow {
     grid-template-columns: 1fr auto 24px auto 1fr auto;
@@ -194,5 +203,13 @@
 
   .detailCrest {
     display: none;
+  }
+
+  .teamFull {
+    display: none;
+  }
+
+  .teamShort {
+    display: inline;
   }
 }

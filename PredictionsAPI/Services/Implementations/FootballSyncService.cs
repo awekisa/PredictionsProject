@@ -84,7 +84,9 @@ public class FootballSyncService : IFootballSyncService
                 StartTime = match.UtcDate,
                 ExternalFixtureId = match.Id,
                 HomeCrestUrl = match.HomeTeam.Crest,
-                AwayCrestUrl = match.AwayTeam.Crest
+                AwayCrestUrl = match.AwayTeam.Crest,
+                HomeTeamShort = match.HomeTeam.Tla,
+                AwayTeamShort = match.AwayTeam.Tla
             });
             gamesImported++;
         }
@@ -169,6 +171,17 @@ public class FootballSyncService : IFootballSyncService
 
             if (!activeMatches.TryGetValue(game.ExternalFixtureId.Value, out var match))
                 continue;
+
+            if (game.HomeTeamShort is null && match.HomeTeam.Tla is not null)
+            {
+                game.HomeTeamShort = match.HomeTeam.Tla;
+                updated++;
+            }
+            if (game.AwayTeamShort is null && match.AwayTeam.Tla is not null)
+            {
+                game.AwayTeamShort = match.AwayTeam.Tla;
+                updated++;
+            }
 
             var newHome = match.Score.FullTime.Home;
             var newAway = match.Score.FullTime.Away;
