@@ -25,8 +25,8 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
     myPrediction !== null &&
     game.isFinished &&
     hasScore &&
-    myPrediction.homeGoals === game.homeGoals &&
-    myPrediction.awayGoals === game.awayGoals;
+    Number(myPrediction.homeGoals) === Number(game.homeGoals) &&
+    Number(myPrediction.awayGoals) === Number(game.awayGoals);
 
   const statusLabel = game.isFinished ? 'Finished' : hasStarted ? 'Live' : 'Upcoming';
   const statusClass = game.isFinished
