@@ -1,4 +1,17 @@
-## 📦 v0.1.8 — 5 Mar 2026
+## 📦 v0.2.0 — 6 Mar 2026
+
+> **Redesigned Match Cards**
+> Cards now use a badge system showing your prediction status at a glance — red PREDICT, yellow PREDICTED with score, green PREDICTED! for correct guesses, and red NO PREDICTION for missed games. Darker theme with updated colours.
+
+> **Interactive Prediction Standings**
+> Click any number in the standings table to drill down into the player's predictions. See exactly which games earned points, with predicted vs actual scores colour-coded by result.
+
+> **Correct Outcomes Column**
+> Standings table now shows a separate count for predictions that got the right winner/draw but not the exact score.
+
+---
+
+
 
 > **Discord Notifications**
 > Release notes are automatically posted to Discord after each deployment.
