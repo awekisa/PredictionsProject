@@ -16,6 +16,7 @@
   height: 56px;
   object-fit: contain;
   flex-shrink: 0;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.15));
 }
 
 /* Tabs */
