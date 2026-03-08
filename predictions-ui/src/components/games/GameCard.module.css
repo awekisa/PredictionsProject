@@ -235,6 +235,23 @@
 }
 
 @media (max-width: 480px) {
+  .card {
+    padding: 0.5rem 0.425rem 0.575rem;
+  }
+
+  .badgeBase {
+    padding: 0.11rem 0.275rem;
+  }
+
+  .topRow {
+    gap: 0.15rem;
+    margin-bottom: 1.7rem;
+  }
+
+  .actionArea {
+    gap: 0.15rem;
+  }
+
   .homeTeam,
   .awayTeam {
     font-size: 0.78rem;
@@ -242,7 +259,7 @@
 
   .homeCrest,
   .awayCrest {
-    width: 22px;
-    height: 16px;
+    width: 28px;
+    height: 20px;
   }
 }
