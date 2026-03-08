@@ -28,6 +28,9 @@ export default function Navbar() {
           <Link to="/" className={styles.navLink}>
             Tournaments
           </Link>
+          <Link to="/standings" className={styles.navLink}>
+            Global Standings
+          </Link>
           {isAdmin && (
             <Link to="/admin/tournaments" className={styles.navLink}>
               Admin
@@ -58,6 +61,9 @@ export default function Navbar() {
         <div className={styles.mobileMenu}>
           <Link to="/" className={styles.mobileLink} onClick={closeMenu}>
             Tournaments
+          </Link>
+          <Link to="/standings" className={styles.mobileLink} onClick={closeMenu}>
+            Global Standings
           </Link>
           {isAdmin && (
             <Link to="/admin/tournaments" className={styles.mobileLink} onClick={closeMenu}>

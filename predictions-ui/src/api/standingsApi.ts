@@ -9,3 +9,12 @@ export const getUserPredictionDetails = (tournamentId: number, userDisplayName: 
     `/tournaments/${tournamentId}/standings/${encodeURIComponent(userDisplayName)}/predictions`,
     { params: { type } }
   ).then((res) => res.data);
+
+export const getGlobalStandings = () =>
+  apiClient.get<StandingEntryResponse[]>('/standings/global').then((res) => res.data);
+
+export const getGlobalUserPredictionDetails = (userDisplayName: string, type: string) =>
+  apiClient.get<UserPredictionDetailResponse[]>(
+    `/standings/global/${encodeURIComponent(userDisplayName)}/predictions`,
+    { params: { type } }
+  ).then((res) => res.data);

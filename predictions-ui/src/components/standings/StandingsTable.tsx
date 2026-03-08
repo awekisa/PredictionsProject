@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { getUserPredictionDetails } from '../../api/standingsApi';
+import { getUserPredictionDetails, getGlobalUserPredictionDetails } from '../../api/standingsApi';
 import type { StandingEntryResponse, UserPredictionDetailResponse } from '../../types';
 import styles from './StandingsTable.module.css';
 
 interface Props {
   standings: StandingEntryResponse[];
-  tournamentId: number;
+  tournamentId?: number;
 }
 
 type DetailType = 'all' | 'outcomes' | 'scores' | 'total';
@@ -45,7 +45,9 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
     setPanel({ user, type, label });
     setLoading(true);
     try {
-      const data = await getUserPredictionDetails(tournamentId, user, type);
+      const data = tournamentId
+        ? await getUserPredictionDetails(tournamentId, user, type)
+        : await getGlobalUserPredictionDetails(user, type);
       setDetails(data);
     } catch {
       setDetails([]);

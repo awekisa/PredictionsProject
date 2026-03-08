@@ -7,6 +7,7 @@ import RegisterPage from './components/auth/RegisterPage';
 import TournamentListPage from './components/tournaments/TournamentListPage';
 import TournamentDetailPage from './components/tournaments/TournamentDetailPage';
 import GamePredictionsPage from './components/games/GamePredictionsPage';
+import GlobalStandingsPage from './components/standings/GlobalStandingsPage';
 import AdminTournamentsPage from './components/admin/AdminTournamentsPage';
 import AdminGamesPage from './components/admin/AdminGamesPage';
 
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/" element={<TournamentListPage />} />
           <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
           <Route path="/games/:gameId/predictions" element={<GamePredictionsPage />} />
+          <Route path="/standings" element={<GlobalStandingsPage />} />
 
           <Route element={<AdminRoute />}>
             <Route path="/admin/tournaments" element={<AdminTournamentsPage />} />

@@ -267,4 +267,80 @@ public class StandingsServiceTests
 
         standings.Should().BeEmpty();
     }
+
+    [Fact]
+    public async Task GlobalStandings_AggregatesAcrossTournaments()
+    {
+        var db = DbContextFactory.Create(nameof(GlobalStandings_AggregatesAcrossTournaments));
+
+        var alice = DbContextFactory.MakeUser("u1", "Alice");
+        var bob = DbContextFactory.MakeUser("u2", "Bob");
+        var t1 = DbContextFactory.MakeTournament(1);
+        var t2 = DbContextFactory.MakeTournament(2);
+        var game1 = DbContextFactory.MakeGame(1, 1, DateTime.UtcNow.AddDays(-1), homeGoals: 2, awayGoals: 1);
+        var game2 = DbContextFactory.MakeGame(2, 2, DateTime.UtcNow.AddDays(-2), homeGoals: 0, awayGoals: 0);
+
+        db.Users.AddRange(alice, bob);
+        db.Tournaments.AddRange(t1, t2);
+        db.Games.AddRange(game1, game2);
+
+        // Alice: exact in t1 (3pts), exact in t2 (3pts) → 6pts total
+        db.Predictions.Add(DbContextFactory.MakePrediction(1, 1, "u1", 2, 1));
+        db.Predictions.Add(DbContextFactory.MakePrediction(2, 2, "u1", 0, 0));
+
+        // Bob: outcome in t1 (1pt), exact in t2 (3pts) → 4pts total
+        db.Predictions.Add(DbContextFactory.MakePrediction(3, 1, "u2", 3, 0));
+        db.Predictions.Add(DbContextFactory.MakePrediction(4, 2, "u2", 0, 0));
+
+        await db.SaveChangesAsync();
+
+        var service = new StandingsService(db);
+        var standings = await service.GetGlobalStandingsAsync();
+
+        standings.Should().HaveCount(2);
+        standings[0].UserDisplayName.Should().Be("Alice");
+        standings[0].Points.Should().Be(6);
+        standings[0].CorrectScores.Should().Be(2);
+        standings[1].UserDisplayName.Should().Be("Bob");
+        standings[1].Points.Should().Be(4);
+        standings[1].CorrectScores.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GlobalStandings_NoPredictions_ReturnsEmpty()
+    {
+        var db = DbContextFactory.Create(nameof(GlobalStandings_NoPredictions_ReturnsEmpty));
+        db.Tournaments.Add(DbContextFactory.MakeTournament(1));
+        await db.SaveChangesAsync();
+
+        var service = new StandingsService(db);
+        var standings = await service.GetGlobalStandingsAsync();
+
+        standings.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GlobalUserPredictionDetails_ReturnsAcrossTournaments()
+    {
+        var db = DbContextFactory.Create(nameof(GlobalUserPredictionDetails_ReturnsAcrossTournaments));
+
+        var alice = DbContextFactory.MakeUser("u1", "Alice");
+        var t1 = DbContextFactory.MakeTournament(1);
+        var t2 = DbContextFactory.MakeTournament(2);
+        var game1 = DbContextFactory.MakeGame(1, 1, DateTime.UtcNow.AddDays(-1), homeGoals: 2, awayGoals: 1);
+        var game2 = DbContextFactory.MakeGame(2, 2, DateTime.UtcNow.AddDays(-2), homeGoals: 0, awayGoals: 0);
+
+        db.Users.Add(alice);
+        db.Tournaments.AddRange(t1, t2);
+        db.Games.AddRange(game1, game2);
+        db.Predictions.Add(DbContextFactory.MakePrediction(1, 1, "u1", 2, 1)); // exact 3pts
+        db.Predictions.Add(DbContextFactory.MakePrediction(2, 2, "u1", 0, 0)); // exact 3pts
+        await db.SaveChangesAsync();
+
+        var service = new StandingsService(db);
+        var details = await service.GetGlobalUserPredictionDetailsAsync("Alice", "all");
+
+        details.Should().HaveCount(2);
+        details.Should().AllSatisfy(d => d.PointsEarned.Should().Be(3));
+    }
 }
