@@ -5,12 +5,13 @@ interface Props {
   teamName: string;
   fallbackUrl?: string | null;
   className?: string;
+  localSrc?: string;
 }
 
-export default function TeamCrest({ teamName, fallbackUrl, className }: Props) {
+export default function TeamCrest({ teamName, fallbackUrl, className, localSrc }: Props) {
   const [useFallback, setUseFallback] = useState(false);
 
-  const src = useFallback ? fallbackUrl : localCrestPath(teamName);
+  const src = useFallback ? fallbackUrl : (localSrc ?? localCrestPath(teamName));
 
   if (!src) return null;
 

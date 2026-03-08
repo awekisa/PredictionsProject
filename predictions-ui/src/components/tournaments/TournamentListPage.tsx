@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { getTournaments } from '../../api/tournamentApi';
 import type { TournamentResponse } from '../../types';
 import { formatDate } from '../../utils/formatDate';
+import { localEmblemPath } from '../../utils/crestUrl';
+import TeamCrest from '../common/TeamCrest';
 import styles from './TournamentListPage.module.css';
 
 export default function TournamentListPage() {
@@ -33,9 +35,12 @@ export default function TournamentListPage() {
               className={styles.card}
               onClick={() => navigate(`/tournaments/${t.id}`, { state: { tournament: t } })}
             >
-              {t.emblemUrl && (
-                <img src={t.emblemUrl} alt="" className={styles.emblem} />
-              )}
+              <TeamCrest
+                teamName={t.name}
+                localSrc={localEmblemPath(t.name)}
+                fallbackUrl={t.emblemUrl}
+                className={styles.emblem}
+              />
               <div className={styles.cardName}>{t.name}</div>
               <div className={styles.cardDate}>
                 Created {formatDate(t.createdAt)}

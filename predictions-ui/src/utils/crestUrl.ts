@@ -1,12 +1,16 @@
 /**
- * Resolves team crest URL: tries local SVG first, falls back to DB URL.
- * Local files live in /crests/{normalized-name}.svg
  * Naming convention: lowercase, spaces → hyphens, & → and
  */
+function normalize(name: string): string {
+  return name.toLowerCase().replace(/&/g, 'and').replace(/\s+/g, '-');
+}
+
+/** Local team crest path: /crests/{normalized-name}.svg */
 export function localCrestPath(teamName: string): string {
-  const normalized = teamName
-    .toLowerCase()
-    .replace(/&/g, 'and')
-    .replace(/\s+/g, '-');
-  return `/crests/${normalized}.svg`;
+  return `/crests/${normalize(teamName)}.svg`;
+}
+
+/** Local tournament emblem path: /emblems/{normalized-name}.svg */
+export function localEmblemPath(tournamentName: string): string {
+  return `/emblems/${normalize(tournamentName)}.svg`;
 }

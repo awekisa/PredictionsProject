@@ -12,7 +12,9 @@ import type {
   CompetitionStandingsResponse,
 } from '../../types';
 import GameCard from '../games/GameCard';
+import TeamCrest from '../common/TeamCrest';
 import StandingsTable from '../standings/StandingsTable';
+import { localEmblemPath } from '../../utils/crestUrl';
 import FootballStandingsPanel from './FootballStandingsPanel';
 import styles from './TournamentDetailPage.module.css';
 
@@ -105,8 +107,13 @@ let filtered: GameResponse[];
   return (
     <div>
       <div className={styles.header}>
-        {tournament?.emblemUrl && (
-          <img src={tournament.emblemUrl} alt="" className={styles.emblem} />
+        {tournament && (
+          <TeamCrest
+            teamName={tournament.name}
+            localSrc={localEmblemPath(tournament.name)}
+            fallbackUrl={tournament.emblemUrl}
+            className={styles.emblem}
+          />
         )}
         <h1>{tournament?.name ?? ''}</h1>
       </div>
