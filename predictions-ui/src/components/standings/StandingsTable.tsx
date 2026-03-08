@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { getUserPredictionDetails, getGlobalUserPredictionDetails } from '../../api/standingsApi';
 import type { StandingEntryResponse, UserPredictionDetailResponse } from '../../types';
+import TeamCrest from '../common/TeamCrest';
 import styles from './StandingsTable.module.css';
 
 interface Props {
@@ -147,7 +148,7 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
                 <div key={i} className={styles.detailRow}>
                   <span className={styles.detailDate}>{formatDate(d.matchDate)}</span>
                   <span className={styles.detailTeam}>
-                    {d.homeCrestUrl && <img src={d.homeCrestUrl} alt="" className={styles.detailCrest} />}
+                    <TeamCrest teamName={d.homeTeam} fallbackUrl={d.homeCrestUrl} className={styles.detailCrest} />
                     <span className={styles.detailTeamName}>
                       <span className={styles.teamFull}>{d.homeTeam}</span>
                       {d.homeTeamShort && <span className={styles.teamShort}>{d.homeTeamShort}</span>}
@@ -165,7 +166,7 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
                       <span className={styles.teamFull}>{d.awayTeam}</span>
                       {d.awayTeamShort && <span className={styles.teamShort}>{d.awayTeamShort}</span>}
                     </span>
-                    {d.awayCrestUrl && <img src={d.awayCrestUrl} alt="" className={styles.detailCrest} />}
+                    <TeamCrest teamName={d.awayTeam} fallbackUrl={d.awayCrestUrl} className={styles.detailCrest} />
                   </span>
                   <span
                     className={

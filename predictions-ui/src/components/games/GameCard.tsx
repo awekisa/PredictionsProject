@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { placePrediction } from '../../api/predictionApi';
 import type { GameResponse, PredictionResponse } from '../../types';
 import { formatTime } from '../../utils/formatDate';
+import TeamCrest from '../common/TeamCrest';
 import styles from './GameCard.module.css';
 
 interface Props {
@@ -143,13 +144,9 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
       {/* Row 2: TeamName — Flag — score/vs — Flag — TeamName */}
       <div className={styles.matchRow}>
         <span className={styles.homeTeam}>{game.homeTeam}</span>
-        {game.homeCrestUrl && (
-          <img src={game.homeCrestUrl} alt="" className={styles.homeCrest} />
-        )}
+        <TeamCrest teamName={game.homeTeam} fallbackUrl={game.homeCrestUrl} className={styles.homeCrest} />
         <span className={styles.score}>{scoreDisplay}</span>
-        {game.awayCrestUrl && (
-          <img src={game.awayCrestUrl} alt="" className={styles.awayCrest} />
-        )}
+        <TeamCrest teamName={game.awayTeam} fallbackUrl={game.awayCrestUrl} className={styles.awayCrest} />
         <span className={styles.awayTeam}>{game.awayTeam}</span>
       </div>
     </div>

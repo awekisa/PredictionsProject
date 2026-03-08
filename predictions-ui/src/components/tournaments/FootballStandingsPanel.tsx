@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { CompetitionStandingsResponse, StandingGroupResponse } from '../../types';
+import TeamCrest from '../common/TeamCrest';
 import styles from './FootballStandingsPanel.module.css';
 
 interface Props {
@@ -48,9 +49,7 @@ function StandingsTable({ group }: { group: StandingGroupResponse }) {
             <td className={styles.tdPos}>{row.position}</td>
             <td>
               <div className={styles.teamCell}>
-                {row.teamCrest && (
-                  <img src={row.teamCrest} alt="" className={styles.crest} />
-                )}
+                <TeamCrest teamName={row.teamName} fallbackUrl={row.teamCrest} className={styles.crest} />
                 <span className={styles.teamName}>{row.teamName}</span>
               </div>
             </td>
