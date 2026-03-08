@@ -194,6 +194,29 @@
   display: none;
 }
 
+/* Header variants — full shown by default, short on mobile */
+.headerFull {
+  /* shown by default */
+}
+
+.headerShort {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .headerFull {
+    display: none;
+  }
+
+  .headerShort {
+    display: inline;
+  }
+
+  .tableWrap table {
+    font-size: 0.82rem;
+  }
+}
+
 @media (max-width: 480px) {
   .detailRow {
     grid-template-columns: 1fr auto 24px auto 1fr auto;

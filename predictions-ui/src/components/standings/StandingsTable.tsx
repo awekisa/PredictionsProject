@@ -68,10 +68,22 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
             <tr>
               <th>#</th>
               <th>Player</th>
-              <th className={styles.centered}>Points</th>
-              <th className={styles.centered}>Correct Outcomes</th>
-              <th className={styles.centered}>Correct Scores</th>
-              <th className={styles.centered}>Total Predictions</th>
+              <th className={styles.centered}>
+                <span className={styles.headerFull}>Points</span>
+                <span className={styles.headerShort}>Pts</span>
+              </th>
+              <th className={styles.centered}>
+                <span className={styles.headerFull}>Correct Outcomes</span>
+                <span className={styles.headerShort}>Out</span>
+              </th>
+              <th className={styles.centered}>
+                <span className={styles.headerFull}>Correct Scores</span>
+                <span className={styles.headerShort}>Scr</span>
+              </th>
+              <th className={styles.centered}>
+                <span className={styles.headerFull}>Total Predictions</span>
+                <span className={styles.headerShort}>Tot</span>
+              </th>
             </tr>
           </thead>
           <tbody>
