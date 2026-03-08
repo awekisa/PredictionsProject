@@ -1,3 +1,13 @@
+## 📦 v0.2.2 — 8 Mar 2026
+
+> **Global Standings**
+> New page aggregating prediction results across all tournaments into a single leaderboard. Accessible from the "Global Standings" link in the navigation bar. Same drill-down feature — click any stat to see the underlying predictions.
+
+> **Mobile Standings Fix**
+> Standings table no longer overflows on small screens. Column headers are abbreviated on mobile (Pts, Out, Scr, Tot).
+
+---
+
 ## 📦 v0.2.1 — 6 Mar 2026
 
 > **Refreshed Card Design**
