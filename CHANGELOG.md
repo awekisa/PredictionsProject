@@ -1,3 +1,10 @@
+## 📦 v0.3.1 — 9 Mar 2026
+
+> **Health Check Endpoint**
+> Added `/api/health` endpoint to keep the backend alive on Render free tier.
+
+---
+
 ## 📦 v0.3.0 — 9 Mar 2026
 
 > **Local Team Crests**
