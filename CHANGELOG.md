@@ -1,3 +1,10 @@
+## 📦 v0.4.0 — 9 Mar 2026
+
+> **Larger Text**
+> Increased text sizes across the entire app — 50% bigger on desktop, 25% on mobile. Everything from game cards to standings tables is now easier to read.
+
+---
+
 ## 📦 v0.3.2 — 9 Mar 2026
 
 > **Local Crests Everywhere**
