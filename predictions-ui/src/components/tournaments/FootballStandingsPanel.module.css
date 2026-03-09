@@ -67,14 +67,14 @@
   table-layout: fixed;
 }
 
-.colPos  { width: 22px; }
+.colPos  { width: 28px; }
 .colTeam { /* takes remaining width */ }
-.colNum  { width: 24px; }
-.colGd   { width: 30px; }
-.colPts  { width: 30px; }
+.colNum  { width: 28px; }
+.colGd   { width: 36px; }
+.colPts  { width: 34px; }
 
 .table th {
-  padding: 0.25rem 0.3rem;
+  padding: 4px 3px;
   text-align: center;
   font-weight: 600;
   color: var(--color-text-secondary);
@@ -82,7 +82,7 @@
 }
 
 .table td {
-  padding: 0.25rem 0.3rem;
+  padding: 4px 3px;
   text-align: center;
   border-bottom: 1px solid var(--color-border);
 }
