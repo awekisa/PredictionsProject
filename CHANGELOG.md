@@ -1,3 +1,10 @@
+## 📦 v0.3.2 — 9 Mar 2026
+
+> **Local Crests Everywhere**
+> Game cards now use local SVG crests instead of external PNGs, matching the league table and standings. Crests load faster and look sharper on all screen sizes.
+
+---
+
 ## 📦 v0.3.1 — 9 Mar 2026
 
 > **Health Check Endpoint**
