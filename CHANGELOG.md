@@ -1,3 +1,13 @@
+## 📦 v0.3.0 — 9 Mar 2026
+
+> **Local Team Crests**
+> Team crests and tournament logos are now served locally as SVGs instead of loading from an external API. Faster rendering, no more broken images if the API is down. Falls back to the external URL if no local file exists.
+
+> **Tournament Emblem Styling**
+> Tournament logos now display on a clean white circle background so they remain visible on both dark and light themes.
+
+---
+
 ## 📦 v0.2.2 — 8 Mar 2026
 
 > **Global Standings**
