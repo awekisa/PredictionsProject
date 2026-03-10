@@ -217,8 +217,8 @@
 
 .homeCrest,
 .awayCrest {
-  width: 28px;
-  height: 20px;
+  width: 35px;
+  height: 25px;
   object-fit: contain;
   flex-shrink: 0;
 }
