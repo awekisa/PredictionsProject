@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { localCrestPath } from '../../utils/crestUrl';
 
 interface Props {
@@ -11,6 +11,14 @@ interface Props {
 
 export default function TeamCrest({ teamName, fallbackUrl, className, localSrc, localFallbackSrc }: Props) {
   const [srcIndex, setSrcIndex] = useState(0);
+  const prevLocalSrc = useRef(localSrc);
+
+  useEffect(() => {
+    if (prevLocalSrc.current !== localSrc) {
+      prevLocalSrc.current = localSrc;
+      setSrcIndex(0);
+    }
+  }, [localSrc]);
 
   const sources = [
     localSrc ?? localCrestPath(teamName),
