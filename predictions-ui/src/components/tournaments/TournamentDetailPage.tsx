@@ -113,7 +113,6 @@ let filtered: GameResponse[];
           <TeamCrest
             teamName={tournament.name}
             localSrc={localEmblemPath(tournament.name, theme)}
-            localFallbackSrc={localEmblemPath(tournament.name)}
             fallbackUrl={tournament.emblemUrl}
             className={styles.emblem}
           />

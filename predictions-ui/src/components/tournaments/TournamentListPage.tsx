@@ -40,7 +40,6 @@ export default function TournamentListPage() {
               <TeamCrest
                 teamName={t.name}
                 localSrc={localEmblemPath(t.name, theme)}
-                localFallbackSrc={localEmblemPath(t.name)}
                 fallbackUrl={t.emblemUrl}
                 className={styles.emblem}
               />
