@@ -6,12 +6,19 @@ interface Props {
   fallbackUrl?: string | null;
   className?: string;
   localSrc?: string;
+  localFallbackSrc?: string;
 }
 
-export default function TeamCrest({ teamName, fallbackUrl, className, localSrc }: Props) {
-  const [useFallback, setUseFallback] = useState(false);
+export default function TeamCrest({ teamName, fallbackUrl, className, localSrc, localFallbackSrc }: Props) {
+  const [srcIndex, setSrcIndex] = useState(0);
 
-  const src = useFallback ? fallbackUrl : (localSrc ?? localCrestPath(teamName));
+  const sources = [
+    localSrc ?? localCrestPath(teamName),
+    localFallbackSrc,
+    fallbackUrl,
+  ].filter((s): s is string => !!s);
+
+  const src = sources[srcIndex];
 
   if (!src) return null;
 
@@ -21,8 +28,8 @@ export default function TeamCrest({ teamName, fallbackUrl, className, localSrc }
       alt=""
       className={className}
       onError={() => {
-        if (!useFallback && fallbackUrl) {
-          setUseFallback(true);
+        if (srcIndex < sources.length - 1) {
+          setSrcIndex(srcIndex + 1);
         }
       }}
     />

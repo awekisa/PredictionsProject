@@ -15,6 +15,7 @@ import GameCard from '../games/GameCard';
 import TeamCrest from '../common/TeamCrest';
 import StandingsTable from '../standings/StandingsTable';
 import { localEmblemPath } from '../../utils/crestUrl';
+import { useTheme } from '../../context/ThemeContext';
 import FootballStandingsPanel from './FootballStandingsPanel';
 import styles from './TournamentDetailPage.module.css';
 
@@ -45,6 +46,7 @@ export default function TournamentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const tournamentId = Number(id);
+  const { theme } = useTheme();
 
   const [tournament, setTournament] = useState<TournamentResponse | null>(
     (location.state as { tournament?: TournamentResponse } | null)?.tournament ?? null
@@ -110,7 +112,8 @@ let filtered: GameResponse[];
         {tournament && (
           <TeamCrest
             teamName={tournament.name}
-            localSrc={localEmblemPath(tournament.name)}
+            localSrc={localEmblemPath(tournament.name, theme)}
+            localFallbackSrc={localEmblemPath(tournament.name)}
             fallbackUrl={tournament.emblemUrl}
             className={styles.emblem}
           />

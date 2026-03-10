@@ -10,7 +10,8 @@ export function localCrestPath(teamName: string): string {
   return `/crests/${normalize(teamName)}.svg`;
 }
 
-/** Local tournament emblem path: /emblems/{normalized-name}.svg */
-export function localEmblemPath(tournamentName: string): string {
-  return `/emblems/${normalize(tournamentName)}.svg`;
+/** Local tournament emblem path: /emblems/{normalized-name}.svg (with optional dark variant) */
+export function localEmblemPath(tournamentName: string, theme?: 'light' | 'dark'): string {
+  const base = normalize(tournamentName);
+  return theme === 'dark' ? `/emblems/${base}-dark.svg` : `/emblems/${base}.svg`;
 }
