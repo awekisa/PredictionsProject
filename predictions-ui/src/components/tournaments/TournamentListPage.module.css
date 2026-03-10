@@ -31,8 +31,6 @@
   height: 48px;
   object-fit: contain;
   margin-bottom: 0.5rem;
-  border-radius: 50%;
-  padding: 5px;
 }
 
 .cardName {
