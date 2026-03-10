@@ -1,3 +1,16 @@
+## 📦 v0.4.1 — 10 Mar 2026
+
+> **Theme-Specific Tournament Logos**
+> Tournament emblems now swap between light and dark variants when you toggle the theme. Premier League and Champions League both have dedicated dark-mode logos.
+
+> **Refined Text Sizing**
+> The enlarged font sizes from v0.4.0 now apply only to team names in game cards instead of the entire app. Everything else is back to normal size.
+
+> **Bigger Crests & Better Spacing**
+> Team crests in game cards are 25% larger, and the match row has more breathing room below the top bar.
+
+---
+
 ## 📦 v0.4.0 — 9 Mar 2026
 
 > **Larger Text**
