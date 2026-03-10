@@ -22,10 +22,21 @@ export default function RegisterPage() {
       handleAuthResponse(response);
       navigate('/');
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: string } }).response?.data ||
-        'Registration failed.';
-      setError(typeof msg === 'string' ? msg : 'Registration failed.');
+      const data = (err as { response?: { data?: unknown } }).response?.data;
+      let msg = 'Registration failed.';
+      if (Array.isArray(data)) {
+        const hasPasswordError = data.some(
+          (e: { code?: string }) => e.code?.startsWith('Password') ?? false
+        );
+        if (hasPasswordError) {
+          msg = 'Password must be at least 6 characters and contain an uppercase letter, a lowercase letter, and a digit.';
+        } else {
+          msg = data.map((e: { description?: string }) => e.description).join(' ');
+        }
+      } else if (typeof data === 'string') {
+        msg = data;
+      }
+      setError(msg);
     } finally {
       setLoading(false);
     }
