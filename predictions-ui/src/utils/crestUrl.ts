@@ -1,8 +1,19 @@
 /**
- * Naming convention: lowercase, spaces → hyphens, & → and
+ * Naming convention: lowercase, spaces → hyphens, & → and, diacritics stripped
  */
+const ALIASES: Record<string, string> = {
+  'ivory coast': 'cote-d-ivoire',
+  'korea republic': 'south-korea',
+  "côte d'ivoire": 'cote-d-ivoire',
+};
+
 function normalize(name: string): string {
-  return name.toLowerCase().replace(/&/g, 'and').replace(/\s+/g, '-');
+  const lower = name.toLowerCase();
+  if (ALIASES[lower]) return ALIASES[lower];
+  return lower
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/&/g, 'and')
+    .replace(/\s+/g, '-');
 }
 
 /** Local team crest path: /crests/{normalized-name}.svg */
