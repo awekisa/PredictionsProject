@@ -1,3 +1,16 @@
+## 📦 v0.4.2 — 10 Mar 2026
+
+> **World Cup 2026 Crests**
+> Added local SVG crests for all 41 WC 2026 participating nations plus light and dark tournament emblems. Falls back to the API if a local file is missing.
+
+> **Password Requirements on Register**
+> When registration fails due to an invalid password, the app now shows the actual requirements — at least 6 characters with an uppercase letter, a lowercase letter, and a digit.
+
+> **Cleaner Tournament Logos**
+> Removed the circular white background from tournament emblems so themed logos display cleanly.
+
+---
+
 ## 📦 v0.4.1 — 10 Mar 2026
 
 > **Theme-Specific Tournament Logos**
