@@ -1,3 +1,16 @@
+## 📦 v0.4.3 — 11 Mar 2026
+
+> **Bigger, Consistent Crests**
+> Team crests in game cards are now larger and display at a consistent size on both desktop and mobile.
+
+> **Crest Fix for Special Characters**
+> Fixed local crest lookup for Curaçao, Ivory Coast, and Korea Republic whose names didn't match the local files.
+
+> **More Room for Team Names**
+> Reduced spacing in the match row so longer team names fit without being cut off.
+
+---
+
 ## 📦 v0.4.2 — 10 Mar 2026
 
 > **World Cup 2026 Crests**
