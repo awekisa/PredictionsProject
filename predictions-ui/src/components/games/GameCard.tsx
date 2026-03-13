@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { placePrediction } from '../../api/predictionApi';
 import type { GameResponse, PredictionResponse } from '../../types';
 import { formatTime } from '../../utils/formatDate';
@@ -16,6 +16,33 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
   const [awayGoals, setAwayGoals] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showInputs, setShowInputs] = useState(false);
+  const homeNameRef = useRef<HTMLSpanElement>(null);
+  const awayNameRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const MAX_WIDTH = 80;
+    const measure = () => {
+      if (window.innerWidth > 480) {
+        if (homeNameRef.current) homeNameRef.current.style.transform = '';
+        if (awayNameRef.current) awayNameRef.current.style.transform = '';
+        return;
+      }
+      [homeNameRef, awayNameRef].forEach((ref) => {
+        const el = ref.current;
+        if (!el) return;
+        el.style.transform = 'scaleX(1)';
+        const natural = el.scrollWidth;
+        if (natural > MAX_WIDTH) {
+          el.style.transform = `scaleX(${MAX_WIDTH / natural})`;
+        } else {
+          el.style.transform = '';
+        }
+      });
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [game.homeTeam, game.awayTeam]);
 
   const now = new Date();
   const startTime = new Date(game.startTime);
@@ -143,11 +170,15 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
 
       {/* Row 2: TeamName — Flag — score/vs — Flag — TeamName */}
       <div className={styles.matchRow}>
-        <span className={styles.homeTeam}>{game.homeTeam}</span>
+        <div className={styles.teamNameBox}>
+          <span ref={homeNameRef} className={styles.homeTeam}>{game.homeTeam}</span>
+        </div>
         <TeamCrest teamName={game.homeTeam} fallbackUrl={game.homeCrestUrl} className={styles.homeCrest} />
         <span className={styles.score}>{scoreDisplay}</span>
         <TeamCrest teamName={game.awayTeam} fallbackUrl={game.awayCrestUrl} className={styles.awayCrest} />
-        <span className={styles.awayTeam}>{game.awayTeam}</span>
+        <div className={`${styles.teamNameBox} ${styles.teamNameBoxAway}`}>
+          <span ref={awayNameRef} className={styles.awayTeam}>{game.awayTeam}</span>
+        </div>
       </div>
     </div>
   );

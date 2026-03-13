@@ -191,6 +191,15 @@
   padding-top: 0.6rem;
 }
 
+.teamNameBox {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.teamNameBoxAway {
+  /* used on mobile only */
+}
+
 .homeTeam {
   font-size: 21px;
   font-weight: 400;
@@ -236,30 +245,100 @@
 
 @media (max-width: 480px) {
   .card {
-    padding: 0.5rem 0.425rem 0.575rem;
-  }
-
-  .badgeBase {
-    padding: 0.11rem 0.275rem;
+    border-radius: 8px;
+    position: relative;
+    padding: 0 7px 23px;
   }
 
   .topRow {
-    gap: 0.15rem;
-    margin-bottom: 1.7rem;
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 12px;
+    padding-top: 16px;
   }
 
   .actionArea {
-    gap: 0.15rem;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    z-index: 1;
+    gap: 3px;
+  }
+
+  .statusBadge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 1;
+  }
+
+  .badgeBase {
+    border-radius: 3px;
+    font-size: 12px;
+    padding: 2px 6px;
+  }
+
+  .timeBox {
+    font-size: 22px;
+  }
+
+  .matchRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding-top: 0;
+  }
+
+  .teamNameBox {
+    width: 80px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .teamNameBoxAway {
+    display: flex;
+    justify-content: flex-end;
   }
 
   .homeTeam,
   .awayTeam {
     font-size: 16px;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: visible;
   }
 
-  .homeCrest,
-  .awayCrest {
-    width: 56px;
+  .homeTeam {
+    transform-origin: left center;
+    text-align: left;
+  }
+
+  .awayTeam {
+    transform-origin: right center;
+    text-align: right;
+  }
+
+  .homeCrest {
+    width: 50px;
     height: 40px;
+    margin-left: 10px;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  .awayCrest {
+    width: 50px;
+    height: 40px;
+    margin-left: 8px;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+
+  .score {
+    font-size: 18px;
+    min-width: auto;
+    flex-shrink: 0;
   }
 }
