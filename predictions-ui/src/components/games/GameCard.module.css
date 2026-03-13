@@ -306,17 +306,17 @@
     font-size: 16px;
     display: inline-block;
     white-space: nowrap;
-    overflow: visible;
+    width: 80px;
   }
 
   .homeTeam {
-    transform-origin: left center;
     text-align: left;
+    transform-origin: left center;
   }
 
   .awayTeam {
-    transform-origin: right center;
     text-align: right;
+    transform-origin: right center;
   }
 
   .homeCrest {

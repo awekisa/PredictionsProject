@@ -30,12 +30,12 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
       [homeNameRef, awayNameRef].forEach((ref) => {
         const el = ref.current;
         if (!el) return;
-        el.style.transform = 'scaleX(1)';
+        el.style.transform = '';
+        el.style.width = 'auto';
         const natural = el.scrollWidth;
+        el.style.width = '';
         if (natural > MAX_WIDTH) {
           el.style.transform = `scaleX(${MAX_WIDTH / natural})`;
-        } else {
-          el.style.transform = '';
         }
       });
     };
