@@ -303,6 +303,7 @@
 
   .homeTeam,
   .awayTeam {
+    display: block;
     font-size: 16px;
     white-space: nowrap;
     overflow: hidden;
