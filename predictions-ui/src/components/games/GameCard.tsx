@@ -21,20 +21,21 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
 
   useEffect(() => {
     const MAX_WIDTH = 80;
-    const BASE_FONT = 16;
     const measure = () => {
       if (window.innerWidth > 480) {
-        if (homeNameRef.current) homeNameRef.current.style.fontSize = '';
-        if (awayNameRef.current) awayNameRef.current.style.fontSize = '';
+        if (homeNameRef.current) homeNameRef.current.style.transform = '';
+        if (awayNameRef.current) awayNameRef.current.style.transform = '';
         return;
       }
       [homeNameRef, awayNameRef].forEach((ref) => {
         const el = ref.current;
         if (!el) return;
-        el.style.fontSize = `${BASE_FONT}px`;
+        el.style.transform = 'scaleX(1)';
         const natural = el.scrollWidth;
         if (natural > MAX_WIDTH) {
-          el.style.fontSize = `${BASE_FONT * (MAX_WIDTH / natural)}px`;
+          el.style.transform = `scaleX(${MAX_WIDTH / natural})`;
+        } else {
+          el.style.transform = '';
         }
       });
     };
