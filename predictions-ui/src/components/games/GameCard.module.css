@@ -307,6 +307,8 @@
     display: inline-block;
     white-space: nowrap;
     width: 80px;
+    overflow: visible;
+    text-overflow: clip;
   }
 
   .homeTeam {
