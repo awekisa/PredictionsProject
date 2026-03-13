@@ -143,14 +143,12 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
 
           {/* Upcoming: prediction set, not editing */}
           {!hasStarted && myPrediction && !showInputs && (
-            <>
-              <span className={styles.predictedBadge}>
-                Predicted&nbsp; {myPrediction.homeGoals}:{myPrediction.awayGoals}
-              </span>
-              <button className={styles.editBtn} onClick={openEdit}>
-                Edit
-              </button>
-            </>
+            <button className={styles.predictedBadge} onClick={openEdit}>
+              Predicted&nbsp; {myPrediction.homeGoals}:{myPrediction.awayGoals}
+              <svg className={styles.editIcon} viewBox="0 0 16 16" fill="currentColor">
+                <path d="M12.15 2.15a1.5 1.5 0 0 1 2.12 2.12l-8.5 8.5-2.83.71.71-2.83 8.5-8.5zM1.5 14.25h13a.75.75 0 0 1 0 1.5h-13a.75.75 0 0 1 0-1.5z"/>
+              </svg>
+            </button>
           )}
 
           {/* Started: correct prediction */}

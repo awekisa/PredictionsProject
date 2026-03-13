@@ -66,6 +66,18 @@
   background: #d2a521;
   color: #1a1a1a;
   gap: 0.35em;
+  cursor: pointer;
+}
+
+.predictedBadge:hover {
+  background: #b8900f;
+}
+
+/* Edit pencil icon inside predicted badge */
+.editIcon {
+  width: 0.85em;
+  height: 0.85em;
+  flex-shrink: 0;
 }
 
 /* PREDICTED! badge (correct) */
@@ -73,18 +85,6 @@
   composes: badgeBase;
   background: #49d300;
   color: #1a1a1a;
-}
-
-/* EDIT button */
-.editBtn {
-  composes: badgeBase;
-  background: #ab1c24;
-  color: #e6e7e8;
-  cursor: pointer;
-}
-
-.editBtn:hover {
-  background: #8f161c;
 }
 
 /* Score input form */
