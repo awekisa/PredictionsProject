@@ -311,12 +311,10 @@
   }
 
   .homeTeam {
-    transform-origin: left center;
     text-align: left;
   }
 
   .awayTeam {
-    transform-origin: right center;
     text-align: right;
   }
 
