@@ -5,6 +5,14 @@ import { formatTime } from '../../utils/formatDate';
 import TeamCrest from '../common/TeamCrest';
 import styles from './GameCard.module.css';
 
+const DISPLAY_NAMES: Record<string, string> = {
+  'Korea Republic': 'S. Korea',
+};
+
+function displayName(name: string): string {
+  return DISPLAY_NAMES[name] ?? name;
+}
+
 interface Props {
   game: GameResponse;
   myPrediction: PredictionResponse | null;
@@ -21,21 +29,20 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
 
   useEffect(() => {
     const MAX_WIDTH = 80;
+    const BASE_FONT = 16;
     const measure = () => {
       if (window.innerWidth > 480) {
-        if (homeNameRef.current) homeNameRef.current.style.transform = '';
-        if (awayNameRef.current) awayNameRef.current.style.transform = '';
+        if (homeNameRef.current) homeNameRef.current.style.fontSize = '';
+        if (awayNameRef.current) awayNameRef.current.style.fontSize = '';
         return;
       }
       [homeNameRef, awayNameRef].forEach((ref) => {
         const el = ref.current;
         if (!el) return;
-        el.style.transform = '';
-        el.style.width = 'auto';
+        el.style.fontSize = `${BASE_FONT}px`;
         const natural = el.scrollWidth;
-        el.style.width = '';
         if (natural > MAX_WIDTH) {
-          el.style.transform = `scaleX(${MAX_WIDTH / natural})`;
+          el.style.fontSize = `${BASE_FONT * (MAX_WIDTH / natural)}px`;
         }
       });
     };
@@ -171,13 +178,13 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
       {/* Row 2: TeamName — Flag — score/vs — Flag — TeamName */}
       <div className={styles.matchRow}>
         <div className={styles.teamNameBox}>
-          <span ref={homeNameRef} className={styles.homeTeam}>{game.homeTeam}</span>
+          <span ref={homeNameRef} className={styles.homeTeam}>{displayName(game.homeTeam)}</span>
         </div>
         <TeamCrest teamName={game.homeTeam} fallbackUrl={game.homeCrestUrl} className={styles.homeCrest} />
         <span className={styles.score}>{scoreDisplay}</span>
         <TeamCrest teamName={game.awayTeam} fallbackUrl={game.awayCrestUrl} className={styles.awayCrest} />
         <div className={`${styles.teamNameBox} ${styles.teamNameBoxAway}`}>
-          <span ref={awayNameRef} className={styles.awayTeam}>{game.awayTeam}</span>
+          <span ref={awayNameRef} className={styles.awayTeam}>{displayName(game.awayTeam)}</span>
         </div>
       </div>
     </div>
