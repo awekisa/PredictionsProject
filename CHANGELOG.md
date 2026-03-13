@@ -1,3 +1,10 @@
+## 📦 v0.4.5 — 13 Mar 2026
+
+> **Redesigned Mobile Game Cards**
+> Game cards on mobile now match the new compact design with absolutely positioned badges, larger time text, precisely spaced crests, and team names that scale horizontally to fit instead of being truncated.
+
+---
+
 ## 📦 v0.4.3 — 11 Mar 2026
 
 > **Bigger, Consistent Crests**
