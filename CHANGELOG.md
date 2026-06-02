@@ -1,3 +1,10 @@
+## 📦 v0.4.10 — 2 Jun 2026
+
+> **Algeria and Croatia Flags**
+> Algeria and Croatia now use the uploaded 4x3 SVG flags instead of the older crest assets.
+
+---
+
 ## 📦 v0.4.9 — 2 Jun 2026
 
 > **World Cup Flags Refresh**
