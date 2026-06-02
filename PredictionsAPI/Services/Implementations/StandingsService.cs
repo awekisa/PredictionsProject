@@ -26,6 +26,9 @@ public class StandingsService : IStandingsService
         var allTournamentPredictions = await _context.Predictions
             .Include(p => p.User)
             .Where(p => p.Game.TournamentId == tournamentId)
+            .Where(p => !_context.UserRoles
+                .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur.UserId, RoleName = r.NormalizedName })
+                .Any(role => role.UserId == p.UserId && role.RoleName == "ADMIN"))
             .ToListAsync();
 
         var gameResults = gamesWithResults.ToDictionary(g => g.Id);
@@ -97,6 +100,9 @@ public class StandingsService : IStandingsService
             .Include(p => p.Game)
             .Include(p => p.User)
             .Where(p => p.Game.TournamentId == tournamentId && p.User.DisplayName == userDisplayName)
+            .Where(p => !_context.UserRoles
+                .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur.UserId, RoleName = r.NormalizedName })
+                .Any(role => role.UserId == p.UserId && role.RoleName == "ADMIN"))
             .ToListAsync();
 
         var results = new List<UserPredictionDetailResponse>();
@@ -163,6 +169,9 @@ public class StandingsService : IStandingsService
 
         var allPredictions = await _context.Predictions
             .Include(p => p.User)
+            .Where(p => !_context.UserRoles
+                .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur.UserId, RoleName = r.NormalizedName })
+                .Any(role => role.UserId == p.UserId && role.RoleName == "ADMIN"))
             .ToListAsync();
 
         var gameResults = gamesWithResults.ToDictionary(g => g.Id);
@@ -234,6 +243,9 @@ public class StandingsService : IStandingsService
             .Include(p => p.Game)
             .Include(p => p.User)
             .Where(p => p.User.DisplayName == userDisplayName)
+            .Where(p => !_context.UserRoles
+                .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur.UserId, RoleName = r.NormalizedName })
+                .Any(role => role.UserId == p.UserId && role.RoleName == "ADMIN"))
             .ToListAsync();
 
         var results = new List<UserPredictionDetailResponse>();

@@ -10,6 +10,8 @@ import GamePredictionsPage from './components/games/GamePredictionsPage';
 import GlobalStandingsPage from './components/standings/GlobalStandingsPage';
 import AdminTournamentsPage from './components/admin/AdminTournamentsPage';
 import AdminGamesPage from './components/admin/AdminGamesPage';
+import AdminPredictionsPage from './components/admin/AdminPredictionsPage';
+import AdminUsersPage from './components/admin/AdminUsersPage';
 
 export default function App() {
   return (
@@ -27,6 +29,8 @@ export default function App() {
           <Route element={<AdminRoute />}>
             <Route path="/admin/tournaments" element={<AdminTournamentsPage />} />
             <Route path="/admin/tournaments/:tournamentId/games" element={<AdminGamesPage />} />
+            <Route path="/admin/predictions" element={<AdminPredictionsPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
           </Route>
         </Route>
       </Route>

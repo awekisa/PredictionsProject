@@ -99,6 +99,16 @@ export interface PredictionResponse {
   createdAt: string;
 }
 
+export type AdminPredictionResponse = PredictionResponse;
+
+export interface AdminUserResponse {
+  id: string;
+  email: string;
+  displayName: string;
+  roles: string[];
+  predictionCount: number;
+}
+
 export interface PlacePredictionRequest {
   homeGoals: number;
   awayGoals: number;

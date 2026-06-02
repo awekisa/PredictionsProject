@@ -41,9 +41,17 @@ export default function Navbar() {
             Global Standings
           </Link>
           {isAdmin && (
-            <Link to="/admin/tournaments" className={styles.navLink}>
-              Admin
-            </Link>
+            <>
+              <Link to="/admin/tournaments" className={styles.navLink}>
+                Admin Tournaments
+              </Link>
+              <Link to="/admin/predictions" className={styles.navLink}>
+                Admin Predictions
+              </Link>
+              <Link to="/admin/users" className={styles.navLink}>
+                Admin Users
+              </Link>
+            </>
           )}
         </div>
 
@@ -89,9 +97,17 @@ export default function Navbar() {
             Global Standings
           </Link>
           {isAdmin && (
-            <Link to="/admin/tournaments" className={styles.mobileLink} onClick={closeMenu}>
-              Admin
-            </Link>
+            <>
+              <Link to="/admin/tournaments" className={styles.mobileLink} onClick={closeMenu}>
+                Admin Tournaments
+              </Link>
+              <Link to="/admin/predictions" className={styles.mobileLink} onClick={closeMenu}>
+                Admin Predictions
+              </Link>
+              <Link to="/admin/users" className={styles.mobileLink} onClick={closeMenu}>
+                Admin Users
+              </Link>
+            </>
           )}
         </div>
       )}

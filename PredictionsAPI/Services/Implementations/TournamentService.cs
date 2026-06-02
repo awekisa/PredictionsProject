@@ -56,7 +56,10 @@ public class TournamentService : ITournamentService
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var tournament = await _context.Tournaments.FindAsync(id);
+        var tournament = await _context.Tournaments
+            .Include(t => t.Games)
+                .ThenInclude(g => g.Predictions)
+            .FirstOrDefaultAsync(t => t.Id == id);
         if (tournament is null) return false;
 
         _context.Tournaments.Remove(tournament);

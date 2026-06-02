@@ -82,6 +82,9 @@ public class PredictionService : IPredictionService
             .Include(p => p.Game)
             .Include(p => p.User)
             .Where(p => p.GameId == gameId)
+            .Where(p => !_context.UserRoles
+                .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur.UserId, RoleName = r.NormalizedName })
+                .Any(role => role.UserId == p.UserId && role.RoleName == "ADMIN"))
             .Select(p => new PredictionResponse
             {
                 Id = p.Id,
