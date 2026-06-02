@@ -1,3 +1,10 @@
+## 📦 v0.4.12 — 3 Jun 2026
+
+> **Admin Delete Controls**
+> Admins can now delete tournaments, predictions, and users from dedicated admin screens with confirmation. Tournament deletes remove related games and predictions, and Admin-role predictions are excluded from public prediction lists and standings counts.
+
+---
+
 ## 📦 v0.4.11 — 2 Jun 2026
 
 > **Account Drawer**
