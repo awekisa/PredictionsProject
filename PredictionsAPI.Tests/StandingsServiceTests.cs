@@ -153,6 +153,32 @@ public class StandingsServiceTests
     }
 
     [Fact]
+    public async Task Standings_ExcludesAdminPredictionsFromRowsAndCounts()
+    {
+        var db = DbContextFactory.Create(nameof(Standings_ExcludesAdminPredictionsFromRowsAndCounts));
+        var alice = DbContextFactory.MakeUser("u1", "Alice");
+        var admin = DbContextFactory.MakeUser("admin1", "Admin User");
+        var tournament = DbContextFactory.MakeTournament(1);
+        var game = DbContextFactory.MakeGame(1, 1, DateTime.UtcNow.AddDays(-1), homeGoals: 2, awayGoals: 1);
+
+        db.Users.AddRange(alice, admin);
+        db.Roles.Add(new Microsoft.AspNetCore.Identity.IdentityRole { Id = "role-admin", Name = "Admin", NormalizedName = "ADMIN" });
+        db.UserRoles.Add(new Microsoft.AspNetCore.Identity.IdentityUserRole<string> { UserId = "admin1", RoleId = "role-admin" });
+        db.Tournaments.Add(tournament);
+        db.Games.Add(game);
+        db.Predictions.Add(DbContextFactory.MakePrediction(1, 1, "u1", 2, 1));
+        db.Predictions.Add(DbContextFactory.MakePrediction(2, 1, "admin1", 2, 1));
+        await db.SaveChangesAsync();
+
+        var service = new StandingsService(db);
+        var standings = await service.GetStandingsAsync(1);
+
+        standings.Should().ContainSingle();
+        standings[0].UserDisplayName.Should().Be("Alice");
+        standings[0].TotalPredictions.Should().Be(1);
+    }
+
+    [Fact]
     public async Task Standings_OrderedByPoints_ThenCorrectScores_ThenTotalPredictions()
     {
         var db = DbContextFactory.Create(nameof(Standings_OrderedByPoints_ThenCorrectScores_ThenTotalPredictions));

@@ -61,6 +61,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGameService, GameService>();
         services.AddScoped<IPredictionService, PredictionService>();
         services.AddScoped<IStandingsService, StandingsService>();
+        services.AddScoped<AdminDeletionService>();
 
         // Football API
         services.AddSingleton<FootballApiStatusStore>();

@@ -16,7 +16,7 @@ export default function ConfirmDialog({ message, onConfirm, onCancel }: Props) {
             Cancel
           </button>
           <button className={styles.deleteBtn} onClick={onConfirm}>
-            Delete
+            Confirm
           </button>
         </div>
       </div>

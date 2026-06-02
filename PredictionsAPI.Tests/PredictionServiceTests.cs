@@ -163,6 +163,31 @@ public class PredictionServiceTests
     }
 
     [Fact]
+    public async Task GetGamePredictions_AfterStartTime_ExcludesAdminPredictions()
+    {
+        var db = DbContextFactory.Create(nameof(GetGamePredictions_AfterStartTime_ExcludesAdminPredictions));
+        var user = DbContextFactory.MakeUser("u1", "Alice");
+        var admin = DbContextFactory.MakeUser("admin1", "Admin User");
+        var tournament = DbContextFactory.MakeTournament(1);
+        var game = DbContextFactory.MakeGame(1, 1, DateTime.UtcNow.AddHours(-1));
+
+        db.Users.AddRange(user, admin);
+        db.Roles.Add(new Microsoft.AspNetCore.Identity.IdentityRole { Id = "role-admin", Name = "Admin", NormalizedName = "ADMIN" });
+        db.UserRoles.Add(new Microsoft.AspNetCore.Identity.IdentityUserRole<string> { UserId = "admin1", RoleId = "role-admin" });
+        db.Tournaments.Add(tournament);
+        db.Games.Add(game);
+        db.Predictions.Add(DbContextFactory.MakePrediction(1, 1, "u1", 2, 1));
+        db.Predictions.Add(DbContextFactory.MakePrediction(2, 1, "admin1", 9, 9));
+        await db.SaveChangesAsync();
+
+        var service = new PredictionService(db);
+        var result = await service.GetGamePredictionsAsync(1);
+
+        result.Should().ContainSingle();
+        result[0].UserDisplayName.Should().Be("Alice");
+    }
+
+    [Fact]
     public async Task GetMyPredictions_ReturnsOnlyUserPredictions()
     {
         var db = DbContextFactory.Create(nameof(GetMyPredictions_ReturnsOnlyUserPredictions));
