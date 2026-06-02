@@ -8,6 +8,7 @@ const ALIASES: Record<string, string> = {
 };
 
 const FLAG_COUNTRY_CODES: Record<string, string> = {
+  'algeria': 'dz',
   'argentina': 'ar',
   'australia': 'au',
   'austria': 'at',
@@ -16,6 +17,7 @@ const FLAG_COUNTRY_CODES: Record<string, string> = {
   'canada': 'ca',
   'cape verde': 'cv',
   'colombia': 'co',
+  'croatia': 'hr',
   'côte d\'ivoire': 'ci',
   'curacao': 'cw',
   'curaçao': 'cw',
