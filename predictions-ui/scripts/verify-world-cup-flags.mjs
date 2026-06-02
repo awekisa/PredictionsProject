@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const worldCupFlagCases = [
+  ['Algeria', 'dz'],
   ['Argentina', 'ar'],
   ['Australia', 'au'],
   ['Austria', 'at'],
@@ -10,6 +11,7 @@ const worldCupFlagCases = [
   ['Canada', 'ca'],
   ['Cape Verde', 'cv'],
   ['Colombia', 'co'],
+  ['Croatia', 'hr'],
   ['Côte d\'Ivoire', 'ci'],
   ['Curacao', 'cw'],
   ['Ecuador', 'ec'],
