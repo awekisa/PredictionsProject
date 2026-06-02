@@ -15,6 +15,15 @@ export interface RegisterRequest {
   displayName: string;
 }
 
+export interface UpdateUsernameRequest {
+  displayName: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface TournamentResponse {
   id: number;
   name: string;
