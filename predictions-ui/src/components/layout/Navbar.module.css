@@ -48,8 +48,61 @@
   margin-left: auto;
 }
 
-.userName {
+.userBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
+  padding: 0.25rem 0.6rem 0.25rem 0.35rem;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.userBtn:hover {
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.userBtn[data-open='true'] {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #1a1a1a;
+  font-weight: 700;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: -0.02em;
+}
+
+.userMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+}
+
+.userNameTxt {
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.userRole {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--color-text-secondary);
 }
 
@@ -128,8 +181,12 @@
     display: none;
   }
 
-  .userName {
+  .userMeta {
     display: none;
+  }
+
+  .userBtn {
+    padding: 0.2rem;
   }
 
   .right {

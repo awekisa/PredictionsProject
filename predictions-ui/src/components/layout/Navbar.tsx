@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/ThemeContext';
+import AccountDrawer from '../account/AccountDrawer';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
@@ -9,6 +10,7 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -16,6 +18,13 @@ export default function Navbar() {
   };
 
   const closeMenu = () => setMenuOpen(false);
+  const initials = (user?.displayName ?? '?')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <nav className={styles.navbar}>
@@ -39,7 +48,21 @@ export default function Navbar() {
         </div>
 
         <div className={styles.right}>
-          <span className={styles.userName}>{user?.displayName}</span>
+          <button
+            className={styles.userBtn}
+            data-open={accountOpen}
+            onClick={() => setAccountOpen(true)}
+            aria-haspopup="dialog"
+            aria-expanded={accountOpen}
+          >
+            <span className={styles.avatar} aria-hidden="true">
+              {initials}
+            </span>
+            <span className={styles.userMeta}>
+              <span className={styles.userNameTxt}>{user?.displayName}</span>
+              {isAdmin && <span className={styles.userRole}>Admin</span>}
+            </span>
+          </button>
           <button className={styles.themeBtn} onClick={toggleTheme} aria-label="Toggle theme">
             {theme === 'dark' ? '☀' : '☾'}
           </button>
@@ -72,6 +95,8 @@ export default function Navbar() {
           )}
         </div>
       )}
+
+      <AccountDrawer open={accountOpen} onClose={() => setAccountOpen(false)} />
     </nav>
   );
 }
