@@ -1,3 +1,10 @@
+## 📦 v0.4.9 — 2 Jun 2026
+
+> **World Cup Flags Refresh**
+> World Cup national teams now use the uploaded 4x3 SVG flag set, including special cases for England, Scotland, Côte d’Ivoire, Korea Republic, Curaçao, USA, South Africa, and future qualifiers from the full imported set.
+
+---
+
 ## 📦 v0.4.5 — 13 Mar 2026
 
 > **Redesigned Mobile Game Cards**
