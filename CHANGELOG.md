@@ -1,3 +1,10 @@
+## 📦 v0.4.11 — 2 Jun 2026
+
+> **Account Drawer**
+> The navbar username now opens a drawer-style account panel where signed-in users can update their display name and change their password with matching frontend and backend validation.
+
+---
+
 ## 📦 v0.4.10 — 2 Jun 2026
 
 > **Algeria and Croatia Flags**
