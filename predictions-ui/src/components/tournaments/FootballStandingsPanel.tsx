@@ -95,6 +95,20 @@ function isWorldCupLike(tournamentName?: string, externalLeagueId?: number | nul
   return externalLeagueId === WORLD_CUP_COMPETITION_ID || /world cup/i.test(tournamentName ?? '');
 }
 
+function createStandingRow(team: string): DerivedStandingRow {
+  return {
+    team,
+    played: 0,
+    won: 0,
+    draw: 0,
+    lost: 0,
+    goalsFor: 0,
+    goalsAgainst: 0,
+    goalDifference: 0,
+    points: 0,
+  };
+}
+
 function addResult(row: DerivedStandingRow, goalsFor: number, goalsAgainst: number): void {
   row.played += 1;
   row.goalsFor += goalsFor;
@@ -111,19 +125,9 @@ function addResult(row: DerivedStandingRow, goalsFor: number, goalsAgainst: numb
   }
 }
 
-function deriveGroupStandings(teams: string[], games: GameResponse[]): DerivedStandingRow[] {
+function calculateStandingRows(teams: string[], games: GameResponse[]): DerivedStandingRow[] {
   const rows = new Map<string, DerivedStandingRow>();
-  teams.forEach((team) => rows.set(team, {
-    team,
-    played: 0,
-    won: 0,
-    draw: 0,
-    lost: 0,
-    goalsFor: 0,
-    goalsAgainst: 0,
-    goalDifference: 0,
-    points: 0,
-  }));
+  teams.forEach((team) => rows.set(team, createStandingRow(team)));
 
   games.forEach((game) => {
     if (!game.isFinished || game.homeGoals === null || game.awayGoals === null) return;
@@ -135,12 +139,45 @@ function deriveGroupStandings(teams: string[], games: GameResponse[]): DerivedSt
     addResult(away, game.awayGoals, game.homeGoals);
   });
 
-  return Array.from(rows.values()).sort((a, b) =>
-    b.points - a.points ||
-    b.goalDifference - a.goalDifference ||
-    b.goalsFor - a.goalsFor ||
-    a.team.localeCompare(b.team)
-  );
+  return Array.from(rows.values());
+}
+
+function sortRowsByFifaCriteria(rows: DerivedStandingRow[], games: GameResponse[]): DerivedStandingRow[] {
+  const headToHeadByPoints = new Map<number, Map<string, DerivedStandingRow>>();
+
+  function headToHeadRow(row: DerivedStandingRow): DerivedStandingRow {
+    if (!headToHeadByPoints.has(row.points)) {
+      const tiedTeams = rows.filter((candidate) => candidate.points === row.points).map((candidate) => candidate.team);
+      headToHeadByPoints.set(row.points, new Map(calculateStandingRows(tiedTeams, games).map((candidate) => [candidate.team, candidate])));
+    }
+    return headToHeadByPoints.get(row.points)?.get(row.team) ?? createStandingRow(row.team);
+  }
+
+  return [...rows].sort((a, b) => {
+    const points = b.points - a.points;
+    if (points !== 0) return points;
+
+    const tiedTeamCount = rows.filter((row) => row.points === a.points).length;
+    if (tiedTeamCount > 1) {
+      const aHeadToHead = headToHeadRow(a);
+      const bHeadToHead = headToHeadRow(b);
+      const headToHead =
+        bHeadToHead.points - aHeadToHead.points ||
+        bHeadToHead.goalDifference - aHeadToHead.goalDifference ||
+        bHeadToHead.goalsFor - aHeadToHead.goalsFor;
+      if (headToHead !== 0) return headToHead;
+    }
+
+    return (
+      b.goalDifference - a.goalDifference ||
+      b.goalsFor - a.goalsFor ||
+      a.team.localeCompare(b.team)
+    );
+  });
+}
+
+function deriveGroupStandings(teams: string[], games: GameResponse[]): DerivedStandingRow[] {
+  return sortRowsByFifaCriteria(calculateStandingRows(teams, games), games);
 }
 
 function formatGoalDifference(goalDifference: number): string {
