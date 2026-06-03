@@ -160,13 +160,37 @@
 }
 
 .detailRow {
+  --outcome-color: var(--color-text-secondary);
   display: grid;
   grid-template-columns: minmax(0, 1fr) max-content minmax(28px, max-content);
   align-items: center;
   column-gap: 0.9rem;
   padding: 0.5rem 0.85rem;
   border-bottom: 1px solid var(--color-border);
+  border-left: 3px solid var(--outcome-color);
   font-size: 0.8rem;
+}
+
+.scoreOutcome {
+  --outcome-color: #49d300;
+  background: rgb(73 211 0 / 0.08);
+}
+
+.correctOutcome {
+  --outcome-color: #ff9800;
+  background: rgb(255 152 0 / 0.08);
+}
+
+.missedOutcome {
+  --outcome-color: #95a1b1;
+  background: rgb(149 161 177 / 0.07);
+}
+
+.pointsEarned {
+  color: var(--outcome-color);
+  font-weight: 700;
+  text-align: right;
+  min-width: 28px;
 }
 
 .actualResult {
@@ -257,10 +281,10 @@
   }
 
   .teamFull {
-    display: none;
+    display: inline;
   }
 
   .teamShort {
-    display: inline;
+    display: none;
   }
 }
