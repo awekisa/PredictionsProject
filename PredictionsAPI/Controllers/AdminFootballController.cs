@@ -48,6 +48,13 @@ public class AdminFootballController : ControllerBase
         }
     }
 
+    [HttpPost("tournaments/{id:int}/backfill-fixtures")]
+    public async Task<IActionResult> BackfillFixtures(int id)
+    {
+        var result = await _footballSyncService.BackfillFixturesAsync(id);
+        return Ok(result);
+    }
+
     [HttpPost("tournaments/{id:int}/sync-scores")]
     public async Task<IActionResult> SyncScores(int id)
     {
