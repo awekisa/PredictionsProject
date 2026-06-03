@@ -55,41 +55,36 @@
   color: var(--color-primary-hover);
 }
 
-/* Detail panel */
-.detailPanel {
-  margin-top: 0.75rem;
+/* Prediction result sections */
+.resultSections {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.resultSection {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   overflow: hidden;
 }
 
-.panelHeader {
+.resultSectionHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
   padding: 0.6rem 0.85rem;
   border-bottom: 1px solid var(--color-border);
-}
-
-.panelTitle {
+  color: var(--color-text);
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--color-text);
 }
 
-.panelClose {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
-  font-size: 1.2rem;
-  padding: 0 0.3rem;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.panelClose:hover {
-  color: var(--color-text);
+.resultSectionHeader > span:last-child {
+  color: var(--color-primary);
+  text-align: right;
+  white-space: nowrap;
 }
 
 .panelLoading,

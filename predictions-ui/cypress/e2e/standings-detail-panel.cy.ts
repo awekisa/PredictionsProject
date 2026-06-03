@@ -10,10 +10,10 @@ const tournament = {
 const standings = [
   {
     position: 1,
-    userDisplayName: 'Admin',
-    points: 0,
+    userDisplayName: 'Mitko',
+    points: 3,
     correctOutcomes: 0,
-    correctScores: 0,
+    correctScores: 1,
     totalPredictions: 1,
   },
 ];
@@ -35,41 +35,48 @@ const predictionDetails = [
   },
 ];
 
-describe('Standings prediction detail panel', () => {
-  it('shows actual match result on the left and right-aligns prediction plus points', () => {
+describe('Standings prediction result rows', () => {
+  it('shows result rows directly instead of the aggregate standings table', () => {
     cy.viewport(390, 844);
     cy.intercept('GET', '**/api/tournaments/1', { statusCode: 200, body: tournament });
     cy.intercept('GET', '**/api/tournaments/1/games', { statusCode: 200, body: [] });
     cy.intercept('GET', '**/api/tournaments/1/my-predictions', { statusCode: 200, body: [] });
     cy.intercept('GET', '**/api/tournaments/1/standings', { statusCode: 200, body: standings });
     cy.intercept('GET', '**/api/tournaments/1/football-standings', { statusCode: 204, body: '' });
-    cy.intercept('GET', '**/api/tournaments/1/standings/Admin/predictions?type=total', {
+    cy.intercept('GET', '**/api/tournaments/1/standings/Mitko/predictions?type=total', {
       statusCode: 200,
       body: predictionDetails,
     }).as('details');
 
     cy.visitAuthenticated('/tournaments/1');
     cy.contains('button', 'Prediction Standings').click();
-    cy.contains('button', '1').click();
     cy.wait('@details');
 
-    cy.contains('Admin — All Predictions').should('exist');
-    cy.get('[data-testid="prediction-detail-header"]').within(() => {
-      cy.contains('Result').should('be.visible');
-      cy.contains('Prediction').should('be.visible');
-      cy.contains('Pts').should('be.visible');
-    });
-    cy.get('[data-testid="prediction-detail-row"]').within(() => {
-      cy.get('[data-testid="actual-result"]')
-        .should('have.attr', 'aria-label', 'Jordan 0:0 Argentina')
-        .and('be.visible')
-        .and('contain.text', 'JOR')
-        .and('contain.text', '0:0')
-        .and('contain.text', 'ARG');
-      cy.get('[data-testid="actual-result"] [class*="teamShort"]').should('be.visible');
-      cy.get('[data-testid="actual-result"] [class*="teamFull"]').should('not.be.visible');
-      cy.get('[data-testid="prediction-score"]').should('have.text', '1:2').and('be.visible');
-      cy.get('[data-testid="points-earned"]').should('have.text', '0').and('be.visible');
+    cy.contains('th', 'Player').should('not.exist');
+    cy.contains('th', 'PTS').should('not.exist');
+    cy.contains('th', 'OUT').should('not.exist');
+    cy.contains('th', 'SCR').should('not.exist');
+    cy.contains('th', 'TOT').should('not.exist');
+
+    cy.get('[data-testid="prediction-result-section"]').within(() => {
+      cy.contains('Mitko').should('be.visible');
+      cy.get('[data-testid="prediction-detail-header"]').within(() => {
+        cy.contains('Result').should('be.visible');
+        cy.contains('Prediction').should('be.visible');
+        cy.contains('Pts').should('be.visible');
+      });
+      cy.get('[data-testid="prediction-detail-row"]').within(() => {
+        cy.get('[data-testid="actual-result"]')
+          .should('have.attr', 'aria-label', 'Jordan 0:0 Argentina')
+          .and('be.visible')
+          .and('contain.text', 'JOR')
+          .and('contain.text', '0:0')
+          .and('contain.text', 'ARG');
+        cy.get('[data-testid="actual-result"] [class*="teamShort"]').should('be.visible');
+        cy.get('[data-testid="actual-result"] [class*="teamFull"]').should('not.be.visible');
+        cy.get('[data-testid="prediction-score"]').should('have.text', '1:2').and('be.visible');
+        cy.get('[data-testid="points-earned"]').should('have.text', '0').and('be.visible');
+      });
     });
 
     cy.get('[data-testid="prediction-detail-row"]').then(($row) => {
