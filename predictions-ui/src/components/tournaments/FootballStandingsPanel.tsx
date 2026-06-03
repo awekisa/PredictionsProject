@@ -138,6 +138,10 @@ function deriveFixtureGroups(games: GameResponse[]): DerivedGroup[] {
     }));
 }
 
+function isUngroupedLeagueStandings(groups: StandingGroupResponse[]): boolean {
+  return groups.length === 1 && !groups[0].group && /regular|season|league/i.test(groups[0].stage ?? '');
+}
+
 function TournamentFormatPanel({ games }: { games: GameResponse[] }) {
   const groups = deriveFixtureGroups(games);
 
@@ -195,6 +199,9 @@ export default function FootballStandingsPanel({ standings, loading, hasExternal
   }
 
   const groups = standings.groups;
+  if (showTournamentFormat && (groups.length === 0 || isUngroupedLeagueStandings(groups))) {
+    return <TournamentFormatPanel games={games} />;
+  }
   if (groups.length === 0) return null;
 
   // Determine if this is a multi-group competition (group stage)
