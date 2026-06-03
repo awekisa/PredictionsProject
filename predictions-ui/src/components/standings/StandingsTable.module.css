@@ -135,18 +135,43 @@
   min-width: 0;
 }
 
-.detailCrest {
-  width: 18px;
-  height: 14px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
 .detailScore {
   font-weight: 700;
   font-family: 'Square721', sans-serif;
   text-align: center;
   min-width: 28px;
+}
+
+.detailHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content minmax(28px, max-content);
+  align-items: center;
+  column-gap: 0.9rem;
+  padding: 0.45rem 0.85rem;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.detailHeader > span:first-child {
+  text-align: left;
+}
+
+.detailHeader > span:not(:first-child) {
+  text-align: right;
+}
+
+.detailRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content minmax(28px, max-content);
+  align-items: center;
+  column-gap: 0.9rem;
+  padding: 0.5rem 0.85rem;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.8rem;
 }
 
 .actualResult {
@@ -155,17 +180,17 @@
   justify-content: flex-start;
   gap: 0.45rem;
   min-width: 0;
-  flex: 1 1 auto;
+  grid-column: 1;
   text-align: left;
 }
 
 .predictionMeta {
-  display: flex;
+  display: grid;
+  grid-template-columns: max-content minmax(28px, max-content);
   align-items: center;
   justify-content: flex-end;
   gap: 0.9rem;
-  flex: 0 0 auto;
-  margin-left: auto;
+  grid-column: 2 / span 2;
   text-align: right;
 }
 
