@@ -10,15 +10,23 @@ interface Props {
 
 type DetailsByUser = Record<string, UserPredictionDetailResponse[]>;
 
-function pointsClass(points: number): string {
-  if (points === 3) return styles.detailPts3;
-  if (points === 1) return styles.detailPts1;
-  return styles.detailPts0;
+function predictionOutcome(points: number): 'score' | 'outcome' | 'missed' {
+  if (points === 3) return 'score';
+  if (points === 1) return 'outcome';
+  return 'missed';
+}
+
+function outcomeClass(outcome: 'score' | 'outcome' | 'missed'): string {
+  if (outcome === 'score') return styles.scoreOutcome;
+  if (outcome === 'outcome') return styles.correctOutcome;
+  return styles.missedOutcome;
 }
 
 function PredictionResultRow({ detail }: { detail: UserPredictionDetailResponse }) {
+  const outcome = predictionOutcome(detail.pointsEarned);
+
   return (
-    <div className={styles.detailRow} data-testid="prediction-detail-row">
+    <div className={`${styles.detailRow} ${outcomeClass(outcome)}`} data-testid="prediction-detail-row" data-outcome={outcome}>
       <span
         className={styles.actualResult}
         data-testid="actual-result"
@@ -44,7 +52,7 @@ function PredictionResultRow({ detail }: { detail: UserPredictionDetailResponse 
         <span className={styles.detailScore} data-testid="prediction-score">
           {detail.predictedHome}:{detail.predictedAway}
         </span>
-        <span data-testid="points-earned" className={pointsClass(detail.pointsEarned)}>
+        <span data-testid="points-earned" className={styles.pointsEarned}>
           {detail.pointsEarned}
         </span>
       </span>

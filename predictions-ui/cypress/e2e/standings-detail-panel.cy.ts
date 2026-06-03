@@ -11,10 +11,10 @@ const standings = [
   {
     position: 1,
     userDisplayName: 'Mitko',
-    points: 3,
-    correctOutcomes: 0,
+    points: 4,
+    correctOutcomes: 1,
     correctScores: 1,
-    totalPredictions: 1,
+    totalPredictions: 3,
   },
 ];
 
@@ -33,10 +33,38 @@ const predictionDetails = [
     pointsEarned: 0,
     matchDate: '2026-06-03T12:58:12Z',
   },
+  {
+    homeTeam: 'Brazil',
+    awayTeam: 'Germany',
+    homeCrestUrl: null,
+    awayCrestUrl: null,
+    homeTeamShort: 'BRA',
+    awayTeamShort: 'GER',
+    predictedHome: 2,
+    predictedAway: 1,
+    actualHome: 2,
+    actualAway: 1,
+    pointsEarned: 3,
+    matchDate: '2026-06-04T12:58:12Z',
+  },
+  {
+    homeTeam: 'France',
+    awayTeam: 'Spain',
+    homeCrestUrl: null,
+    awayCrestUrl: null,
+    homeTeamShort: 'FRA',
+    awayTeamShort: 'ESP',
+    predictedHome: 1,
+    predictedAway: 0,
+    actualHome: 2,
+    actualAway: 1,
+    pointsEarned: 1,
+    matchDate: '2026-06-05T12:58:12Z',
+  },
 ];
 
 describe('Standings prediction result rows', () => {
-  it('shows result rows directly instead of the aggregate standings table', () => {
+  it('shows team names directly and highlights exact scores, outcomes, and misses', () => {
     cy.viewport(390, 844);
     cy.intercept('GET', '**/api/tournaments/1', { statusCode: 200, body: tournament });
     cy.intercept('GET', '**/api/tournaments/1/games', { statusCode: 200, body: [] });
@@ -65,27 +93,67 @@ describe('Standings prediction result rows', () => {
         cy.contains('Prediction').should('be.visible');
         cy.contains('Pts').should('be.visible');
       });
-      cy.get('[data-testid="prediction-detail-row"]').within(() => {
-        cy.get('[data-testid="actual-result"]')
-          .should('have.attr', 'aria-label', 'Jordan 0:0 Argentina')
-          .and('be.visible')
-          .and('contain.text', 'JOR')
-          .and('contain.text', '0:0')
-          .and('contain.text', 'ARG');
-        cy.get('[data-testid="actual-result"] [class*="teamShort"]').should('be.visible');
-        cy.get('[data-testid="actual-result"] [class*="teamFull"]').should('not.be.visible');
-        cy.get('[data-testid="prediction-score"]').should('have.text', '1:2').and('be.visible');
-        cy.get('[data-testid="points-earned"]').should('have.text', '0').and('be.visible');
-      });
     });
 
-    cy.get('[data-testid="prediction-detail-row"]').then(($row) => {
+    const expectedRows = [
+      {
+        result: 'Jordan 0:0 Argentina',
+        home: 'Jordan',
+        away: 'Argentina',
+        prediction: '1:2',
+        points: '0',
+        outcome: 'missed',
+        color: 'rgb(149, 161, 177)',
+      },
+      {
+        result: 'Brazil 2:1 Germany',
+        home: 'Brazil',
+        away: 'Germany',
+        prediction: '2:1',
+        points: '3',
+        outcome: 'score',
+        color: 'rgb(73, 211, 0)',
+      },
+      {
+        result: 'France 2:1 Spain',
+        home: 'France',
+        away: 'Spain',
+        prediction: '1:0',
+        points: '1',
+        outcome: 'outcome',
+        color: 'rgb(255, 152, 0)',
+      },
+    ];
+
+    cy.get('[data-testid="prediction-detail-row"]').should('have.length', expectedRows.length);
+    expectedRows.forEach((expected, index) => {
+      cy.get('[data-testid="prediction-detail-row"]')
+        .eq(index)
+        .should('have.attr', 'data-outcome', expected.outcome)
+        .and('have.css', 'border-left-color', expected.color)
+        .within(() => {
+          cy.get('[data-testid="actual-result"]')
+            .should('have.attr', 'aria-label', expected.result)
+            .and('be.visible')
+            .and('contain.text', expected.home)
+            .and('contain.text', expected.away);
+          cy.get('[data-testid="actual-result"] [class*="teamFull"]').should('be.visible');
+          cy.get('[data-testid="actual-result"] [class*="teamShort"]').should('not.be.visible');
+          cy.get('[data-testid="prediction-score"]').should('have.text', expected.prediction).and('be.visible');
+          cy.get('[data-testid="points-earned"]')
+            .should('have.text', expected.points)
+            .and('have.css', 'color', expected.color)
+            .and('be.visible');
+        });
+    });
+
+    cy.get('[data-testid="prediction-detail-row"]').first().then(($row) => {
       const rowRect = $row[0].getBoundingClientRect();
-      cy.get('[data-testid="actual-result"]').then(($actual) => {
+      cy.get('[data-testid="actual-result"]').first().then(($actual) => {
         const actualRect = $actual[0].getBoundingClientRect();
-        expect(actualRect.left).to.be.closeTo(rowRect.left, 16);
+        expect(actualRect.left).to.be.closeTo(rowRect.left, 20);
       });
-      cy.get('[data-testid="prediction-meta"]').then(($meta) => {
+      cy.get('[data-testid="prediction-meta"]').first().then(($meta) => {
         const metaRect = $meta[0].getBoundingClientRect();
         expect(metaRect.right).to.be.closeTo(rowRect.right, 16);
         expect(metaRect.left).to.be.greaterThan(rowRect.left + rowRect.width * 0.55);
