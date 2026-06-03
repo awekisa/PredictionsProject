@@ -1,3 +1,10 @@
+## 📦 v0.4.15 — 3 Jun 2026
+
+> **World Cup 2026 Flag Mappings**
+> The new World Cup 2026 tournament now uses existing 4x3 flag assets for Bosnia-H., Congo DR, Czechia, Iraq, Sweden, and Turkey instead of falling back to missing/old crest paths.
+
+---
+
 ## 📦 v0.4.14 — 3 Jun 2026
 
 > **Fixture Backfill Sync**
