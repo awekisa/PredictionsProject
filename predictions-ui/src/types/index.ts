@@ -33,30 +33,6 @@ export interface TournamentResponse {
   emblemUrl: string | null;
 }
 
-export interface LeagueSearchResult {
-  leagueId: number;
-  name: string;
-  country: string;
-  type: string;
-  logo?: string;
-  seasons: number[];
-}
-
-export interface ImportLeagueRequest {
-  leagueId: number;
-  season: number;
-  name: string;
-}
-
-export interface BackfillFixturesResponse {
-  providerFixtures: number;
-  existingGames: number;
-  added: number;
-  matchedExisting: number;
-  skippedExisting: number;
-  skippedUndetermined: number;
-}
-
 export interface CreateTournamentRequest {
   name: string;
 }
