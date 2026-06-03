@@ -240,6 +240,80 @@
   font-weight: 800;
 }
 
+.knockoutNote {
+  margin: -0.2rem 0 0.65rem;
+  color: var(--color-text-secondary);
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.knockoutRounds {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.knockoutRound {
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) - 2px);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-surface) 94%, var(--color-primary) 6%);
+}
+
+.knockoutRoundTitle {
+  padding: 0.42rem 0.55rem;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.knockoutMatches {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.knockoutMatch {
+  display: grid;
+  grid-template-columns: 2.4rem minmax(0, 1fr);
+  gap: 0.45rem;
+  align-items: center;
+  padding: 0.45rem 0.55rem;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.76rem;
+}
+
+.knockoutMatch:last-child {
+  border-bottom: none;
+}
+
+.matchNumber {
+  color: var(--color-text-secondary);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.knockoutTeams {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0.35rem;
+  align-items: center;
+  color: var(--color-text);
+}
+
+.knockoutTeams span:not(.versus) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.versus {
+  color: var(--color-text-secondary);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }

@@ -92,6 +92,49 @@ type DerivedGroup = {
 
 const WORLD_CUP_COMPETITION_ID = 2000;
 
+type KnockoutMatchSchema = {
+  matchNumber: number;
+  round: string;
+  kickoffUtc: string;
+  homeSeed: string;
+  awaySeed: string;
+};
+
+const WORLD_CUP_KNOCKOUT_SCHEMA: KnockoutMatchSchema[] = [
+  { matchNumber: 73, round: 'Round of 32', kickoffUtc: '2026-06-28T19:00:00Z', homeSeed: '2A', awaySeed: '2B' },
+  { matchNumber: 74, round: 'Round of 32', kickoffUtc: '2026-06-29T20:30:00Z', homeSeed: '1E', awaySeed: '3ABCDF' },
+  { matchNumber: 75, round: 'Round of 32', kickoffUtc: '2026-06-30T01:00:00Z', homeSeed: '1F', awaySeed: '2C' },
+  { matchNumber: 76, round: 'Round of 32', kickoffUtc: '2026-06-29T17:00:00Z', homeSeed: '1C', awaySeed: '2F' },
+  { matchNumber: 77, round: 'Round of 32', kickoffUtc: '2026-06-30T21:00:00Z', homeSeed: '1I', awaySeed: '3CDFGH' },
+  { matchNumber: 78, round: 'Round of 32', kickoffUtc: '2026-06-30T17:00:00Z', homeSeed: '2E', awaySeed: '2I' },
+  { matchNumber: 79, round: 'Round of 32', kickoffUtc: '2026-07-01T01:00:00Z', homeSeed: '1A', awaySeed: '3CEFHI' },
+  { matchNumber: 80, round: 'Round of 32', kickoffUtc: '2026-07-01T16:00:00Z', homeSeed: '1L', awaySeed: '3EHIJK' },
+  { matchNumber: 81, round: 'Round of 32', kickoffUtc: '2026-07-02T00:00:00Z', homeSeed: '1D', awaySeed: '3BEFIJ' },
+  { matchNumber: 82, round: 'Round of 32', kickoffUtc: '2026-07-01T20:00:00Z', homeSeed: '1G', awaySeed: '3AEHIJ' },
+  { matchNumber: 83, round: 'Round of 32', kickoffUtc: '2026-07-02T23:00:00Z', homeSeed: '2K', awaySeed: '2L' },
+  { matchNumber: 84, round: 'Round of 32', kickoffUtc: '2026-07-02T19:00:00Z', homeSeed: '1H', awaySeed: '2J' },
+  { matchNumber: 85, round: 'Round of 32', kickoffUtc: '2026-07-03T03:00:00Z', homeSeed: '1B', awaySeed: '3EFGIJ' },
+  { matchNumber: 86, round: 'Round of 32', kickoffUtc: '2026-07-03T22:00:00Z', homeSeed: '1J', awaySeed: '2H' },
+  { matchNumber: 87, round: 'Round of 32', kickoffUtc: '2026-07-04T01:30:00Z', homeSeed: '1K', awaySeed: '3DEIJL' },
+  { matchNumber: 88, round: 'Round of 32', kickoffUtc: '2026-07-03T18:00:00Z', homeSeed: '2D', awaySeed: '2G' },
+  { matchNumber: 89, round: 'Round of 16', kickoffUtc: '2026-07-04T21:00:00Z', homeSeed: 'W74', awaySeed: 'W77' },
+  { matchNumber: 90, round: 'Round of 16', kickoffUtc: '2026-07-04T17:00:00Z', homeSeed: 'W73', awaySeed: 'W75' },
+  { matchNumber: 91, round: 'Round of 16', kickoffUtc: '2026-07-05T20:00:00Z', homeSeed: 'W76', awaySeed: 'W78' },
+  { matchNumber: 92, round: 'Round of 16', kickoffUtc: '2026-07-06T00:00:00Z', homeSeed: 'W79', awaySeed: 'W80' },
+  { matchNumber: 93, round: 'Round of 16', kickoffUtc: '2026-07-06T19:00:00Z', homeSeed: 'W83', awaySeed: 'W84' },
+  { matchNumber: 94, round: 'Round of 16', kickoffUtc: '2026-07-07T00:00:00Z', homeSeed: 'W81', awaySeed: 'W82' },
+  { matchNumber: 95, round: 'Round of 16', kickoffUtc: '2026-07-07T16:00:00Z', homeSeed: 'W86', awaySeed: 'W88' },
+  { matchNumber: 96, round: 'Round of 16', kickoffUtc: '2026-07-07T20:00:00Z', homeSeed: 'W85', awaySeed: 'W87' },
+  { matchNumber: 97, round: 'Quarter-final', kickoffUtc: '2026-07-09T20:00:00Z', homeSeed: 'W89', awaySeed: 'W90' },
+  { matchNumber: 98, round: 'Quarter-final', kickoffUtc: '2026-07-10T19:00:00Z', homeSeed: 'W93', awaySeed: 'W94' },
+  { matchNumber: 99, round: 'Quarter-final', kickoffUtc: '2026-07-11T21:00:00Z', homeSeed: 'W91', awaySeed: 'W92' },
+  { matchNumber: 100, round: 'Quarter-final', kickoffUtc: '2026-07-12T01:00:00Z', homeSeed: 'W95', awaySeed: 'W96' },
+  { matchNumber: 101, round: 'Semi-final', kickoffUtc: '2026-07-14T19:00:00Z', homeSeed: 'W97', awaySeed: 'W98' },
+  { matchNumber: 102, round: 'Semi-final', kickoffUtc: '2026-07-15T19:00:00Z', homeSeed: 'W99', awaySeed: 'W100' },
+  { matchNumber: 103, round: 'Third-place play-off', kickoffUtc: '2026-07-18T21:00:00Z', homeSeed: 'RU101', awaySeed: 'RU102' },
+  { matchNumber: 104, round: 'Final', kickoffUtc: '2026-07-19T19:00:00Z', homeSeed: 'W101', awaySeed: 'W102' },
+];
+
 function isWorldCupLike(tournamentName?: string, externalLeagueId?: number | null): boolean {
   return externalLeagueId === WORLD_CUP_COMPETITION_ID || /world cup/i.test(tournamentName ?? '');
 }
@@ -185,6 +228,63 @@ function formatGoalDifference(goalDifference: number): string {
   return goalDifference > 0 ? `+${goalDifference}` : `${goalDifference}`;
 }
 
+function formatSeed(seed: string): string {
+  const winner = seed.match(/^1([A-L])$/);
+  if (winner) return `Winner Group ${winner[1]}`;
+
+  const runnerUp = seed.match(/^2([A-L])$/);
+  if (runnerUp) return `Runner-up Group ${runnerUp[1]}`;
+
+  const thirdPlace = seed.match(/^3([A-L]+)$/);
+  if (thirdPlace) return `Best third-place team from Groups ${thirdPlace[1].split('').join('/')}`;
+
+  const matchWinner = seed.match(/^W(\d+)$/);
+  if (matchWinner) return `Winner Match ${matchWinner[1]}`;
+
+  const matchRunnerUp = seed.match(/^RU(\d+)$/);
+  if (matchRunnerUp) return `Runner-up Match ${matchRunnerUp[1]}`;
+
+  return seed;
+}
+
+function normalizeTime(value: string): number {
+  return parseApiDateTime(value).getTime();
+}
+
+function isSeedPlaceholder(team: string): boolean {
+  return /^(Winner|Runner-up|Best third-place team)\b/i.test(team);
+}
+
+function findStoredKnockoutGame(match: KnockoutMatchSchema, games: GameResponse[]): GameResponse | undefined {
+  const schemaKickoff = normalizeTime(match.kickoffUtc);
+  return games.find((game) => {
+    if (game.id === match.matchNumber) return true;
+    return normalizeTime(game.startTime) === schemaKickoff;
+  });
+}
+
+function displaySlot(storedTeam: string | undefined, seed: string): string {
+  if (storedTeam && !isSeedPlaceholder(storedTeam)) return storedTeam;
+  return formatSeed(seed);
+}
+
+function groupKnockoutSchema(games: GameResponse[]): { round: string; matches: (KnockoutMatchSchema & { homeTeam: string; awayTeam: string })[] }[] {
+  const byRound = new Map<string, (KnockoutMatchSchema & { homeTeam: string; awayTeam: string })[]>();
+
+  WORLD_CUP_KNOCKOUT_SCHEMA.forEach((match) => {
+    const storedGame = findStoredKnockoutGame(match, games);
+    const displayMatch = {
+      ...match,
+      homeTeam: displaySlot(storedGame?.homeTeam, match.homeSeed),
+      awayTeam: displaySlot(storedGame?.awayTeam, match.awaySeed),
+    };
+    if (!byRound.has(match.round)) byRound.set(match.round, []);
+    byRound.get(match.round)!.push(displayMatch);
+  });
+
+  return Array.from(byRound.entries()).map(([round, matches]) => ({ round, matches }));
+}
+
 function deriveFixtureGroups(games: GameResponse[]): DerivedGroup[] {
   const adjacency = new Map<string, Set<string>>();
   const firstKickoffs = new Map<string, number>();
@@ -248,6 +348,7 @@ function isUngroupedLeagueStandings(groups: StandingGroupResponse[]): boolean {
 
 function TournamentFormatPanel({ games }: { games: GameResponse[] }) {
   const groups = deriveFixtureGroups(games);
+  const knockoutRounds = groupKnockoutSchema(games);
 
   return (
     <div className={styles.panel}>
@@ -293,8 +394,30 @@ function TournamentFormatPanel({ games }: { games: GameResponse[] }) {
         )}
       </div>
       <div className={styles.formatSection}>
-        <div className={styles.sectionHeader}>Knockout Bracket</div>
-        <p className={styles.unavailable}>Bracket appears once knockout fixtures are available.</p>
+        <div className={styles.sectionHeader}>
+          <span>Knockout Bracket</span>
+          <span className={styles.sectionMeta}>official FIFA schema</span>
+        </div>
+        <p className={styles.knockoutNote}>Qualified teams replace seed labels automatically once the knockout fixtures are populated.</p>
+        <div className={styles.knockoutRounds}>
+          {knockoutRounds.map((round) => (
+            <div key={round.round} className={styles.knockoutRound}>
+              <div className={styles.knockoutRoundTitle}>{round.round}</div>
+              <div className={styles.knockoutMatches}>
+                {round.matches.map((match) => (
+                  <div key={match.matchNumber} className={styles.knockoutMatch} data-testid="world-cup-knockout-match">
+                    <div className={styles.matchNumber}>M{match.matchNumber}</div>
+                    <div className={styles.knockoutTeams}>
+                      <span>{match.homeTeam}</span>
+                      <span className={styles.versus}>vs</span>
+                      <span>{match.awayTeam}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
