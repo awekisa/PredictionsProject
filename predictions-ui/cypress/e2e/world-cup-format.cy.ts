@@ -53,7 +53,7 @@ describe('World Cup tournament format panel', () => {
         groups: [
           {
             group: null,
-            stage: 'REGULAR_SEASON',
+            stage: 'GROUP_STAGE',
             table: [
               { position: 1, teamName: 'Argentina', teamCrest: null, playedGames: 0, won: 0, draw: 0, lost: 0, points: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0 },
               { position: 2, teamName: 'Brazil', teamCrest: null, playedGames: 0, won: 0, draw: 0, lost: 0, points: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0 },
