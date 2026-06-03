@@ -1,3 +1,10 @@
+## 📦 v0.4.23 — 3 Jun 2026
+
+> **Goals for/against in World Cup groups**
+> Group panels now show GF and GA alongside P, GD, and Pts, all derived from stored finished-game scores.
+
+---
+
 ## 📦 v0.4.22 — 3 Jun 2026
 
 > **World Cup group standings**
