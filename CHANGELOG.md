@@ -1,3 +1,10 @@
+## 📦 v0.4.21 — 3 Jun 2026
+
+> **Removed external football API admin controls**
+> The admin tournament page now keeps only manual/agent-friendly controls: New Tournament, Games, Edit, and Delete. Removed the quota badge, Import from API, API badges, Backfill Fixtures, Sync Scores, the frontend football API client, and stale provider DTO/styles.
+
+---
+
 ## 📦 v0.4.20 — 3 Jun 2026
 
 > **Removed unreliable football standings API from UI**
