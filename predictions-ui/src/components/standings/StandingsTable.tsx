@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getUserPredictionDetails, getGlobalUserPredictionDetails } from '../../api/standingsApi';
 import type { StandingEntryResponse, UserPredictionDetailResponse } from '../../types';
 import styles from './StandingsTable.module.css';
@@ -8,48 +8,94 @@ interface Props {
   tournamentId?: number;
 }
 
-type DetailType = 'all' | 'outcomes' | 'scores' | 'total';
+type DetailsByUser = Record<string, UserPredictionDetailResponse[]>;
 
-interface ActivePanel {
-  user: string;
-  type: DetailType;
-  label: string;
+function pointsClass(points: number): string {
+  if (points === 3) return styles.detailPts3;
+  if (points === 1) return styles.detailPts1;
+  return styles.detailPts0;
 }
 
-function positionClass(pos: number): string {
-  if (pos === 1) return styles.gold;
-  if (pos === 2) return styles.silver;
-  if (pos === 3) return styles.bronze;
-  return '';
-}
-
-function panelTitle(label: string, user: string): string {
-  return `${user} — ${label}`;
+function PredictionResultRow({ detail }: { detail: UserPredictionDetailResponse }) {
+  return (
+    <div className={styles.detailRow} data-testid="prediction-detail-row">
+      <span
+        className={styles.actualResult}
+        data-testid="actual-result"
+        aria-label={`${detail.homeTeam} ${detail.actualHome}:${detail.actualAway} ${detail.awayTeam}`}
+      >
+        <span className={styles.detailTeam}>
+          <span className={styles.detailTeamName}>
+            <span className={styles.teamFull}>{detail.homeTeam}</span>
+            {detail.homeTeamShort && <span className={styles.teamShort}>{detail.homeTeamShort}</span>}
+          </span>
+        </span>
+        <span className={styles.detailScore}>
+          {detail.actualHome}:{detail.actualAway}
+        </span>
+        <span className={styles.detailTeam}>
+          <span className={styles.detailTeamName}>
+            <span className={styles.teamFull}>{detail.awayTeam}</span>
+            {detail.awayTeamShort && <span className={styles.teamShort}>{detail.awayTeamShort}</span>}
+          </span>
+        </span>
+      </span>
+      <span className={styles.predictionMeta} data-testid="prediction-meta">
+        <span className={styles.detailScore} data-testid="prediction-score">
+          {detail.predictedHome}:{detail.predictedAway}
+        </span>
+        <span data-testid="points-earned" className={pointsClass(detail.pointsEarned)}>
+          {detail.pointsEarned}
+        </span>
+      </span>
+    </div>
+  );
 }
 
 export default function StandingsTable({ standings, tournamentId }: Props) {
-  const [panel, setPanel] = useState<ActivePanel | null>(null);
-  const [details, setDetails] = useState<UserPredictionDetailResponse[]>([]);
+  const [detailsByUser, setDetailsByUser] = useState<DetailsByUser>({});
   const [loading, setLoading] = useState(false);
 
-  const openPanel = async (user: string, type: DetailType, label: string) => {
-    if (panel?.user === user && panel?.type === type) {
-      setPanel(null);
-      return;
+  useEffect(() => {
+    let active = true;
+
+    async function loadPredictionRows() {
+      if (standings.length === 0) {
+        setDetailsByUser({});
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const entries = await Promise.all(
+          standings.map(async (standing) => {
+            const details = tournamentId
+              ? await getUserPredictionDetails(tournamentId, standing.userDisplayName, 'total')
+              : await getGlobalUserPredictionDetails(standing.userDisplayName, 'total');
+            return [standing.userDisplayName, details] as const;
+          })
+        );
+
+        if (active) {
+          setDetailsByUser(Object.fromEntries(entries));
+        }
+      } catch {
+        if (active) {
+          setDetailsByUser({});
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
     }
-    setPanel({ user, type, label });
-    setLoading(true);
-    try {
-      const data = tournamentId
-        ? await getUserPredictionDetails(tournamentId, user, type)
-        : await getGlobalUserPredictionDetails(user, type);
-      setDetails(data);
-    } catch {
-      setDetails([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+
+    loadPredictionRows();
+
+    return () => {
+      active = false;
+    };
+  }, [standings, tournamentId]);
 
   if (standings.length === 0) {
     return <div className={styles.empty}>No standings data yet.</div>;
@@ -57,138 +103,39 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
 
   return (
     <>
-      <div className={styles.tableWrap}>
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Player</th>
-              <th className={styles.centered}>
-                <span className={styles.headerFull}>Points</span>
-                <span className={styles.headerShort}>Pts</span>
-              </th>
-              <th className={styles.centered}>
-                <span className={styles.headerFull}>Correct Outcomes</span>
-                <span className={styles.headerShort}>Out</span>
-              </th>
-              <th className={styles.centered}>
-                <span className={styles.headerFull}>Correct Scores</span>
-                <span className={styles.headerShort}>Scr</span>
-              </th>
-              <th className={styles.centered}>
-                <span className={styles.headerFull}>Total Predictions</span>
-                <span className={styles.headerShort}>Tot</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {standings.map((s) => (
-              <tr key={s.position}>
-                <td className={positionClass(s.position)}>{s.position}</td>
-                <td>{s.userDisplayName}</td>
-                <td className={styles.centered}>
-                  <button
-                    className={styles.cellLink}
-                    onClick={() => openPanel(s.userDisplayName, 'all', 'All Scoring Predictions')}
-                  >
-                    {s.points}
-                  </button>
-                </td>
-                <td className={styles.centered}>
-                  <button
-                    className={styles.cellLink}
-                    onClick={() => openPanel(s.userDisplayName, 'outcomes', 'Correct Outcomes (1 pt)')}
-                  >
-                    {s.correctOutcomes}
-                  </button>
-                </td>
-                <td className={styles.centered}>
-                  <button
-                    className={styles.cellLink}
-                    onClick={() => openPanel(s.userDisplayName, 'scores', 'Correct Scores (3 pts)')}
-                  >
-                    {s.correctScores}
-                  </button>
-                </td>
-                <td className={styles.centered}>
-                  <button
-                    className={styles.cellLink}
-                    onClick={() => openPanel(s.userDisplayName, 'total', 'All Predictions')}
-                  >
-                    {s.totalPredictions}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {panel && (
-        <div className={styles.detailPanel}>
-          <div className={styles.panelHeader}>
-            <span className={styles.panelTitle}>{panelTitle(panel.label, panel.user)}</span>
-            <button className={styles.panelClose} onClick={() => setPanel(null)}>
-              &times;
-            </button>
-          </div>
-          {loading ? (
-            <div className={styles.panelLoading}>Loading...</div>
-          ) : details.length === 0 ? (
-            <div className={styles.panelEmpty}>No predictions found.</div>
-          ) : (
-            <div className={styles.panelList}>
-              <div className={styles.detailHeader} data-testid="prediction-detail-header" aria-hidden="true">
-                <span>Result</span>
-                <span>Prediction</span>
-                <span>Pts</span>
-              </div>
-              {details.map((d, i) => (
-                <div key={i} className={styles.detailRow} data-testid="prediction-detail-row">
-                  <span
-                    className={styles.actualResult}
-                    data-testid="actual-result"
-                    aria-label={`${d.homeTeam} ${d.actualHome}:${d.actualAway} ${d.awayTeam}`}
-                  >
-                    <span className={styles.detailTeam}>
-                      <span className={styles.detailTeamName}>
-                        <span className={styles.teamFull}>{d.homeTeam}</span>
-                        {d.homeTeamShort && <span className={styles.teamShort}>{d.homeTeamShort}</span>}
-                      </span>
-                    </span>
-                    <span className={styles.detailScore}>
-                      {d.actualHome}:{d.actualAway}
-                    </span>
-                    <span className={styles.detailTeam}>
-                      <span className={styles.detailTeamName}>
-                        <span className={styles.teamFull}>{d.awayTeam}</span>
-                        {d.awayTeamShort && <span className={styles.teamShort}>{d.awayTeamShort}</span>}
-                      </span>
-                    </span>
-                  </span>
-                  <span className={styles.predictionMeta} data-testid="prediction-meta">
-                    <span className={styles.detailScore} data-testid="prediction-score">
-                      {d.predictedHome}:{d.predictedAway}
-                    </span>
-                    <span
-                      data-testid="points-earned"
-                      className={
-                        d.pointsEarned === 3
-                          ? styles.detailPts3
-                          : d.pointsEarned === 1
-                            ? styles.detailPts1
-                            : styles.detailPts0
-                      }
-                    >
-                      {d.pointsEarned}
-                    </span>
-                  </span>
+      <div className={styles.resultSections}>
+        {loading ? (
+          <div className={styles.panelLoading}>Loading predictions...</div>
+        ) : (
+          standings.map((standing) => {
+            const details = detailsByUser[standing.userDisplayName] ?? [];
+            return (
+              <section
+                key={standing.userDisplayName}
+                className={styles.resultSection}
+                data-testid="prediction-result-section"
+              >
+                <div className={styles.resultSectionHeader}>
+                  <span>{standing.userDisplayName}</span>
+                  <span>{standing.points} pts</span>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+                <div className={styles.panelList}>
+                  <div className={styles.detailHeader} data-testid="prediction-detail-header" aria-hidden="true">
+                    <span>Result</span>
+                    <span>Prediction</span>
+                    <span>Pts</span>
+                  </div>
+                  {details.length === 0 ? (
+                    <div className={styles.panelEmpty}>No predictions found.</div>
+                  ) : (
+                    details.map((detail, index) => <PredictionResultRow key={index} detail={detail} />)
+                  )}
+                </div>
+              </section>
+            );
+          })
+        )}
+      </div>
 
       <div className={styles.note}>
         Scoring: Exact score = 3 pts | Correct outcome = 1 pt
