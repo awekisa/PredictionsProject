@@ -1,3 +1,10 @@
+## 📦 v0.4.22 — 3 Jun 2026
+
+> **World Cup group standings**
+> Group panels now show locally derived standings from stored fixture results: played, goal difference, and points. Teams sort by points, goal difference, goals for, then name, without calling external football standings APIs.
+
+---
+
 ## 📦 v0.4.21 — 3 Jun 2026
 
 > **Removed external football API admin controls**
