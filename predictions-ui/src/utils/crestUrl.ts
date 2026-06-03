@@ -46,6 +46,7 @@ const FLAG_COUNTRY_CODES: Record<string, string> = {
   'scotland': 'gb-sct',
   'senegal': 'sn',
   'south africa': 'za',
+  'south korea': 'kr',
   'spain': 'es',
   'switzerland': 'ch',
   'tunisia': 'tn',
