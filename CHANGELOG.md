@@ -1,3 +1,10 @@
+## 📦 v0.4.16 — 3 Jun 2026
+
+> **UTC game storage, local-time display/deadlines**
+> Admin-created/edited game starts are normalized to UTC, displayed in each browser's local timezone, and prediction/result deadline checks compare UTC instants consistently.
+
+---
+
 ## 📦 v0.4.15 — 3 Jun 2026
 
 > **World Cup 2026 Flag Mappings**
