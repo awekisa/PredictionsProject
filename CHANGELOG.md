@@ -1,3 +1,10 @@
+## 📦 v0.4.19 — 3 Jun 2026
+
+> **World Cup GROUP_STAGE table override**
+> Production verification showed football-data returns the World Cup as one ungrouped `GROUP_STAGE` table. The UI now treats any single ungrouped World Cup standings table as unsuitable and displays fixture-derived groups instead.
+
+---
+
 ## 📦 v0.4.18 — 3 Jun 2026
 
 > **World Cup groups forced over provider league table**
