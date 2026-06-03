@@ -1,3 +1,10 @@
+## 📦 v0.4.13 — 3 Jun 2026
+
+> **South Korea Standings Flag**
+> South Korea now uses the uploaded 4x3 national flag in tournament league tables instead of falling back to the older crest asset.
+
+---
+
 ## 📦 v0.4.12 — 3 Jun 2026
 
 > **Admin Delete Controls**
