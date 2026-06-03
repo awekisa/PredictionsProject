@@ -1,3 +1,10 @@
+## 📦 v0.4.27 — 3 Jun 2026
+
+> **Mobile-fit World Cup knockout labels**
+> Knockout seed placeholders are shorter on narrow screens (`Winner A`, `Runner-up B`, `Best 3rd from C/E/F/H/I`, `Winner M101`) and the `vs` divider is centered with equal visible spacing between both teams.
+
+---
+
 ## 📦 v0.4.26 — 3 Jun 2026
 
 > **World Cup knockout schema**
