@@ -1,3 +1,10 @@
+## 📦 v0.4.25 — 3 Jun 2026
+
+> **Device-local game start times**
+> Game start parsing is now centralized so UTC API instants render in the browser/device timezone even if an API timestamp arrives without an explicit `Z` suffix. Added Sofia summer-time regression coverage for game-card/admin formatting and deadline helpers.
+
+---
+
 ## 📦 v0.4.24 — 3 Jun 2026
 
 > **FIFA World Cup group tie-breakers**
