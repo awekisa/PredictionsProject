@@ -1,3 +1,10 @@
+## 📦 v0.4.17 — 3 Jun 2026
+
+> **World Cup tournament-format standings**
+> World Cup pages now show a compact tournament format panel with fixture-derived group cards and a knockout-bracket placeholder when provider standings are unavailable, instead of presenting the competition as one league table.
+
+---
+
 ## 📦 v0.4.16 — 3 Jun 2026
 
 > **UTC game storage, local-time display/deadlines**
