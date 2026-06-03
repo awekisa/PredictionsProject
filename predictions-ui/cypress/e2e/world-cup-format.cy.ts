@@ -90,15 +90,26 @@ describe('World Cup tournament format panel', () => {
     cy.contains('Knockout Bracket').should('exist');
     cy.contains('Round of 32').should('exist');
     cy.contains('M73').should('exist');
-    cy.contains('Runner-up Group A').should('exist');
-    cy.contains('Runner-up Group B').should('exist');
+    cy.contains('Runner-up A').should('exist');
+    cy.contains('Runner-up B').should('exist');
     cy.contains('M79').should('exist');
-    cy.contains('Winner Group A').should('exist');
-    cy.contains('Best third-place team from Groups C/E/F/H/I').should('exist');
+    cy.contains('Winner A').should('exist');
+    cy.contains('Best 3rd from C/E/F/H/I').should('exist');
+    cy.contains('Winner Group A').should('not.exist');
+    cy.contains('Best third-place team from Groups C/E/F/H/I').should('not.exist');
     cy.contains('Final').should('exist');
     cy.contains('M104').should('exist');
-    cy.contains('Winner Match 101').should('exist');
-    cy.contains('Winner Match 102').should('exist');
+    cy.contains('Winner M101').should('exist');
+    cy.contains('Winner M102').should('exist');
+
+    cy.contains('[data-testid="world-cup-knockout-match"]', 'M73').within(() => {
+      cy.get('[class*=knockoutTeams]').then(($teams) => {
+        const [home, versus, away] = [...$teams[0].children] as HTMLElement[];
+        const homeGap = Math.round(versus.getBoundingClientRect().left - home.getBoundingClientRect().right);
+        const awayGap = Math.round(away.getBoundingClientRect().left - versus.getBoundingClientRect().right);
+        expect(Math.abs(homeGap - awayGap)).to.be.lessThan(3);
+      });
+    });
   });
 
   it('updates knockout schema entries with real teams from stored knockout fixtures', () => {
@@ -115,12 +126,12 @@ describe('World Cup tournament format panel', () => {
 
     cy.contains('[data-testid="world-cup-knockout-match"]', 'M79').within(() => {
       cy.contains('Argentina').should('exist');
-      cy.contains('Best third-place team from Groups C/E/F/H/I').should('exist');
-      cy.contains('Winner Group A').should('not.exist');
+      cy.contains('Best 3rd from C/E/F/H/I').should('exist');
+      cy.contains('Winner A').should('not.exist');
     });
     cy.contains('[data-testid="world-cup-knockout-match"]', 'M73').within(() => {
-      cy.contains('Runner-up Group A').should('exist');
-      cy.contains('Runner-up Group B').should('exist');
+      cy.contains('Runner-up A').should('exist');
+      cy.contains('Runner-up B').should('exist');
     });
   });
 
