@@ -1,16 +1,38 @@
+const game = (overrides: Record<string, unknown>) => ({
+  id: 0,
+  tournamentId: 1,
+  homeTeam: 'Home',
+  awayTeam: 'Away',
+  startTime: '2026-06-11T19:00:00Z',
+  homeGoals: null,
+  awayGoals: null,
+  isFinished: false,
+  homeCrestUrl: null,
+  awayCrestUrl: null,
+  homeTeamShort: null,
+  awayTeamShort: null,
+  ...overrides,
+});
+
 const groupStageGames = [
-  { id: 1, tournamentId: 1, homeTeam: 'Argentina', awayTeam: 'Brazil', startTime: '2026-06-11T19:00:00Z', homeGoals: 2, awayGoals: 0, isFinished: true, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ARG', awayTeamShort: 'BRA' },
-  { id: 2, tournamentId: 1, homeTeam: 'Germany', awayTeam: 'Japan', startTime: '2026-06-11T22:00:00Z', homeGoals: 1, awayGoals: 1, isFinished: true, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'GER', awayTeamShort: 'JPN' },
-  { id: 3, tournamentId: 1, homeTeam: 'Argentina', awayTeam: 'Germany', startTime: '2026-06-15T19:00:00Z', homeGoals: 0, awayGoals: 0, isFinished: true, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ARG', awayTeamShort: 'GER' },
-  { id: 4, tournamentId: 1, homeTeam: 'Brazil', awayTeam: 'Japan', startTime: '2026-06-15T22:00:00Z', homeGoals: 3, awayGoals: 1, isFinished: true, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'BRA', awayTeamShort: 'JPN' },
-  { id: 5, tournamentId: 1, homeTeam: 'Argentina', awayTeam: 'Japan', startTime: '2026-06-20T19:00:00Z', homeGoals: 1, awayGoals: 2, isFinished: true, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ARG', awayTeamShort: 'JPN' },
-  { id: 6, tournamentId: 1, homeTeam: 'Brazil', awayTeam: 'Germany', startTime: '2026-06-20T22:00:00Z', homeGoals: 0, awayGoals: 2, isFinished: true, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'BRA', awayTeamShort: 'GER' },
-  { id: 7, tournamentId: 1, homeTeam: 'Spain', awayTeam: 'France', startTime: '2026-06-12T19:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ESP', awayTeamShort: 'FRA' },
-  { id: 8, tournamentId: 1, homeTeam: 'England', awayTeam: 'Portugal', startTime: '2026-06-12T22:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ENG', awayTeamShort: 'POR' },
-  { id: 9, tournamentId: 1, homeTeam: 'Spain', awayTeam: 'England', startTime: '2026-06-16T19:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ESP', awayTeamShort: 'ENG' },
-  { id: 10, tournamentId: 1, homeTeam: 'France', awayTeam: 'Portugal', startTime: '2026-06-16T22:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'FRA', awayTeamShort: 'POR' },
-  { id: 11, tournamentId: 1, homeTeam: 'Spain', awayTeam: 'Portugal', startTime: '2026-06-21T19:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ESP', awayTeamShort: 'POR' },
-  { id: 12, tournamentId: 1, homeTeam: 'France', awayTeam: 'England', startTime: '2026-06-21T22:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'FRA', awayTeamShort: 'ENG' },
+  game({ id: 1, homeTeam: 'Argentina', awayTeam: 'Brazil', startTime: '2026-06-11T19:00:00Z', homeGoals: 2, awayGoals: 0, isFinished: true, homeTeamShort: 'ARG', awayTeamShort: 'BRA' }),
+  game({ id: 2, homeTeam: 'Germany', awayTeam: 'Japan', startTime: '2026-06-11T22:00:00Z', homeGoals: 1, awayGoals: 1, isFinished: true, homeTeamShort: 'GER', awayTeamShort: 'JPN' }),
+  game({ id: 3, homeTeam: 'Argentina', awayTeam: 'Germany', startTime: '2026-06-15T19:00:00Z', homeGoals: 0, awayGoals: 0, isFinished: true, homeTeamShort: 'ARG', awayTeamShort: 'GER' }),
+  game({ id: 4, homeTeam: 'Brazil', awayTeam: 'Japan', startTime: '2026-06-15T22:00:00Z', homeGoals: 3, awayGoals: 1, isFinished: true, homeTeamShort: 'BRA', awayTeamShort: 'JPN' }),
+  game({ id: 5, homeTeam: 'Argentina', awayTeam: 'Japan', startTime: '2026-06-20T19:00:00Z', homeGoals: 1, awayGoals: 2, isFinished: true, homeTeamShort: 'ARG', awayTeamShort: 'JPN' }),
+  game({ id: 6, homeTeam: 'Brazil', awayTeam: 'Germany', startTime: '2026-06-20T22:00:00Z', homeGoals: 0, awayGoals: 2, isFinished: true, homeTeamShort: 'BRA', awayTeamShort: 'GER' }),
+  game({ id: 7, homeTeam: 'Spain', awayTeam: 'France', startTime: '2026-06-12T19:00:00Z', homeTeamShort: 'ESP', awayTeamShort: 'FRA' }),
+  game({ id: 8, homeTeam: 'England', awayTeam: 'Portugal', startTime: '2026-06-12T22:00:00Z', homeTeamShort: 'ENG', awayTeamShort: 'POR' }),
+  game({ id: 9, homeTeam: 'Spain', awayTeam: 'England', startTime: '2026-06-16T19:00:00Z', homeTeamShort: 'ESP', awayTeamShort: 'ENG' }),
+  game({ id: 10, homeTeam: 'France', awayTeam: 'Portugal', startTime: '2026-06-16T22:00:00Z', homeTeamShort: 'FRA', awayTeamShort: 'POR' }),
+  game({ id: 11, homeTeam: 'Spain', awayTeam: 'Portugal', startTime: '2026-06-21T19:00:00Z', homeTeamShort: 'ESP', awayTeamShort: 'POR' }),
+  game({ id: 12, homeTeam: 'France', awayTeam: 'England', startTime: '2026-06-21T22:00:00Z', homeTeamShort: 'FRA', awayTeamShort: 'ENG' }),
+];
+
+const knockoutGames = [
+  game({ id: 73, homeTeam: 'Runner-up Group A', awayTeam: 'Runner-up Group B', startTime: '2026-06-28T21:00:00Z' }),
+  game({ id: 79, homeTeam: 'Argentina', awayTeam: 'Best third-place team from Groups C/E/F/H/I', startTime: '2026-06-30T19:00:00Z', homeTeamShort: 'ARG' }),
+  game({ id: 104, homeTeam: 'Winner Match 101', awayTeam: 'Winner Match 102', startTime: '2026-07-19T19:00:00Z' }),
 ];
 
 describe('World Cup tournament format panel', () => {
@@ -66,7 +88,40 @@ describe('World Cup tournament format panel', () => {
     cy.contains('Spain').should('exist');
     cy.contains('France').should('exist');
     cy.contains('Knockout Bracket').should('exist');
-    cy.contains('Bracket appears once knockout fixtures are available.').should('exist');
+    cy.contains('Round of 32').should('exist');
+    cy.contains('M73').should('exist');
+    cy.contains('Runner-up Group A').should('exist');
+    cy.contains('Runner-up Group B').should('exist');
+    cy.contains('M79').should('exist');
+    cy.contains('Winner Group A').should('exist');
+    cy.contains('Best third-place team from Groups C/E/F/H/I').should('exist');
+    cy.contains('Final').should('exist');
+    cy.contains('M104').should('exist');
+    cy.contains('Winner Match 101').should('exist');
+    cy.contains('Winner Match 102').should('exist');
+  });
+
+  it('updates knockout schema entries with real teams from stored knockout fixtures', () => {
+    cy.intercept('GET', '**/api/tournaments/1', {
+      statusCode: 200,
+      body: { id: 1, name: 'World Cup 2026', createdAt: '2026-01-01T00:00:00Z', externalLeagueId: 2000, externalSeason: 2026, emblemUrl: null },
+    });
+    cy.intercept('GET', '**/api/tournaments/1/games', { statusCode: 200, body: [...groupStageGames, ...knockoutGames] });
+    cy.intercept('GET', '**/api/tournaments/1/my-predictions', { statusCode: 200, body: [] });
+    cy.intercept('GET', '**/api/tournaments/1/standings', { statusCode: 200, body: [] });
+    cy.intercept('GET', '**/api/tournaments/1/football-standings', { statusCode: 204, body: '' });
+
+    cy.visitAuthenticated('/tournaments/1');
+
+    cy.contains('[data-testid="world-cup-knockout-match"]', 'M79').within(() => {
+      cy.contains('Argentina').should('exist');
+      cy.contains('Best third-place team from Groups C/E/F/H/I').should('exist');
+      cy.contains('Winner Group A').should('not.exist');
+    });
+    cy.contains('[data-testid="world-cup-knockout-match"]', 'M73').within(() => {
+      cy.contains('Runner-up Group A').should('exist');
+      cy.contains('Runner-up Group B').should('exist');
+    });
   });
 
   it('ignores provider one-table World Cup standings and still shows fixture-derived groups', () => {
