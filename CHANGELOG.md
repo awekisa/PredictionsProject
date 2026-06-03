@@ -1,3 +1,10 @@
+## 📦 v0.4.28 — 3 Jun 2026
+
+> **Left-aligned World Cup playoff rows**
+> Knockout matchup rows now start from the left after the match number, giving long team names and seed placeholders more usable width before truncation.
+
+---
+
 ## 📦 v0.4.27 — 3 Jun 2026
 
 > **Mobile-fit World Cup knockout labels**
