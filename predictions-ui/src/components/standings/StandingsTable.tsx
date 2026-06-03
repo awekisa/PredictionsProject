@@ -49,7 +49,7 @@ function PredictionResultRow({ detail }: { detail: UserPredictionDetailResponse 
         </span>
       </span>
       <span className={styles.predictionMeta} data-testid="prediction-meta">
-        <span className={styles.detailScore} data-testid="prediction-score">
+        <span className={`${styles.detailScore} ${styles.predictionScore}`} data-testid="prediction-score">
           {detail.predictedHome}:{detail.predictedAway}
         </span>
         <span data-testid="points-earned" className={styles.pointsEarned}>

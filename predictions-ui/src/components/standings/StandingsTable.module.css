@@ -186,6 +186,10 @@
   background: rgb(149 161 177 / 0.07);
 }
 
+.predictionScore {
+  color: var(--outcome-color);
+}
+
 .pointsEarned {
   color: var(--outcome-color);
   font-weight: 700;

@@ -139,7 +139,10 @@ describe('Standings prediction result rows', () => {
             .and('contain.text', expected.away);
           cy.get('[data-testid="actual-result"] [class*="teamFull"]').should('be.visible');
           cy.get('[data-testid="actual-result"] [class*="teamShort"]').should('not.be.visible');
-          cy.get('[data-testid="prediction-score"]').should('have.text', expected.prediction).and('be.visible');
+          cy.get('[data-testid="prediction-score"]')
+            .should('have.text', expected.prediction)
+            .and('have.css', 'color', expected.color)
+            .and('be.visible');
           cy.get('[data-testid="points-earned"]')
             .should('have.text', expected.points)
             .and('have.css', 'color', expected.color)
