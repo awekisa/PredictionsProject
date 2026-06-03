@@ -42,7 +42,7 @@ public class GameService : IGameService
             TournamentId = tournamentId,
             HomeTeam = request.HomeTeam,
             AwayTeam = request.AwayTeam,
-            StartTime = DateTime.SpecifyKind(request.StartTime, DateTimeKind.Utc)
+            StartTime = ToUtcDateTime(request.StartTime)
         };
 
         _context.Games.Add(game);
@@ -60,7 +60,7 @@ public class GameService : IGameService
 
         game.HomeTeam = request.HomeTeam;
         game.AwayTeam = request.AwayTeam;
-        game.StartTime = DateTime.SpecifyKind(request.StartTime, DateTimeKind.Utc);
+        game.StartTime = ToUtcDateTime(request.StartTime);
 
         await _context.SaveChangesAsync();
 
@@ -85,7 +85,7 @@ public class GameService : IGameService
         var game = await _context.Games.FindAsync(gameId);
         if (game is null) return null;
 
-        if (DateTime.Now < game.StartTime)
+        if (DateTime.UtcNow < EnsureUtc(game.StartTime))
             return null;
 
         game.HomeGoals = request.HomeGoals;
@@ -103,7 +103,7 @@ public class GameService : IGameService
         TournamentId = g.TournamentId,
         HomeTeam = g.HomeTeam,
         AwayTeam = g.AwayTeam,
-        StartTime = g.StartTime,
+        StartTime = EnsureUtc(g.StartTime),
         HomeGoals = g.HomeGoals,
         AwayGoals = g.AwayGoals,
         IsFinished = g.IsFinished,
@@ -111,5 +111,14 @@ public class GameService : IGameService
         AwayCrestUrl = g.AwayCrestUrl,
         HomeTeamShort = g.HomeTeamShort,
         AwayTeamShort = g.AwayTeamShort
+    };
+
+    private static DateTime ToUtcDateTime(DateTimeOffset startTime) => startTime.ToUniversalTime().UtcDateTime;
+
+    private static DateTime EnsureUtc(DateTime value) => value.Kind switch
+    {
+        DateTimeKind.Utc => value,
+        DateTimeKind.Local => value.ToUniversalTime(),
+        _ => DateTime.SpecifyKind(value, DateTimeKind.Utc)
     };
 }

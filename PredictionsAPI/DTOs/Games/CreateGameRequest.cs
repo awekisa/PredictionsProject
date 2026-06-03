@@ -11,5 +11,5 @@ public class CreateGameRequest
     public string AwayTeam { get; set; } = string.Empty;
 
     [Required]
-    public DateTime StartTime { get; set; }
+    public DateTimeOffset StartTime { get; set; }
 }
