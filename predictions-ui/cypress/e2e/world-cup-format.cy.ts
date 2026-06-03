@@ -102,12 +102,18 @@ describe('World Cup tournament format panel', () => {
     cy.contains('Winner M101').should('exist');
     cy.contains('Winner M102').should('exist');
 
-    cy.contains('[data-testid="world-cup-knockout-match"]', 'M73').within(() => {
+    cy.contains('[data-testid="world-cup-knockout-match"]', 'M74').within(() => {
       cy.get('[class*=knockoutTeams]').then(($teams) => {
         const [home, versus, away] = [...$teams[0].children] as HTMLElement[];
-        const homeGap = Math.round(versus.getBoundingClientRect().left - home.getBoundingClientRect().right);
-        const awayGap = Math.round(away.getBoundingClientRect().left - versus.getBoundingClientRect().right);
-        expect(Math.abs(homeGap - awayGap)).to.be.lessThan(3);
+        const teamsBox = $teams[0].getBoundingClientRect();
+        const homeBox = home.getBoundingClientRect();
+        const awayBox = away.getBoundingClientRect();
+        const versusBox = versus.getBoundingClientRect();
+
+        expect(getComputedStyle(home).textAlign).to.equal('left');
+        expect(Math.round(homeBox.left - teamsBox.left)).to.be.lessThan(3);
+        expect(Math.round(versusBox.left - homeBox.right)).to.be.greaterThan(0);
+        expect(Math.round(awayBox.right)).to.be.at.most(Math.round(teamsBox.right));
       });
     });
   });
