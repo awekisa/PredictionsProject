@@ -4,33 +4,40 @@ const tournaments = [
   { id: 24, name: 'FIFA World Cup', createdAt: '2026-03-06T18:34:49Z', externalLeagueId: 2000, externalSeason: 2026, emblemUrl: null },
 ];
 
-describe('Admin football fixture backfill', () => {
-  it('requires confirmation and shows a summary after backfilling missing fixtures', () => {
+describe('Admin tournament external API controls', () => {
+  it('hides provider import, quota, API badges, backfill, and sync controls', () => {
     cy.intercept('GET', '**/api/admin/tournaments', { statusCode: 200, body: tournaments });
-    cy.intercept('GET', '**/api/football/status', { statusCode: 200, body: { requestsLimit: 10, requestsRemaining: 9 } });
-    cy.intercept('POST', '**/api/admin/football/tournaments/24/backfill-fixtures', {
-      statusCode: 200,
-      body: {
-        providerFixtures: 72,
-        existingGames: 54,
-        added: 18,
-        matchedExisting: 0,
-        skippedExisting: 54,
-        skippedUndetermined: 0,
-      },
-    }).as('backfillFixtures');
+    let statusRequests = 0;
+    let backfillRequests = 0;
+    let syncRequests = 0;
+    cy.intercept('GET', '**/api/football/status', (req) => {
+      statusRequests += 1;
+      req.reply({ statusCode: 500, body: { error: 'external status should not be used' } });
+    });
+    cy.intercept('POST', '**/api/admin/football/tournaments/24/backfill-fixtures', (req) => {
+      backfillRequests += 1;
+      req.reply({ statusCode: 500, body: { error: 'external backfill should not be used' } });
+    });
+    cy.intercept('POST', '**/api/admin/football/tournaments/24/sync-scores', (req) => {
+      syncRequests += 1;
+      req.reply({ statusCode: 500, body: { error: 'external sync should not be used' } });
+    });
 
     cy.visitAuthenticated('/admin/tournaments', 'Admin');
+
     cy.contains('FIFA World Cup').should('exist');
-    cy.contains('button', 'Backfill Fixtures').click();
-    cy.contains('Fetch latest fixture list and add missing games to this tournament? Existing games and predictions will be preserved.').should('exist');
-
-    cy.contains('button', 'Cancel').click();
-    cy.get('@backfillFixtures.all').should('have.length', 0);
-
-    cy.contains('button', 'Backfill Fixtures').click();
-    cy.contains('button', 'Confirm').click();
-    cy.wait('@backfillFixtures');
-    cy.contains('18 added, 0 matched, 54 skipped').should('exist');
+    cy.contains('button', 'Games').should('exist');
+    cy.contains('button', 'Edit').should('exist');
+    cy.contains('button', 'Delete').should('exist');
+    cy.contains('button', 'Import from API').should('not.exist');
+    cy.contains('button', 'Backfill Fixtures').should('not.exist');
+    cy.contains('button', 'Sync Scores').should('not.exist');
+    cy.contains('API req/min').should('not.exist');
+    cy.contains('span', 'API').should('not.exist');
+    cy.then(() => {
+      expect(statusRequests).to.equal(0);
+      expect(backfillRequests).to.equal(0);
+      expect(syncRequests).to.equal(0);
+    });
   });
 });

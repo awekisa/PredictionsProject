@@ -1,8 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as adminTournamentApi from '../../api/adminTournamentApi';
-import * as footballApi from '../../api/footballApi';
-import type { LeagueSearchResult, TournamentResponse } from '../../types';
+import type { TournamentResponse } from '../../types';
 import ConfirmDialog from '../common/ConfirmDialog';
 import { formatDate } from '../../utils/formatDate';
 import styles from './AdminTournamentsPage.module.css';
@@ -14,27 +13,6 @@ export default function AdminTournamentsPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [name, setName] = useState('');
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
-  const [pendingBackfillId, setPendingBackfillId] = useState<number | null>(null);
-
-  // Import modal state
-  const [showImport, setShowImport] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [allCompetitions, setAllCompetitions] = useState<LeagueSearchResult[]>([]);
-  const [searchResults, setSearchResults] = useState<LeagueSearchResult[]>([]);
-  const [loadingCompetitions, setLoadingCompetitions] = useState(false);
-  const [selectedLeague, setSelectedLeague] = useState<LeagueSearchResult | null>(null);
-  const [importSeason, setImportSeason] = useState<number | ''>('');
-  const [importName, setImportName] = useState('');
-  const [importing, setImporting] = useState(false);
-  const [importError, setImportError] = useState<string | null>(null);
-
-  // Sync state: tournamentId → status message
-  const [syncMessages, setSyncMessages] = useState<Record<number, string>>({});
-  const [backfillMessages, setBackfillMessages] = useState<Record<number, string>>({});
-  const [importMessage, setImportMessage] = useState<string | null>(null);
-
-  // API rate-limit status
-  const [apiStatus, setApiStatus] = useState<{ requestsLimit: number | null; requestsRemaining: number | null } | null>(null);
 
   const navigate = useNavigate();
 
@@ -43,13 +21,8 @@ export default function AdminTournamentsPage() {
     adminTournamentApi.getAll().then(setTournaments).finally(() => setLoading(false));
   };
 
-  const refreshApiStatus = () => {
-    footballApi.getStatus().then(setApiStatus).catch(() => {});
-  };
-
   useEffect(() => {
     load();
-    refreshApiStatus();
   }, []);
 
   const openCreate = () => {
@@ -81,110 +54,6 @@ export default function AdminTournamentsPage() {
     load();
   };
 
-  // ── Import modal ──────────────────────────────────────────────────────────
-
-  const openImport = async () => {
-    setSearchQuery('');
-    setSearchResults([]);
-    setSelectedLeague(null);
-    setImportSeason('');
-    setImportName('');
-    setImportError(null);
-    setShowImport(true);
-    setLoadingCompetitions(true);
-    try {
-      const results = await footballApi.getCompetitions();
-      setAllCompetitions(results);
-      setSearchResults(results);
-      refreshApiStatus();
-    } catch {
-      setImportError('Failed to load competitions. Check server logs.');
-    } finally {
-      setLoadingCompetitions(false);
-    }
-  };
-
-  const handleSearchChange = (q: string) => {
-    setSearchQuery(q);
-    setSelectedLeague(null);
-    if (!q.trim()) {
-      setSearchResults(allCompetitions);
-      return;
-    }
-    const lower = q.toLowerCase();
-    setSearchResults(
-      allCompetitions.filter(c =>
-        c.name.toLowerCase().includes(lower) ||
-        c.country.toLowerCase().includes(lower)
-      )
-    );
-  };
-
-  const selectLeague = (league: LeagueSearchResult) => {
-    setSelectedLeague(league);
-    setImportName(league.name);
-    setImportSeason(league.seasons[0] ?? '');
-    setSearchResults([]);
-    setSearchQuery(league.name);
-  };
-
-  const handleImport = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!selectedLeague || importSeason === '') return;
-    setImporting(true);
-    setImportError(null);
-    try {
-      const { gamesImported } = await footballApi.importLeague({
-        leagueId: selectedLeague.leagueId,
-        season: Number(importSeason),
-        name: importName
-      });
-      setShowImport(false);
-      setImportMessage(`Import complete: ${gamesImported} game${gamesImported === 1 ? '' : 's'} imported.`);
-      setTimeout(() => setImportMessage(null), 5000);
-      load();
-      refreshApiStatus();
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-        ?? 'Import failed. Check server logs for details.';
-      setImportError(msg);
-    } finally {
-      setImporting(false);
-    }
-  };
-
-  // ── Sync scores ───────────────────────────────────────────────────────────
-
-  const handleSync = async (id: number) => {
-    setSyncMessages(prev => ({ ...prev, [id]: 'Syncing…' }));
-    try {
-      const { updated } = await footballApi.syncScores(id);
-      setSyncMessages(prev => ({ ...prev, [id]: `${updated} game${updated === 1 ? '' : 's'} updated` }));
-      if (updated > 0) load();
-      refreshApiStatus();
-    } catch {
-      setSyncMessages(prev => ({ ...prev, [id]: 'Sync failed' }));
-    }
-    setTimeout(() => setSyncMessages(prev => { const n = { ...prev }; delete n[id]; return n; }), 4000);
-  };
-
-  const handleBackfill = async (id: number) => {
-    setPendingBackfillId(null);
-    setBackfillMessages(prev => ({ ...prev, [id]: 'Backfilling…' }));
-    try {
-      const result = await footballApi.backfillFixtures(id);
-      setBackfillMessages(prev => ({
-        ...prev,
-        [id]: `${result.added} added, ${result.matchedExisting} matched, ${result.skippedExisting} skipped`
-      }));
-      if (result.added > 0 || result.matchedExisting > 0) load();
-      refreshApiStatus();
-    } catch {
-      setBackfillMessages(prev => ({ ...prev, [id]: 'Backfill failed' }));
-    }
-    setTimeout(() => setBackfillMessages(prev => { const n = { ...prev }; delete n[id]; return n; }), 6000);
-  };
-
   if (loading) return <div className={styles.loading}>Loading...</div>;
 
   return (
@@ -192,29 +61,11 @@ export default function AdminTournamentsPage() {
       <div className={styles.header}>
         <h1>Manage Tournaments</h1>
         <div className={styles.headerActions}>
-          {apiStatus?.requestsRemaining != null && (
-            <span className={
-              apiStatus.requestsRemaining <= 10
-                ? styles.apiQuotaDanger
-                : apiStatus.requestsRemaining <= 25
-                  ? styles.apiQuotaWarn
-                  : styles.apiQuotaOk
-            }>
-              {apiStatus.requestsRemaining}/{apiStatus.requestsLimit} API req/min
-            </span>
-          )}
-          <button className={styles.importBtn} onClick={openImport}>
-            Import from API
-          </button>
           <button className={styles.createBtn} onClick={openCreate}>
             + New Tournament
           </button>
         </div>
       </div>
-
-      {importMessage && (
-        <div className={styles.importMessage}>{importMessage}</div>
-      )}
 
       <div className={styles.tableWrap}>
         <table>
@@ -228,12 +79,7 @@ export default function AdminTournamentsPage() {
           <tbody>
             {tournaments.map((t) => (
               <tr key={t.id}>
-                <td>
-                  {t.name}
-                  {t.externalLeagueId != null && (
-                    <span className={styles.apiTag}>API</span>
-                  )}
-                </td>
+                <td>{t.name}</td>
                 <td>{formatDate(t.createdAt)}</td>
                 <td>
                   <div className={styles.actions}>
@@ -246,24 +92,6 @@ export default function AdminTournamentsPage() {
                     <button className={styles.editBtn} onClick={() => openEdit(t)}>
                       Edit
                     </button>
-                    {t.externalLeagueId != null && (
-                      <button
-                        className={styles.syncBtn}
-                        onClick={() => setPendingBackfillId(t.id)}
-                        disabled={backfillMessages[t.id] === 'Backfilling…'}
-                      >
-                        {backfillMessages[t.id] ?? 'Backfill Fixtures'}
-                      </button>
-                    )}
-                    {t.externalLeagueId != null && (
-                      <button
-                        className={styles.syncBtn}
-                        onClick={() => handleSync(t.id)}
-                        disabled={syncMessages[t.id] === 'Syncing…'}
-                      >
-                        {syncMessages[t.id] ?? 'Sync Scores'}
-                      </button>
-                    )}
                     <button className={styles.deleteBtn} onClick={() => setPendingDeleteId(t.id)}>
                       Delete
                     </button>
@@ -283,15 +111,6 @@ export default function AdminTournamentsPage() {
         />
       )}
 
-      {pendingBackfillId !== null && (
-        <ConfirmDialog
-          message="Fetch latest fixture list and add missing games to this tournament? Existing games and predictions will be preserved."
-          onConfirm={() => handleBackfill(pendingBackfillId)}
-          onCancel={() => setPendingBackfillId(null)}
-        />
-      )}
-
-      {/* ── Create/Edit form ── */}
       {showForm && (
         <div className={styles.formOverlay}>
           <div className={styles.formCard}>
@@ -316,84 +135,6 @@ export default function AdminTournamentsPage() {
                 </button>
                 <button type="submit" className={styles.saveBtn}>
                   {editingId ? 'Save' : 'Create'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ── Import modal ── */}
-      {showImport && (
-        <div className={styles.formOverlay}>
-          <div className={styles.formCard}>
-            <h2>Import from API-Football</h2>
-            <form onSubmit={handleImport}>
-              <div className={styles.searchWrap}>
-                <label>Search league</label>
-                <input
-                  value={searchQuery}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  placeholder="e.g. Premier League"
-                  autoFocus
-                />
-                {loadingCompetitions && <div className={styles.searchHint}>Loading competitions…</div>}
-                {searchResults.length > 0 && (
-                  <ul className={styles.suggestions}>
-                    {searchResults.map((r) => (
-                      <li key={r.leagueId} onClick={() => selectLeague(r)}>
-                        {r.logo && <img src={r.logo} alt="" className={styles.leagueLogo} />}
-                        <span className={styles.leagueName}>{r.name}</span>
-                        <span className={styles.leagueMeta}>{r.country} · {r.type}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              {selectedLeague && (
-                <>
-                  <div>
-                    <label>Season</label>
-                    <select
-                      value={importSeason}
-                      onChange={(e) => setImportSeason(Number(e.target.value))}
-                      required
-                    >
-                      {selectedLeague.seasons.map((y) => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label>Display name</label>
-                    <input
-                      value={importName}
-                      onChange={(e) => setImportName(e.target.value)}
-                      required
-                    />
-                  </div>
-                </>
-              )}
-
-              {importError && (
-                <div className={styles.importError}>{importError}</div>
-              )}
-
-              <div className={styles.formActions}>
-                <button
-                  type="button"
-                  className={styles.cancelBtn}
-                  onClick={() => setShowImport(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className={styles.saveBtn}
-                  disabled={!selectedLeague || importSeason === '' || importing}
-                >
-                  {importing ? 'Importing…' : 'Import'}
                 </button>
               </div>
             </form>
