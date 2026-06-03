@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { getUserPredictionDetails, getGlobalUserPredictionDetails } from '../../api/standingsApi';
 import type { StandingEntryResponse, UserPredictionDetailResponse } from '../../types';
-import TeamCrest from '../common/TeamCrest';
 import styles from './StandingsTable.module.css';
 
 interface Props {
@@ -139,6 +138,11 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
             <div className={styles.panelEmpty}>No predictions found.</div>
           ) : (
             <div className={styles.panelList}>
+              <div className={styles.detailHeader} data-testid="prediction-detail-header" aria-hidden="true">
+                <span>Result</span>
+                <span>Prediction</span>
+                <span>Pts</span>
+              </div>
               {details.map((d, i) => (
                 <div key={i} className={styles.detailRow} data-testid="prediction-detail-row">
                   <span
@@ -147,7 +151,6 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
                     aria-label={`${d.homeTeam} ${d.actualHome}:${d.actualAway} ${d.awayTeam}`}
                   >
                     <span className={styles.detailTeam}>
-                      <TeamCrest teamName={d.homeTeam} fallbackUrl={d.homeCrestUrl} className={styles.detailCrest} />
                       <span className={styles.detailTeamName}>
                         <span className={styles.teamFull}>{d.homeTeam}</span>
                         {d.homeTeamShort && <span className={styles.teamShort}>{d.homeTeamShort}</span>}
@@ -161,7 +164,6 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
                         <span className={styles.teamFull}>{d.awayTeam}</span>
                         {d.awayTeamShort && <span className={styles.teamShort}>{d.awayTeamShort}</span>}
                       </span>
-                      <TeamCrest teamName={d.awayTeam} fallbackUrl={d.awayCrestUrl} className={styles.detailCrest} />
                     </span>
                   </span>
                   <span className={styles.predictionMeta} data-testid="prediction-meta">

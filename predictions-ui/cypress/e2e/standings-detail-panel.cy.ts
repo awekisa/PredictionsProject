@@ -54,10 +54,18 @@ describe('Standings prediction detail panel', () => {
     cy.wait('@details');
 
     cy.contains('Admin — All Predictions').should('exist');
+    cy.get('[data-testid="prediction-detail-header"]').within(() => {
+      cy.contains('Result').should('be.visible');
+      cy.contains('Prediction').should('be.visible');
+      cy.contains('Pts').should('be.visible');
+    });
     cy.get('[data-testid="prediction-detail-row"]').within(() => {
       cy.get('[data-testid="actual-result"]')
         .should('have.attr', 'aria-label', 'Jordan 0:0 Argentina')
-        .and('be.visible');
+        .and('be.visible')
+        .and('contain.text', 'JOR')
+        .and('contain.text', '0:0')
+        .and('contain.text', 'ARG');
       cy.get('[data-testid="actual-result"] [class*="teamShort"]').should('be.visible');
       cy.get('[data-testid="actual-result"] [class*="teamFull"]').should('not.be.visible');
       cy.get('[data-testid="prediction-score"]').should('have.text', '1:2').and('be.visible');
