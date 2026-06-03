@@ -39,6 +39,7 @@ const worldCupFlagCases = [
   ['Scotland', 'gb-sct'],
   ['Senegal', 'sn'],
   ['South Africa', 'za'],
+  ['South Korea', 'kr'],
   ['Spain', 'es'],
   ['Switzerland', 'ch'],
   ['Tunisia', 'tn'],
