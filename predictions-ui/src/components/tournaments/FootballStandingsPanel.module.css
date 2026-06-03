@@ -307,6 +307,14 @@
   white-space: nowrap;
 }
 
+.knockoutTeams span:first-child {
+  text-align: right;
+}
+
+.knockoutTeams span:last-child {
+  text-align: left;
+}
+
 .versus {
   color: var(--color-text-secondary);
   font-size: 0.68rem;

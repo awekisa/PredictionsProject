@@ -230,19 +230,19 @@ function formatGoalDifference(goalDifference: number): string {
 
 function formatSeed(seed: string): string {
   const winner = seed.match(/^1([A-L])$/);
-  if (winner) return `Winner Group ${winner[1]}`;
+  if (winner) return `Winner ${winner[1]}`;
 
   const runnerUp = seed.match(/^2([A-L])$/);
-  if (runnerUp) return `Runner-up Group ${runnerUp[1]}`;
+  if (runnerUp) return `Runner-up ${runnerUp[1]}`;
 
   const thirdPlace = seed.match(/^3([A-L]+)$/);
-  if (thirdPlace) return `Best third-place team from Groups ${thirdPlace[1].split('').join('/')}`;
+  if (thirdPlace) return `Best 3rd from ${thirdPlace[1].split('').join('/')}`;
 
   const matchWinner = seed.match(/^W(\d+)$/);
-  if (matchWinner) return `Winner Match ${matchWinner[1]}`;
+  if (matchWinner) return `Winner M${matchWinner[1]}`;
 
   const matchRunnerUp = seed.match(/^RU(\d+)$/);
-  if (matchRunnerUp) return `Runner-up Match ${matchRunnerUp[1]}`;
+  if (matchRunnerUp) return `Runner-up M${matchRunnerUp[1]}`;
 
   return seed;
 }
