@@ -22,11 +22,16 @@ describe('World Cup tournament format panel', () => {
     cy.intercept('GET', '**/api/tournaments/1/games', { statusCode: 200, body: groupStageGames });
     cy.intercept('GET', '**/api/tournaments/1/my-predictions', { statusCode: 200, body: [] });
     cy.intercept('GET', '**/api/tournaments/1/standings', { statusCode: 200, body: [] });
-    cy.intercept('GET', '**/api/tournaments/1/football-standings', { statusCode: 204, body: '' });
+    let footballStandingsRequests = 0;
+    cy.intercept('GET', '**/api/tournaments/1/football-standings', (req) => {
+      footballStandingsRequests += 1;
+      req.reply({ statusCode: 204, body: '' });
+    });
 
     cy.visitAuthenticated('/tournaments/1');
 
     cy.contains('Tournament Format').should('exist');
+    cy.then(() => expect(footballStandingsRequests).to.equal(0));
     cy.contains('League Table').should('not.exist');
     cy.contains('Group Stage').should('exist');
     cy.contains('Group A').should('exist');
