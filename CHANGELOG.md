@@ -1,3 +1,10 @@
+## 📦 v0.4.26 — 3 Jun 2026
+
+> **World Cup knockout schema**
+> The World Cup tournament-format panel now shows the official knockout path from Round of 32 through the Final using FIFA seed placeholders, and replaces seeds with real teams once knockout fixtures are populated.
+
+---
+
 ## 📦 v0.4.25 — 3 Jun 2026
 
 > **Device-local game start times**
