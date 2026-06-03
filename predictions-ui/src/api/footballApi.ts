@@ -1,11 +1,14 @@
 import apiClient from './apiClient';
-import type { ImportLeagueRequest, LeagueSearchResult, TournamentResponse } from '../types';
+import type { BackfillFixturesResponse, ImportLeagueRequest, LeagueSearchResult, TournamentResponse } from '../types';
 
 export const getCompetitions = () =>
   apiClient.get<LeagueSearchResult[]>('/admin/football/leagues').then(r => r.data);
 
 export const importLeague = (req: ImportLeagueRequest) =>
   apiClient.post<{ tournament: TournamentResponse; gamesImported: number }>('/admin/football/import', req).then(r => r.data);
+
+export const backfillFixtures = (tournamentId: number) =>
+  apiClient.post<BackfillFixturesResponse>(`/admin/football/tournaments/${tournamentId}/backfill-fixtures`).then(r => r.data);
 
 export const syncScores = (tournamentId: number) =>
   apiClient.post<{ updated: number }>(`/admin/football/tournaments/${tournamentId}/sync-scores`).then(r => r.data);

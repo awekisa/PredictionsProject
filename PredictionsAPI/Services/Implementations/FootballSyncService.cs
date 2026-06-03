@@ -126,6 +126,109 @@ public class FootballSyncService : IFootballSyncService
         };
     }
 
+    public async Task<BackfillFixturesResponse> BackfillFixturesAsync(int tournamentId)
+    {
+        var tournament = await _context.Tournaments
+            .Include(t => t.Games)
+            .FirstOrDefaultAsync(t => t.Id == tournamentId);
+
+        if (tournament is null || tournament.ExternalLeagueId is null || tournament.ExternalSeason is null)
+        {
+            return new BackfillFixturesResponse();
+        }
+
+        var matches = await _apiClient.GetMatchesAsync(
+            tournament.ExternalLeagueId.Value,
+            tournament.ExternalSeason.Value);
+
+        var result = new BackfillFixturesResponse
+        {
+            ProviderFixtures = matches.Count,
+            ExistingGames = tournament.Games.Count
+        };
+
+        var gamesByFixtureId = tournament.Games
+            .Where(g => g.ExternalFixtureId is not null)
+            .ToDictionary(g => g.ExternalFixtureId!.Value);
+
+        var unmatchedGames = tournament.Games
+            .Where(g => g.ExternalFixtureId is null)
+            .ToList();
+
+        foreach (var match in matches)
+        {
+            var homeTeam = match.HomeTeam.ShortName ?? match.HomeTeam.Name;
+            var awayTeam = match.AwayTeam.ShortName ?? match.AwayTeam.Name;
+
+            if (string.IsNullOrWhiteSpace(homeTeam) || string.IsNullOrWhiteSpace(awayTeam))
+            {
+                result.SkippedUndetermined++;
+                continue;
+            }
+
+            if (gamesByFixtureId.ContainsKey(match.Id))
+            {
+                result.SkippedExisting++;
+                continue;
+            }
+
+            var matchingGame = unmatchedGames.FirstOrDefault(g => IsSameFixture(g, homeTeam, awayTeam, match.UtcDate));
+            if (matchingGame is not null)
+            {
+                matchingGame.ExternalFixtureId = match.Id;
+                matchingGame.HomeCrestUrl ??= match.HomeTeam.Crest;
+                matchingGame.AwayCrestUrl ??= match.AwayTeam.Crest;
+                matchingGame.HomeTeamShort ??= match.HomeTeam.Tla;
+                matchingGame.AwayTeamShort ??= match.AwayTeam.Tla;
+                gamesByFixtureId[match.Id] = matchingGame;
+                unmatchedGames.Remove(matchingGame);
+                result.MatchedExisting++;
+                continue;
+            }
+
+            var newGame = new Game
+            {
+                TournamentId = tournament.Id,
+                HomeTeam = homeTeam,
+                AwayTeam = awayTeam,
+                StartTime = match.UtcDate,
+                ExternalFixtureId = match.Id,
+                HomeCrestUrl = match.HomeTeam.Crest,
+                AwayCrestUrl = match.AwayTeam.Crest,
+                HomeTeamShort = match.HomeTeam.Tla,
+                AwayTeamShort = match.AwayTeam.Tla
+            };
+            _context.Games.Add(newGame);
+            gamesByFixtureId[match.Id] = newGame;
+            result.Added++;
+        }
+
+        if (result.Added > 0 || result.MatchedExisting > 0)
+        {
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Database error saving fixture backfill for tournament {TournamentId}", tournamentId);
+                throw;
+            }
+        }
+
+        _logger.LogInformation(
+            "Backfilled tournament {TournamentId}: provider={ProviderFixtures}, existing={ExistingGames}, added={Added}, matched={MatchedExisting}, skippedExisting={SkippedExisting}, skippedUndetermined={SkippedUndetermined}",
+            tournamentId,
+            result.ProviderFixtures,
+            result.ExistingGames,
+            result.Added,
+            result.MatchedExisting,
+            result.SkippedExisting,
+            result.SkippedUndetermined);
+
+        return result;
+    }
+
     public async Task<CompetitionStandingsResponse?> GetCompetitionStandingsAsync(int tournamentId)
     {
         var tournament = await _context.Tournaments.FindAsync(tournamentId);
@@ -242,5 +345,17 @@ public class FootballSyncService : IFootballSyncService
         }
 
         return updated;
+    }
+
+    private static bool IsSameFixture(Game game, string homeTeam, string awayTeam, DateTime utcDate)
+    {
+        return NormalizeTeamName(game.HomeTeam) == NormalizeTeamName(homeTeam)
+            && NormalizeTeamName(game.AwayTeam) == NormalizeTeamName(awayTeam)
+            && game.StartTime.ToUniversalTime() == utcDate.ToUniversalTime();
+    }
+
+    private static string NormalizeTeamName(string value)
+    {
+        return value.Trim().ToUpperInvariant();
     }
 }

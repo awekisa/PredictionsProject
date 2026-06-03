@@ -6,6 +6,7 @@ public interface IFootballSyncService
 {
     Task<List<LeagueSearchResult>> GetCompetitionsAsync();
     Task<ImportLeagueResponse> ImportLeagueAsync(ImportLeagueRequest request);
+    Task<BackfillFixturesResponse> BackfillFixturesAsync(int tournamentId);
     Task<int> SyncScoresAsync(int tournamentId);
     Task<CompetitionStandingsResponse?> GetCompetitionStandingsAsync(int tournamentId);
 }

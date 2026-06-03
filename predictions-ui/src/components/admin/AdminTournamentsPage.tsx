@@ -14,6 +14,7 @@ export default function AdminTournamentsPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [name, setName] = useState('');
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const [pendingBackfillId, setPendingBackfillId] = useState<number | null>(null);
 
   // Import modal state
   const [showImport, setShowImport] = useState(false);
@@ -29,6 +30,7 @@ export default function AdminTournamentsPage() {
 
   // Sync state: tournamentId → status message
   const [syncMessages, setSyncMessages] = useState<Record<number, string>>({});
+  const [backfillMessages, setBackfillMessages] = useState<Record<number, string>>({});
   const [importMessage, setImportMessage] = useState<string | null>(null);
 
   // API rate-limit status
@@ -166,6 +168,23 @@ export default function AdminTournamentsPage() {
     setTimeout(() => setSyncMessages(prev => { const n = { ...prev }; delete n[id]; return n; }), 4000);
   };
 
+  const handleBackfill = async (id: number) => {
+    setPendingBackfillId(null);
+    setBackfillMessages(prev => ({ ...prev, [id]: 'Backfilling…' }));
+    try {
+      const result = await footballApi.backfillFixtures(id);
+      setBackfillMessages(prev => ({
+        ...prev,
+        [id]: `${result.added} added, ${result.matchedExisting} matched, ${result.skippedExisting} skipped`
+      }));
+      if (result.added > 0 || result.matchedExisting > 0) load();
+      refreshApiStatus();
+    } catch {
+      setBackfillMessages(prev => ({ ...prev, [id]: 'Backfill failed' }));
+    }
+    setTimeout(() => setBackfillMessages(prev => { const n = { ...prev }; delete n[id]; return n; }), 6000);
+  };
+
   if (loading) return <div className={styles.loading}>Loading...</div>;
 
   return (
@@ -230,6 +249,15 @@ export default function AdminTournamentsPage() {
                     {t.externalLeagueId != null && (
                       <button
                         className={styles.syncBtn}
+                        onClick={() => setPendingBackfillId(t.id)}
+                        disabled={backfillMessages[t.id] === 'Backfilling…'}
+                      >
+                        {backfillMessages[t.id] ?? 'Backfill Fixtures'}
+                      </button>
+                    )}
+                    {t.externalLeagueId != null && (
+                      <button
+                        className={styles.syncBtn}
                         onClick={() => handleSync(t.id)}
                         disabled={syncMessages[t.id] === 'Syncing…'}
                       >
@@ -252,6 +280,14 @@ export default function AdminTournamentsPage() {
           message="Delete this tournament? All games and predictions will be removed."
           onConfirm={() => handleDelete(pendingDeleteId)}
           onCancel={() => setPendingDeleteId(null)}
+        />
+      )}
+
+      {pendingBackfillId !== null && (
+        <ConfirmDialog
+          message="Fetch latest fixture list and add missing games to this tournament? Existing games and predictions will be preserved."
+          onConfirm={() => handleBackfill(pendingBackfillId)}
+          onCancel={() => setPendingBackfillId(null)}
         />
       )}
 
