@@ -4,6 +4,7 @@ import * as adminGameApi from '../../api/adminGameApi';
 import type { GameResponse } from '../../types';
 import ConfirmDialog from '../common/ConfirmDialog';
 import { formatDateTime } from '../../utils/formatDate';
+import { isStarted, toDatetimeLocalValue, toUtcIsoString } from '../../utils/localTime';
 import styles from './AdminGamesPage.module.css';
 
 type FormMode = 'none' | 'game' | 'result';
@@ -53,12 +54,7 @@ export default function AdminGamesPage() {
     setEditingGameId(g.id);
     setHomeTeam(g.homeTeam);
     setAwayTeam(g.awayTeam);
-    // Convert UTC time from API to local time for the datetime-local input
-    const d = new Date(g.startTime);
-    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-      .toISOString()
-      .slice(0, 16);
-    setStartTime(local);
+    setStartTime(toDatetimeLocalValue(g.startTime));
     setFormMode('game');
   };
 
@@ -71,8 +67,7 @@ export default function AdminGamesPage() {
 
   const handleGameSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // Convert local datetime-local value to UTC ISO string before sending
-    const data = { homeTeam, awayTeam, startTime: new Date(startTime).toISOString() };
+    const data = { homeTeam, awayTeam, startTime: toUtcIsoString(startTime) };
     if (editingGameId) {
       await adminGameApi.update(tId, editingGameId, data);
     } else {
@@ -138,7 +133,7 @@ export default function AdminGamesPage() {
                 </td>
                 <td>
                   <div className={styles.actions}>
-                    {!g.isFinished && new Date() >= new Date(g.startTime) && (
+                    {!g.isFinished && isStarted(g.startTime) && (
                       <button className={styles.resultBtn} onClick={() => openSetResult(g)}>
                         Set Result
                       </button>

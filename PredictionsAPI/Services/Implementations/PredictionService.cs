@@ -20,7 +20,7 @@ public class PredictionService : IPredictionService
         var game = await _context.Games.FindAsync(gameId);
         if (game is null) return null;
 
-        if (DateTime.UtcNow >= game.StartTime)
+        if (DateTime.UtcNow >= EnsureUtc(game.StartTime))
             return null;
 
         var existing = await _context.Predictions
@@ -75,7 +75,7 @@ public class PredictionService : IPredictionService
         var game = await _context.Games.FindAsync(gameId);
         if (game is null) return new List<PredictionResponse>();
 
-        if (DateTime.UtcNow < game.StartTime)
+        if (DateTime.UtcNow < EnsureUtc(game.StartTime))
             return new List<PredictionResponse>();
 
         return await _context.Predictions
@@ -116,4 +116,11 @@ public class PredictionService : IPredictionService
             CreatedAt = prediction.CreatedAt
         };
     }
+
+    private static DateTime EnsureUtc(DateTime value) => value.Kind switch
+    {
+        DateTimeKind.Utc => value,
+        DateTimeKind.Local => value.ToUniversalTime(),
+        _ => DateTime.SpecifyKind(value, DateTimeKind.Utc)
+    };
 }

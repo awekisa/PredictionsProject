@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test:flags": "node scripts/verify-world-cup-flags.mjs",
+    "test:time": "TZ=Europe/Sofia node --experimental-transform-types --test scripts/local-time.test.mjs",
     "preview": "vite preview",
     "test:e2e": "cypress run",
     "test:e2e:open": "cypress open"
