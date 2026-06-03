@@ -1,10 +1,10 @@
 const groupStageGames = [
-  { id: 1, tournamentId: 1, homeTeam: 'Argentina', awayTeam: 'Brazil', startTime: '2026-06-11T19:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ARG', awayTeamShort: 'BRA' },
-  { id: 2, tournamentId: 1, homeTeam: 'Germany', awayTeam: 'Japan', startTime: '2026-06-11T22:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'GER', awayTeamShort: 'JPN' },
-  { id: 3, tournamentId: 1, homeTeam: 'Argentina', awayTeam: 'Germany', startTime: '2026-06-15T19:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ARG', awayTeamShort: 'GER' },
-  { id: 4, tournamentId: 1, homeTeam: 'Brazil', awayTeam: 'Japan', startTime: '2026-06-15T22:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'BRA', awayTeamShort: 'JPN' },
-  { id: 5, tournamentId: 1, homeTeam: 'Argentina', awayTeam: 'Japan', startTime: '2026-06-20T19:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ARG', awayTeamShort: 'JPN' },
-  { id: 6, tournamentId: 1, homeTeam: 'Brazil', awayTeam: 'Germany', startTime: '2026-06-20T22:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'BRA', awayTeamShort: 'GER' },
+  { id: 1, tournamentId: 1, homeTeam: 'Argentina', awayTeam: 'Brazil', startTime: '2026-06-11T19:00:00Z', homeGoals: 2, awayGoals: 0, isFinished: true, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ARG', awayTeamShort: 'BRA' },
+  { id: 2, tournamentId: 1, homeTeam: 'Germany', awayTeam: 'Japan', startTime: '2026-06-11T22:00:00Z', homeGoals: 1, awayGoals: 1, isFinished: true, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'GER', awayTeamShort: 'JPN' },
+  { id: 3, tournamentId: 1, homeTeam: 'Argentina', awayTeam: 'Germany', startTime: '2026-06-15T19:00:00Z', homeGoals: 0, awayGoals: 0, isFinished: true, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ARG', awayTeamShort: 'GER' },
+  { id: 4, tournamentId: 1, homeTeam: 'Brazil', awayTeam: 'Japan', startTime: '2026-06-15T22:00:00Z', homeGoals: 3, awayGoals: 1, isFinished: true, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'BRA', awayTeamShort: 'JPN' },
+  { id: 5, tournamentId: 1, homeTeam: 'Argentina', awayTeam: 'Japan', startTime: '2026-06-20T19:00:00Z', homeGoals: 1, awayGoals: 2, isFinished: true, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ARG', awayTeamShort: 'JPN' },
+  { id: 6, tournamentId: 1, homeTeam: 'Brazil', awayTeam: 'Germany', startTime: '2026-06-20T22:00:00Z', homeGoals: 0, awayGoals: 2, isFinished: true, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'BRA', awayTeamShort: 'GER' },
   { id: 7, tournamentId: 1, homeTeam: 'Spain', awayTeam: 'France', startTime: '2026-06-12T19:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ESP', awayTeamShort: 'FRA' },
   { id: 8, tournamentId: 1, homeTeam: 'England', awayTeam: 'Portugal', startTime: '2026-06-12T22:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ENG', awayTeamShort: 'POR' },
   { id: 9, tournamentId: 1, homeTeam: 'Spain', awayTeam: 'England', startTime: '2026-06-16T19:00:00Z', homeGoals: null, awayGoals: null, isFinished: false, homeCrestUrl: null, awayCrestUrl: null, homeTeamShort: 'ESP', awayTeamShort: 'ENG' },
@@ -37,6 +37,18 @@ describe('World Cup tournament format panel', () => {
     cy.contains('Group A').should('exist');
     cy.contains('Argentina').should('exist');
     cy.contains('Brazil').should('exist');
+    cy.get('[data-testid="world-cup-group-card"]').contains('Group A').parents('[data-testid="world-cup-group-card"]').within(() => {
+      cy.contains('GD').should('exist');
+      cy.contains('Pts').should('exist');
+      cy.contains('[class*=groupTeamRow]', 'Germany').within(() => {
+        cy.contains('+2').should('exist');
+        cy.contains('5').should('exist');
+      });
+      cy.contains('[class*=groupTeamRow]', 'Argentina').within(() => {
+        cy.contains('+1').should('exist');
+        cy.contains('4').should('exist');
+      });
+    });
     cy.contains('Group B').should('exist');
     cy.contains('Spain').should('exist');
     cy.contains('France').should('exist');
