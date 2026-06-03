@@ -16,6 +16,7 @@ import StandingsTable from '../standings/StandingsTable';
 import { localEmblemPath } from '../../utils/crestUrl';
 import { useTheme } from '../../context/ThemeContext';
 import FootballStandingsPanel from './FootballStandingsPanel';
+import { parseApiDateTime } from '../../utils/localTime';
 import styles from './TournamentDetailPage.module.css';
 
 type FilterOption = number | 'all'; // number = day offset from today (0=today, -1=yesterday, 1=tomorrow, …)
@@ -83,13 +84,13 @@ let filtered: GameResponse[];
       filtered = [...games];
     } else {
       const { start, end } = getDateRange(filter);
-      filtered = games.filter((g) => { const t = new Date(g.startTime); return t >= start && t < end; });
+      filtered = games.filter((g) => { const t = parseApiDateTime(g.startTime); return t >= start && t < end; });
     }
 
     filtered.sort((a, b) =>
       filter === 'all'
-        ? new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
-        : new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+        ? parseApiDateTime(b.startTime).getTime() - parseApiDateTime(a.startTime).getTime()
+        : parseApiDateTime(a.startTime).getTime() - parseApiDateTime(b.startTime).getTime()
     );
 
     return filtered;

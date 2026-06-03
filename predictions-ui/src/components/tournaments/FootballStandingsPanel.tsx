@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { CompetitionStandingsResponse, GameResponse, StandingGroupResponse } from '../../types';
 import TeamCrest from '../common/TeamCrest';
+import { parseApiDateTime } from '../../utils/localTime';
 import styles from './FootballStandingsPanel.module.css';
 
 interface Props {
@@ -196,7 +197,7 @@ function deriveFixtureGroups(games: GameResponse[]): DerivedGroup[] {
     adjacency.get(game.homeTeam)!.add(game.awayTeam);
     adjacency.get(game.awayTeam)!.add(game.homeTeam);
 
-    const kickoff = new Date(game.startTime).getTime();
+    const kickoff = parseApiDateTime(game.startTime).getTime();
     firstKickoffs.set(game.homeTeam, Math.min(firstKickoffs.get(game.homeTeam) ?? kickoff, kickoff));
     firstKickoffs.set(game.awayTeam, Math.min(firstKickoffs.get(game.awayTeam) ?? kickoff, kickoff));
   });
