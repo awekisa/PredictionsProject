@@ -48,6 +48,13 @@ describe('World Cup tournament format panel', () => {
         cy.contains('[class*=groupStat]', '+2').should('exist');
         cy.contains('[class*=groupPts]', '5').should('exist');
       });
+      cy.get('[class*=groupTeamRow]').then((rows) => {
+        const teams = [...rows].map((row) => row.textContent ?? '');
+        expect(teams[0]).to.contain('Germany');
+        expect(teams[1]).to.contain('Japan');
+        expect(teams[2]).to.contain('Argentina');
+        expect(teams[3]).to.contain('Brazil');
+      });
       cy.contains('[class*=groupTeamRow]', 'Argentina').within(() => {
         cy.contains('[class*=groupStat]', '3').should('exist');
         cy.contains('[class*=groupStat]', '2').should('exist');
