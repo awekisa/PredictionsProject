@@ -28,11 +28,6 @@ function panelTitle(label: string, user: string): string {
   return `${user} — ${label}`;
 }
 
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-}
-
 export default function StandingsTable({ standings, tournamentId }: Props) {
   const [panel, setPanel] = useState<ActivePanel | null>(null);
   const [details, setDetails] = useState<UserPredictionDetailResponse[]>([]);
@@ -145,39 +140,46 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
           ) : (
             <div className={styles.panelList}>
               {details.map((d, i) => (
-                <div key={i} className={styles.detailRow}>
-                  <span className={styles.detailDate}>{formatDate(d.matchDate)}</span>
-                  <span className={styles.detailTeam}>
-                    <TeamCrest teamName={d.homeTeam} fallbackUrl={d.homeCrestUrl} className={styles.detailCrest} />
-                    <span className={styles.detailTeamName}>
-                      <span className={styles.teamFull}>{d.homeTeam}</span>
-                      {d.homeTeamShort && <span className={styles.teamShort}>{d.homeTeamShort}</span>}
-                    </span>
-                  </span>
-                  <span className={styles.detailScore}>
-                    {d.predictedHome}:{d.predictedAway}
-                  </span>
-                  <span className={styles.detailVs}>vs</span>
-                  <span className={styles.detailScore}>
-                    {d.actualHome}:{d.actualAway}
-                  </span>
-                  <span className={`${styles.detailTeam} ${styles.detailTeamRight}`}>
-                    <span className={styles.detailTeamName}>
-                      <span className={styles.teamFull}>{d.awayTeam}</span>
-                      {d.awayTeamShort && <span className={styles.teamShort}>{d.awayTeamShort}</span>}
-                    </span>
-                    <TeamCrest teamName={d.awayTeam} fallbackUrl={d.awayCrestUrl} className={styles.detailCrest} />
-                  </span>
+                <div key={i} className={styles.detailRow} data-testid="prediction-detail-row">
                   <span
-                    className={
-                      d.pointsEarned === 3
-                        ? styles.detailPts3
-                        : d.pointsEarned === 1
-                          ? styles.detailPts1
-                          : styles.detailPts0
-                    }
+                    className={styles.actualResult}
+                    data-testid="actual-result"
+                    aria-label={`${d.homeTeam} ${d.actualHome}:${d.actualAway} ${d.awayTeam}`}
                   >
-                    {d.pointsEarned > 0 ? `+${d.pointsEarned}` : '0'}
+                    <span className={styles.detailTeam}>
+                      <TeamCrest teamName={d.homeTeam} fallbackUrl={d.homeCrestUrl} className={styles.detailCrest} />
+                      <span className={styles.detailTeamName}>
+                        <span className={styles.teamFull}>{d.homeTeam}</span>
+                        {d.homeTeamShort && <span className={styles.teamShort}>{d.homeTeamShort}</span>}
+                      </span>
+                    </span>
+                    <span className={styles.detailScore}>
+                      {d.actualHome}:{d.actualAway}
+                    </span>
+                    <span className={styles.detailTeam}>
+                      <span className={styles.detailTeamName}>
+                        <span className={styles.teamFull}>{d.awayTeam}</span>
+                        {d.awayTeamShort && <span className={styles.teamShort}>{d.awayTeamShort}</span>}
+                      </span>
+                      <TeamCrest teamName={d.awayTeam} fallbackUrl={d.awayCrestUrl} className={styles.detailCrest} />
+                    </span>
+                  </span>
+                  <span className={styles.predictionMeta} data-testid="prediction-meta">
+                    <span className={styles.detailScore} data-testid="prediction-score">
+                      {d.predictedHome}:{d.predictedAway}
+                    </span>
+                    <span
+                      data-testid="points-earned"
+                      className={
+                        d.pointsEarned === 3
+                          ? styles.detailPts3
+                          : d.pointsEarned === 1
+                            ? styles.detailPts1
+                            : styles.detailPts0
+                      }
+                    >
+                      {d.pointsEarned}
+                    </span>
                   </span>
                 </div>
               ))}
