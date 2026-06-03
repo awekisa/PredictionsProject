@@ -1,3 +1,10 @@
+## 📦 v0.4.18 — 3 Jun 2026
+
+> **World Cup groups forced over provider league table**
+> Production verification showed the provider returned World Cup standings as one 48-team regular-season table. World Cup pages now ignore that ungrouped table and show fixture-derived groups plus the knockout placeholder.
+
+---
+
 ## 📦 v0.4.17 — 3 Jun 2026
 
 > **World Cup tournament-format standings**
