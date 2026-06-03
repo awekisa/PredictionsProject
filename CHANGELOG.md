@@ -1,3 +1,10 @@
+## 📦 v0.4.30 — 3 Jun 2026
+
+> **Prediction score outcome colors**
+> Prediction score text in standings detail rows now uses the same green/orange/gray outcome colors as the row highlight and earned points.
+
+---
+
 ## 📦 v0.4.29 — 3 Jun 2026
 
 > **Clear standings prediction detail rows**
