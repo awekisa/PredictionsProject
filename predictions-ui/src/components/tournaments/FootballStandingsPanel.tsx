@@ -69,17 +69,82 @@ function StandingsTable({ group }: { group: StandingGroupResponse }) {
   );
 }
 
+type DerivedStandingRow = {
+  team: string;
+  played: number;
+  won: number;
+  draw: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  points: number;
+};
+
 type DerivedGroup = {
   label: string;
   teams: string[];
   games: number;
   firstKickoff: number;
+  standings: DerivedStandingRow[];
 };
 
 const WORLD_CUP_COMPETITION_ID = 2000;
 
 function isWorldCupLike(tournamentName?: string, externalLeagueId?: number | null): boolean {
   return externalLeagueId === WORLD_CUP_COMPETITION_ID || /world cup/i.test(tournamentName ?? '');
+}
+
+function addResult(row: DerivedStandingRow, goalsFor: number, goalsAgainst: number): void {
+  row.played += 1;
+  row.goalsFor += goalsFor;
+  row.goalsAgainst += goalsAgainst;
+  row.goalDifference = row.goalsFor - row.goalsAgainst;
+  if (goalsFor > goalsAgainst) {
+    row.won += 1;
+    row.points += 3;
+  } else if (goalsFor === goalsAgainst) {
+    row.draw += 1;
+    row.points += 1;
+  } else {
+    row.lost += 1;
+  }
+}
+
+function deriveGroupStandings(teams: string[], games: GameResponse[]): DerivedStandingRow[] {
+  const rows = new Map<string, DerivedStandingRow>();
+  teams.forEach((team) => rows.set(team, {
+    team,
+    played: 0,
+    won: 0,
+    draw: 0,
+    lost: 0,
+    goalsFor: 0,
+    goalsAgainst: 0,
+    goalDifference: 0,
+    points: 0,
+  }));
+
+  games.forEach((game) => {
+    if (!game.isFinished || game.homeGoals === null || game.awayGoals === null) return;
+    const home = rows.get(game.homeTeam);
+    const away = rows.get(game.awayTeam);
+    if (!home || !away) return;
+
+    addResult(home, game.homeGoals, game.awayGoals);
+    addResult(away, game.awayGoals, game.homeGoals);
+  });
+
+  return Array.from(rows.values()).sort((a, b) =>
+    b.points - a.points ||
+    b.goalDifference - a.goalDifference ||
+    b.goalsFor - a.goalsFor ||
+    a.team.localeCompare(b.team)
+  );
+}
+
+function formatGoalDifference(goalDifference: number): string {
+  return goalDifference > 0 ? `+${goalDifference}` : `${goalDifference}`;
 }
 
 function deriveFixtureGroups(games: GameResponse[]): DerivedGroup[] {
@@ -100,7 +165,7 @@ function deriveFixtureGroups(games: GameResponse[]): DerivedGroup[] {
   });
 
   const seen = new Set<string>();
-  const components: { teams: string[]; games: number; firstKickoff: number }[] = [];
+  const components: { teams: string[]; games: number; firstKickoff: number; standings: DerivedStandingRow[] }[] = [];
 
   adjacency.forEach((_edges, startTeam) => {
     if (seen.has(startTeam)) return;
@@ -121,11 +186,12 @@ function deriveFixtureGroups(games: GameResponse[]): DerivedGroup[] {
     }
 
     const teamSet = new Set(teams);
-    const gamesInComponent = games.filter((game) => teamSet.has(game.homeTeam) && teamSet.has(game.awayTeam)).length;
+    const componentGames = games.filter((game) => teamSet.has(game.homeTeam) && teamSet.has(game.awayTeam));
     components.push({
       teams: teams.sort((a, b) => a.localeCompare(b)),
-      games: gamesInComponent,
+      games: componentGames.length,
       firstKickoff: Math.min(...teams.map((team) => firstKickoffs.get(team) ?? Number.MAX_SAFE_INTEGER)),
+      standings: deriveGroupStandings(teams, componentGames),
     });
   });
 
@@ -158,13 +224,24 @@ function TournamentFormatPanel({ games }: { games: GameResponse[] }) {
         ) : (
           <div className={styles.groupCards}>
             {groups.map((group) => (
-              <div key={group.label} className={styles.groupCard}>
+              <div key={group.label} className={styles.groupCard} data-testid="world-cup-group-card">
                 <div className={styles.groupCardTitle}>{group.label}</div>
+                <div className={styles.groupStandingsHeader}>
+                  <span>Team</span>
+                  <span title="Played">P</span>
+                  <span title="Goal difference">GD</span>
+                  <span title="Points">Pts</span>
+                </div>
                 <div className={styles.groupTeams}>
-                  {group.teams.map((team) => (
-                    <div key={team} className={styles.groupTeamRow}>
-                      <TeamCrest teamName={team} className={styles.crest} />
-                      <span>{team}</span>
+                  {group.standings.map((row) => (
+                    <div key={row.team} className={styles.groupTeamRow}>
+                      <div className={styles.groupTeamIdentity}>
+                        <TeamCrest teamName={row.team} className={styles.crest} />
+                        <span>{row.team}</span>
+                      </div>
+                      <span className={styles.groupStat}>{row.played}</span>
+                      <span className={styles.groupStat}>{formatGoalDifference(row.goalDifference)}</span>
+                      <span className={styles.groupPts}>{row.points}</span>
                     </div>
                   ))}
                 </div>
