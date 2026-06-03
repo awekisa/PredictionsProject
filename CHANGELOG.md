@@ -1,3 +1,10 @@
+## 📦 v0.4.14 — 3 Jun 2026
+
+> **Fixture Backfill Sync**
+> Admins can now backfill missing football-data fixtures into existing tournaments without deleting games or predictions. Existing fixtures are skipped by provider ID, legacy games can be matched by teams and kickoff, and the admin screen shows a confirmation plus add/match/skip summary.
+
+---
+
 ## 📦 v0.4.13 — 3 Jun 2026
 
 > **South Korea Standings Flag**
