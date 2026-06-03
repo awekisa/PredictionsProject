@@ -1,3 +1,10 @@
+## 📦 v0.4.29 — 3 Jun 2026
+
+> **Clear standings prediction detail rows**
+> Prediction detail rows now show `home team score away team` on the left, with the user's prediction and earned points right-aligned in clear columns.
+
+---
+
 ## 📦 v0.4.28 — 3 Jun 2026
 
 > **Left-aligned World Cup playoff rows**
