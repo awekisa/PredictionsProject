@@ -9,6 +9,7 @@ describe('local/UTC time helpers', () => {
 
   it('formats UTC API values for datetime-local inputs', () => {
     assert.equal(toDatetimeLocalValue('2026-06-11T19:00:00Z'), '2026-06-11T22:00');
+    assert.equal(toDatetimeLocalValue('2026-06-11T19:00:00'), '2026-06-11T22:00');
   });
 
   it('compares prediction deadlines by instant', () => {

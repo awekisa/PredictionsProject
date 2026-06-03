@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { placePrediction } from '../../api/predictionApi';
 import type { GameResponse, PredictionResponse } from '../../types';
 import { formatTime } from '../../utils/formatDate';
-import { isStarted } from '../../utils/localTime';
+import { isStarted, parseApiDateTime } from '../../utils/localTime';
 import TeamCrest from '../common/TeamCrest';
 import styles from './GameCard.module.css';
 
@@ -53,7 +53,7 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
   }, [game.homeTeam, game.awayTeam]);
 
   const now = new Date();
-  const startTime = new Date(game.startTime);
+  const startTime = parseApiDateTime(game.startTime);
   const hasStarted = isStarted(game.startTime, now);
   const hasScore = game.homeGoals !== null && game.awayGoals !== null;
 
