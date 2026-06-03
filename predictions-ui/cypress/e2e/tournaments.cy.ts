@@ -37,7 +37,7 @@ describe('Tournament list', () => {
     cy.url().should('include', '/tournaments/1');
   });
 
-  it('uses the South Korea flag in the league table instead of the old crest', () => {
+  it('does not call the external football standings API for league tournaments', () => {
     cy.intercept('GET', '**/api/tournaments/1', {
       statusCode: 200,
       body: {
@@ -51,38 +51,17 @@ describe('Tournament list', () => {
     cy.intercept('GET', '**/api/tournaments/1/games', { statusCode: 200, body: [] });
     cy.intercept('GET', '**/api/tournaments/1/my-predictions', { statusCode: 200, body: [] });
     cy.intercept('GET', '**/api/tournaments/1/standings', { statusCode: 200, body: [] });
-    cy.intercept('GET', '**/api/tournaments/1/football-standings', {
-      statusCode: 200,
-      body: {
-        groups: [
-          {
-            group: null,
-            stage: 'REGULAR_SEASON',
-            table: [
-              {
-                position: 1,
-                teamName: 'South Korea',
-                teamCrest: '/crests/south-korea.svg',
-                playedGames: 0,
-                won: 0,
-                draw: 0,
-                lost: 0,
-                points: 0,
-                goalsFor: 0,
-                goalsAgainst: 0,
-                goalDifference: 0,
-              },
-            ],
-          },
-        ],
-      },
+    let footballStandingsRequests = 0;
+    cy.intercept('GET', '**/api/tournaments/1/football-standings', (req) => {
+      footballStandingsRequests += 1;
+      req.reply({ statusCode: 500, body: { error: 'external API should not be used' } });
     });
 
     cy.visitAuthenticated('/tournaments/1');
 
-    cy.contains('td', 'South Korea')
-      .find('img')
-      .should('have.attr', 'src')
-      .and('include', '/flags/4x3/kr.svg');
+    cy.contains('No games for this period.').should('exist');
+    cy.then(() => expect(footballStandingsRequests).to.equal(0));
+    cy.contains('League Table').should('not.exist');
+    cy.contains('Tournament Format').should('not.exist');
   });
 });

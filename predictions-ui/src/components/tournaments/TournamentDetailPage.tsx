@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { getTournament, getFootballStandings } from '../../api/tournamentApi';
+import { getTournament } from '../../api/tournamentApi';
 import { getGames } from '../../api/gameApi';
 import { getMyPredictions } from '../../api/predictionApi';
 import { getStandings } from '../../api/standingsApi';
@@ -9,7 +9,6 @@ import type {
   GameResponse,
   PredictionResponse,
   StandingEntryResponse,
-  CompetitionStandingsResponse,
 } from '../../types';
 import GameCard from '../games/GameCard';
 import TeamCrest from '../common/TeamCrest';
@@ -42,6 +41,10 @@ function getTabInfo(offset: number): { label: string; date: string } {
   return { label, date };
 }
 
+function isWorldCupLike(tournament?: TournamentResponse | null): boolean {
+  return tournament?.externalLeagueId === 2000 || /world cup/i.test(tournament?.name ?? '');
+}
+
 export default function TournamentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
@@ -56,8 +59,6 @@ export default function TournamentDetailPage() {
   const [standings, setStandings] = useState<StandingEntryResponse[]>([]);
   const [activeTab, setActiveTab] = useState<'games' | 'standings'>('games');
   const [gamesLoading, setGamesLoading] = useState(true);
-  const [footballStandings, setFootballStandings] = useState<CompetitionStandingsResponse | null>(null);
-  const [footballStandingsLoading, setFootballStandingsLoading] = useState(false);
   const [filter, setFilter] = useState<FilterOption>(0);
 
   useEffect(() => {
@@ -73,14 +74,6 @@ export default function TournamentDetailPage() {
       setMyPredictions(p);
       setStandings(s);
       setGamesLoading(false);
-
-      if (t?.externalLeagueId) {
-        setFootballStandingsLoading(true);
-        getFootballStandings(tournamentId).then((fs) => {
-          setFootballStandings(fs);
-          setFootballStandingsLoading(false);
-        });
-      }
     });
   }, [tournamentId]);
 
@@ -191,11 +184,11 @@ let filtered: GameResponse[];
                 ))
               )}
             </div>
-            {(footballStandingsLoading || tournament?.externalLeagueId) && (
+            {isWorldCupLike(tournament) && (
               <div className={styles.standingsSidebar}>
                 <FootballStandingsPanel
-                  standings={footballStandings}
-                  loading={footballStandingsLoading}
+                  standings={null}
+                  loading={false}
                   hasExternalLeague={!!tournament?.externalLeagueId}
                   tournamentName={tournament?.name}
                   externalLeagueId={tournament?.externalLeagueId}
