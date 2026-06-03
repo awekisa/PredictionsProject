@@ -138,6 +138,66 @@
   animation: shimmer 1.2s infinite;
 }
 
+.formatSection {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.formatSection:last-child {
+  border-bottom: none;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+  color: var(--color-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.sectionMeta {
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.groupCards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+}
+
+.groupCard {
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) - 2px);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-surface) 92%, var(--color-primary) 8%);
+}
+
+.groupCardTitle {
+  padding: 0.42rem 0.55rem;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.groupTeams {
+  padding: 0.35rem 0.5rem;
+}
+
+.groupTeamRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.45rem;
+  color: var(--color-text);
+  font-size: 0.78rem;
+}
+
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }

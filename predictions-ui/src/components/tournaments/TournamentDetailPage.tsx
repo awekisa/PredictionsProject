@@ -197,6 +197,9 @@ let filtered: GameResponse[];
                   standings={footballStandings}
                   loading={footballStandingsLoading}
                   hasExternalLeague={!!tournament?.externalLeagueId}
+                  tournamentName={tournament?.name}
+                  externalLeagueId={tournament?.externalLeagueId}
+                  games={games}
                 />
               </div>
             )}
