@@ -1,3 +1,10 @@
+## 📦 v0.4.20 — 3 Jun 2026
+
+> **Removed unreliable football standings API from UI**
+> Tournament pages no longer call the external football standings endpoint. World Cup-style pages always show locally derived fixture groups and the knockout placeholder; non-World-Cup pages no longer show the provider standings sidebar.
+
+---
+
 ## 📦 v0.4.19 — 3 Jun 2026
 
 > **World Cup GROUP_STAGE table override**
