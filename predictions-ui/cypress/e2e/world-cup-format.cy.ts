@@ -38,15 +38,21 @@ describe('World Cup tournament format panel', () => {
     cy.contains('Argentina').should('exist');
     cy.contains('Brazil').should('exist');
     cy.get('[data-testid="world-cup-group-card"]').contains('Group A').parents('[data-testid="world-cup-group-card"]').within(() => {
+      cy.contains('GF').should('exist');
+      cy.contains('GA').should('exist');
       cy.contains('GD').should('exist');
       cy.contains('Pts').should('exist');
       cy.contains('[class*=groupTeamRow]', 'Germany').within(() => {
-        cy.contains('+2').should('exist');
-        cy.contains('5').should('exist');
+        cy.contains('[class*=groupStat]', '3').should('exist');
+        cy.contains('[class*=groupStat]', '1').should('exist');
+        cy.contains('[class*=groupStat]', '+2').should('exist');
+        cy.contains('[class*=groupPts]', '5').should('exist');
       });
       cy.contains('[class*=groupTeamRow]', 'Argentina').within(() => {
-        cy.contains('+1').should('exist');
-        cy.contains('4').should('exist');
+        cy.contains('[class*=groupStat]', '3').should('exist');
+        cy.contains('[class*=groupStat]', '2').should('exist');
+        cy.contains('[class*=groupStat]', '+1').should('exist');
+        cy.contains('[class*=groupPts]', '4').should('exist');
       });
     });
     cy.contains('Group B').should('exist');

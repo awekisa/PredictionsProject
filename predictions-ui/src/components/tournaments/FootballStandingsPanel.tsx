@@ -229,6 +229,8 @@ function TournamentFormatPanel({ games }: { games: GameResponse[] }) {
                 <div className={styles.groupStandingsHeader}>
                   <span>Team</span>
                   <span title="Played">P</span>
+                  <span title="Goals for">GF</span>
+                  <span title="Goals against">GA</span>
                   <span title="Goal difference">GD</span>
                   <span title="Points">Pts</span>
                 </div>
@@ -240,6 +242,8 @@ function TournamentFormatPanel({ games }: { games: GameResponse[] }) {
                         <span>{row.team}</span>
                       </div>
                       <span className={styles.groupStat}>{row.played}</span>
+                      <span className={styles.groupStat}>{row.goalsFor}</span>
+                      <span className={styles.groupStat}>{row.goalsAgainst}</span>
                       <span className={styles.groupStat}>{formatGoalDifference(row.goalDifference)}</span>
                       <span className={styles.groupPts}>{row.points}</span>
                     </div>
