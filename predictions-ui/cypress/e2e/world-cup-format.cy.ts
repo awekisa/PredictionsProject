@@ -38,4 +38,40 @@ describe('World Cup tournament format panel', () => {
     cy.contains('Knockout Bracket').should('exist');
     cy.contains('Bracket appears once knockout fixtures are available.').should('exist');
   });
+
+  it('ignores provider one-table World Cup standings and still shows fixture-derived groups', () => {
+    cy.intercept('GET', '**/api/tournaments/1', {
+      statusCode: 200,
+      body: { id: 1, name: 'World Cup 2026', createdAt: '2026-01-01T00:00:00Z', externalLeagueId: 2000, externalSeason: 2026, emblemUrl: null },
+    });
+    cy.intercept('GET', '**/api/tournaments/1/games', { statusCode: 200, body: groupStageGames });
+    cy.intercept('GET', '**/api/tournaments/1/my-predictions', { statusCode: 200, body: [] });
+    cy.intercept('GET', '**/api/tournaments/1/standings', { statusCode: 200, body: [] });
+    cy.intercept('GET', '**/api/tournaments/1/football-standings', {
+      statusCode: 200,
+      body: {
+        groups: [
+          {
+            group: null,
+            stage: 'REGULAR_SEASON',
+            table: [
+              { position: 1, teamName: 'Argentina', teamCrest: null, playedGames: 0, won: 0, draw: 0, lost: 0, points: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0 },
+              { position: 2, teamName: 'Brazil', teamCrest: null, playedGames: 0, won: 0, draw: 0, lost: 0, points: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0 },
+              { position: 3, teamName: 'Spain', teamCrest: null, playedGames: 0, won: 0, draw: 0, lost: 0, points: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0 },
+              { position: 4, teamName: 'France', teamCrest: null, playedGames: 0, won: 0, draw: 0, lost: 0, points: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0 },
+            ],
+          },
+        ],
+      },
+    });
+
+    cy.visitAuthenticated('/tournaments/1');
+
+    cy.contains('Tournament Format').should('exist');
+    cy.contains('Group Stage').should('exist');
+    cy.contains('Group A').should('exist');
+    cy.contains('Group B').should('exist');
+    cy.contains('Knockout Bracket').should('exist');
+    cy.contains('table').should('not.exist');
+  });
 });

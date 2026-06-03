@@ -42,9 +42,9 @@ describe('Tournament list', () => {
       statusCode: 200,
       body: {
         id: 1,
-        name: 'World Cup 2026',
+        name: 'Premier League',
         createdAt: '2025-01-01T00:00:00Z',
-        externalLeagueId: 1,
+        externalLeagueId: 2021,
         externalSeason: 2026,
       },
     });
