@@ -1,3 +1,10 @@
+## 📦 v0.4.24 — 3 Jun 2026
+
+> **FIFA World Cup group tie-breakers**
+> World Cup group standings now sort equal-points teams by FIFA-style head-to-head criteria first: head-to-head points, head-to-head goal difference, and head-to-head goals scored, before falling back to all-group GD/GF and a deterministic team-name fallback.
+
+---
+
 ## 📦 v0.4.23 — 3 Jun 2026
 
 > **Goals for/against in World Cup groups**
