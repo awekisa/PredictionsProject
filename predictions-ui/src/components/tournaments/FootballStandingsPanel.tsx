@@ -139,7 +139,7 @@ function deriveFixtureGroups(games: GameResponse[]): DerivedGroup[] {
 }
 
 function isUngroupedLeagueStandings(groups: StandingGroupResponse[]): boolean {
-  return groups.length === 1 && !groups[0].group && /regular|season|league/i.test(groups[0].stage ?? '');
+  return groups.length === 1 && !groups[0].group;
 }
 
 function TournamentFormatPanel({ games }: { games: GameResponse[] }) {
