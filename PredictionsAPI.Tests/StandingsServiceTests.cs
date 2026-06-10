@@ -346,6 +346,48 @@ public class StandingsServiceTests
     }
 
     [Fact]
+    public async Task UserPredictionDetails_Total_HidesPredictionsBeforeGameStarts()
+    {
+        var db = DbContextFactory.Create(nameof(UserPredictionDetails_Total_HidesPredictionsBeforeGameStarts));
+
+        var alice = DbContextFactory.MakeUser("u1", "Alice");
+        var tournament = DbContextFactory.MakeTournament(1);
+        var futureGame = DbContextFactory.MakeGame(1, 1, DateTime.UtcNow.AddDays(1));
+
+        db.Users.Add(alice);
+        db.Tournaments.Add(tournament);
+        db.Games.Add(futureGame);
+        db.Predictions.Add(DbContextFactory.MakePrediction(1, 1, "u1", 2, 1));
+        await db.SaveChangesAsync();
+
+        var service = new StandingsService(db);
+        var details = await service.GetUserPredictionDetailsAsync(1, "Alice", "total");
+
+        details.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GlobalUserPredictionDetails_Total_HidesPredictionsBeforeGameStarts()
+    {
+        var db = DbContextFactory.Create(nameof(GlobalUserPredictionDetails_Total_HidesPredictionsBeforeGameStarts));
+
+        var alice = DbContextFactory.MakeUser("u1", "Alice");
+        var tournament = DbContextFactory.MakeTournament(1);
+        var futureGame = DbContextFactory.MakeGame(1, 1, DateTime.UtcNow.AddDays(1));
+
+        db.Users.Add(alice);
+        db.Tournaments.Add(tournament);
+        db.Games.Add(futureGame);
+        db.Predictions.Add(DbContextFactory.MakePrediction(1, 1, "u1", 2, 1));
+        await db.SaveChangesAsync();
+
+        var service = new StandingsService(db);
+        var details = await service.GetGlobalUserPredictionDetailsAsync("Alice", "total");
+
+        details.Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task GlobalUserPredictionDetails_ReturnsAcrossTournaments()
     {
         var db = DbContextFactory.Create(nameof(GlobalUserPredictionDetails_ReturnsAcrossTournaments));
