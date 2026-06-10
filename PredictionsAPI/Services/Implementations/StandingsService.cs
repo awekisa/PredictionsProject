@@ -110,6 +110,9 @@ public class StandingsService : IStandingsService
         foreach (var p in predictions)
         {
             var game = p.Game;
+            if (DateTime.UtcNow < EnsureUtc(game.StartTime))
+                continue;
+
             bool isFinished = game.IsFinished && game.HomeGoals.HasValue && game.AwayGoals.HasValue;
 
             int pointsEarned = 0;
@@ -253,6 +256,9 @@ public class StandingsService : IStandingsService
         foreach (var p in predictions)
         {
             var game = p.Game;
+            if (DateTime.UtcNow < EnsureUtc(game.StartTime))
+                continue;
+
             bool isFinished = game.IsFinished && game.HomeGoals.HasValue && game.AwayGoals.HasValue;
 
             int pointsEarned = 0;
@@ -300,6 +306,13 @@ public class StandingsService : IStandingsService
 
         return results.OrderByDescending(r => r.MatchDate).ToList();
     }
+
+    private static DateTime EnsureUtc(DateTime value) => value.Kind switch
+    {
+        DateTimeKind.Utc => value,
+        DateTimeKind.Local => value.ToUniversalTime(),
+        _ => DateTime.SpecifyKind(value, DateTimeKind.Utc)
+    };
 
     private static bool IsCorrectScore(int resultHome, int resultAway, int predHome, int predAway)
     {
