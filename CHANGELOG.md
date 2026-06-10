@@ -1,3 +1,10 @@
+## 📦 v0.4.31 — 10 Jun 2026
+
+> **Pre-kickoff prediction privacy**
+> Prediction standings detail rows now keep users' exact scores hidden until each game has kicked off, matching the existing per-game prediction privacy rule.
+
+---
+
 ## 📦 v0.4.30 — 3 Jun 2026
 
 > **Prediction score outcome colors**
