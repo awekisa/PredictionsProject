@@ -70,4 +70,22 @@ public class GameServiceTests
         result.HomeGoals.Should().Be(2);
         result.AwayGoals.Should().Be(1);
     }
+
+    [Fact]
+    public async Task ClearResultAsync_RemovesPrematureSettlementAndKeepsFixture()
+    {
+        var db = DbContextFactory.Create(nameof(ClearResultAsync_RemovesPrematureSettlementAndKeepsFixture));
+        db.Tournaments.Add(DbContextFactory.MakeTournament(1));
+        db.Games.Add(DbContextFactory.MakeGame(1, 1, DateTime.UtcNow.AddHours(-1), homeGoals: 0, awayGoals: 1));
+        await db.SaveChangesAsync();
+
+        var service = new GameService(db);
+        var result = await service.ClearResultAsync(1);
+
+        result.Should().NotBeNull();
+        result!.IsFinished.Should().BeFalse();
+        result.HomeGoals.Should().BeNull();
+        result.AwayGoals.Should().BeNull();
+        db.Games.Single().Id.Should().Be(1);
+    }
 }

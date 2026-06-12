@@ -10,4 +10,5 @@ public interface IGameService
     Task<GameResponse?> UpdateAsync(int tournamentId, int gameId, UpdateGameRequest request);
     Task<bool> DeleteAsync(int tournamentId, int gameId);
     Task<GameResponse?> SetResultAsync(int gameId, SetGameResultRequest request);
+    Task<GameResponse?> ClearResultAsync(int gameId);
 }

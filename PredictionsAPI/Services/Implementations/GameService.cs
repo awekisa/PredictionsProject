@@ -97,6 +97,20 @@ public class GameService : IGameService
         return MapToResponse(game);
     }
 
+    public async Task<GameResponse?> ClearResultAsync(int gameId)
+    {
+        var game = await _context.Games.FindAsync(gameId);
+        if (game is null) return null;
+
+        game.HomeGoals = null;
+        game.AwayGoals = null;
+        game.IsFinished = false;
+
+        await _context.SaveChangesAsync();
+
+        return MapToResponse(game);
+    }
+
     private static GameResponse MapToResponse(Game g) => new()
     {
         Id = g.Id,
