@@ -24,4 +24,12 @@ public class AdminScoresController : ControllerBase
         if (game is null) return BadRequest("Game not found or has not started yet.");
         return Ok(game);
     }
+
+    [HttpDelete("{gameId}/result")]
+    public async Task<IActionResult> ClearResult(int gameId)
+    {
+        var game = await _gameService.ClearResultAsync(gameId);
+        if (game is null) return NotFound("Game not found.");
+        return Ok(game);
+    }
 }
