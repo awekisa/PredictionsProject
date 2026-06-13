@@ -1,3 +1,10 @@
+## 📦 v0.4.35 — 13 Jun 2026
+
+> **Prediction detail popup polish**
+> Game and player prediction popups now keep outcome coloring consistent: green for exact scores, yellow for correct outcomes, and muted gray for misses. Popup close buttons now center the X inside the circular button.
+
+---
+
 ## 📦 v0.4.34 — 13 Jun 2026
 
 > **Mobile-fit prediction standings**
