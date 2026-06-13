@@ -1,3 +1,10 @@
+## 📦 v0.4.42 — 13 Jun 2026
+
+> **Live FIFA updater script fix**
+> Corrected the tracked World Cup sync script to call the score-sync endpoint for live games, store FIFA status/time, and avoid finalising live scores.
+
+---
+
 ## 📦 v0.4.41 — 13 Jun 2026
 
 > **EF migration attribute fix**
