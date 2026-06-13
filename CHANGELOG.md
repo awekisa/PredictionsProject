@@ -1,3 +1,10 @@
+## 📦 v0.4.37 — 13 Jun 2026
+
+> **Safer World Cup score settlement**
+> Production score-settlement scripts now treat FIFA `MatchStatus: 0` as the only automatic finalisation signal, while live status `3` and special statuses require waiting or manual review even when score fields are present.
+
+---
+
 ## 📦 v0.4.36 — 13 Jun 2026
 
 > **Compact prediction UI labels**
