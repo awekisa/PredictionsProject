@@ -1,3 +1,10 @@
+## 📦 v0.4.32 — 13 Jun 2026
+
+> **Prediction leaderboard drill-downs**
+> Prediction standings now show a leaderboard-only table, finished fixture scores open all-player prediction details, and clickable player rows open started-game prediction profiles without exposing upcoming predictions.
+
+---
+
 ## 📦 v0.4.31 — 10 Jun 2026
 
 > **Pre-kickoff prediction privacy**
