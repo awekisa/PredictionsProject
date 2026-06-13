@@ -25,6 +25,7 @@ public class StandingsService : IStandingsService
 
         var allTournamentPredictions = await _context.Predictions
             .Include(p => p.User)
+            .Include(p => p.Game)
             .Where(p => p.Game.TournamentId == tournamentId)
             .Where(p => !_context.UserRoles
                 .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur.UserId, RoleName = r.NormalizedName })
@@ -32,6 +33,7 @@ public class StandingsService : IStandingsService
             .ToListAsync();
 
         var gameResults = gamesWithResults.ToDictionary(g => g.Id);
+        var now = DateTime.UtcNow;
 
         var userStats = allTournamentPredictions
             .GroupBy(p => new { p.UserId, p.User.DisplayName })
@@ -40,7 +42,7 @@ public class StandingsService : IStandingsService
                 int points = 0;
                 int correctScores = 0;
                 int correctOutcomes = 0;
-                int totalPredictions = group.Count();
+                int totalPredictions = group.Count(prediction => now >= EnsureUtc(prediction.Game.StartTime));
 
                 foreach (var prediction in group)
                 {
@@ -172,12 +174,14 @@ public class StandingsService : IStandingsService
 
         var allPredictions = await _context.Predictions
             .Include(p => p.User)
+            .Include(p => p.Game)
             .Where(p => !_context.UserRoles
                 .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur.UserId, RoleName = r.NormalizedName })
                 .Any(role => role.UserId == p.UserId && role.RoleName == "ADMIN"))
             .ToListAsync();
 
         var gameResults = gamesWithResults.ToDictionary(g => g.Id);
+        var now = DateTime.UtcNow;
 
         var userStats = allPredictions
             .GroupBy(p => new { p.UserId, p.User.DisplayName })
@@ -186,7 +190,7 @@ public class StandingsService : IStandingsService
                 int points = 0;
                 int correctScores = 0;
                 int correctOutcomes = 0;
-                int totalPredictions = group.Count();
+                int totalPredictions = group.Count(prediction => now >= EnsureUtc(prediction.Game.StartTime));
 
                 foreach (var prediction in group)
                 {
