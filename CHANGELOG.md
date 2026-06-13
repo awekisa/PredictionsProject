@@ -1,3 +1,10 @@
+## 📦 v0.4.40 — 13 Jun 2026
+
+> **EF migration designer compile fix**
+> Corrected the generated migration designer imports and target-model override so backend CI can compile and production can apply the FIFA score/status schema.
+
+---
+
 ## 📦 v0.4.39 — 13 Jun 2026
 
 > **Migration discovery fix**
