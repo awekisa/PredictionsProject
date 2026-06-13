@@ -19,8 +19,13 @@ predictions-ui/.env.local
 predictions-ui/.env.*.local
 PredictionsAPI/appsettings.Development.json
 
-# Claude Code
+# Python
+__pycache__/
+*.py[cod]
+
+# Claude Code / local agent artifacts
 .claude/
+.hermes/
 CLAUDE.md
 .playwright-mcp/
 
