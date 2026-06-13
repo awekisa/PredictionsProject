@@ -1,3 +1,10 @@
+## 📦 v0.4.36 — 13 Jun 2026
+
+> **Compact prediction UI labels**
+> Prediction popups now use smaller typography with compact `Pred`/`Pts` columns, and standings use abbreviated `CS`, `1X2`, `PG`, `#TP`, and `PTS` labels with an explanatory legend.
+
+---
+
 ## 📦 v0.4.35 — 13 Jun 2026
 
 > **Prediction detail popup polish**
