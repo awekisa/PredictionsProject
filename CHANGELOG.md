@@ -1,3 +1,10 @@
+## 📦 v0.4.33 — 13 Jun 2026
+
+> **Started-game prediction counts**
+> Prediction standings now count only predictions for games that have already started or finished, keeping future predicted games out of the visible totals.
+
+---
+
 ## 📦 v0.4.32 — 13 Jun 2026
 
 > **Prediction leaderboard drill-downs**
