@@ -1,3 +1,10 @@
+## 📦 v0.4.34 — 13 Jun 2026
+
+> **Mobile-fit prediction standings**
+> Prediction standings now use compact responsive columns and abbreviated mobile headers so all leaderboard columns fit on narrow screens without horizontal scrolling.
+
+---
+
 ## 📦 v0.4.33 — 13 Jun 2026
 
 > **Started-game prediction counts**
