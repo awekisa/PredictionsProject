@@ -1,3 +1,10 @@
+## 📦 v0.4.41 — 13 Jun 2026
+
+> **EF migration attribute fix**
+> Restored the EF infrastructure import required for the migration designer `DbContext` attribute.
+
+---
+
 ## 📦 v0.4.40 — 13 Jun 2026
 
 > **EF migration designer compile fix**
