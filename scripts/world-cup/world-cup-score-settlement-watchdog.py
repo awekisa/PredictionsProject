@@ -2,10 +2,9 @@
 """World Cup 2026 FIFA score/status sync.
 
 Fetches production games for tournament 26, compares started games to FIFA's
-official calendar endpoint, and syncs FIFA match status plus the currently
-reported score on every run. `isFinished` is driven by FIFA MatchStatus == 0;
-live scores are stored with `isFinished=false` so standings/prediction scoring
-remain final-only while the Games tab can show the live score.
+official calendar endpoint, and finalises production scores only when FIFA
+clearly reports a normal finished match. Live FIFA scores are intentionally not
+persisted as final game scores.
 
 For knockout/elimination games, prediction scoring should use the full-time
 (90-minute) score, not extra-time/penalty shootout scores. If FIFA exposes
@@ -33,6 +32,7 @@ FINAL_STATUSES = {0}
 SCHEDULED_STATUSES = {1}
 LIVE_STATUSES = {3}
 MANUAL_REVIEW_STATUSES = {4, 8, 9, 12}
+MIN_FINAL_ELAPSED_MINUTES = 115
 STATUS_NAMES = {
     0: "finished",
     1: "scheduled",
@@ -241,7 +241,7 @@ def main() -> int:
         status_name = STATUS_NAMES.get(status, str(status))
         decision = score_sync_decision(fifa_match)
         if not decision.should_sync:
-            if decision.classification in {"manual_review", "unknown"} or now > start:
+            if decision.classification in {"manual_review", "unknown"}:
                 output["manual"].append({"match": match_label, "productionGameId": game.get("id"), "reason": decision.reason, "fifaDataObserved": {"idMatch": fifa_match.get("IdMatch"), "matchStatus": status, "statusName": status_name, "matchTime": fifa_match.get("MatchTime"), "homeTeamScore": fifa_match.get("HomeTeamScore"), "awayTeamScore": fifa_match.get("AwayTeamScore"), "resultType": fifa_match.get("ResultType")}})
             continue
 
