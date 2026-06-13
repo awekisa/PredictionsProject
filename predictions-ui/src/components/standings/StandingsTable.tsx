@@ -77,16 +77,25 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
   return (
     <>
       <div className={styles.tableWrap} data-testid="prediction-leaderboard">
-        <table>
+        <table className={styles.leaderboardTable}>
+          <colgroup>
+            <col className={styles.rankColumn} />
+            <col className={styles.playerColumn} />
+            <col className={styles.metricColumn} />
+            <col className={styles.metricColumn} />
+            <col className={styles.metricColumn} />
+            <col className={styles.metricColumn} />
+            <col className={styles.metricColumn} />
+          </colgroup>
           <thead>
             <tr>
-              <th>Rank #</th>
-              <th>Player Name</th>
-              <th>Exact Scores</th>
-              <th>Correct Outcomes</th>
-              <th>Games with Points</th>
-              <th>Total Predicted Games</th>
-              <th>Total Points</th>
+              <th data-short="#">Rank #</th>
+              <th data-short="Player">Player Name</th>
+              <th data-short="Exact">Exact Scores</th>
+              <th data-short="Outcome">Correct Outcomes</th>
+              <th data-short="Pts Games">Games with Points</th>
+              <th data-short="Predicted">Total Predicted Games</th>
+              <th data-short="Points">Total Points</th>
             </tr>
           </thead>
           <tbody>

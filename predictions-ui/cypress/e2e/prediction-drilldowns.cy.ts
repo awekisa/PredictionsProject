@@ -139,6 +139,25 @@ describe('prediction standings and drill-downs', () => {
     });
   });
 
+  it('keeps every standings column inside a narrow mobile viewport', () => {
+    cy.viewport(320, 720);
+    stubTournament();
+
+    cy.visitAuthenticated('/tournaments/1');
+    cy.contains('button', 'Prediction Standings').click();
+
+    cy.get('[data-testid="prediction-leaderboard"]').then(($leaderboard) => {
+      const el = $leaderboard[0];
+      expect(el.scrollWidth, 'leaderboard width').to.be.at.most(el.clientWidth + 1);
+    });
+
+    cy.get('[data-testid="prediction-leaderboard"] thead th').should('have.length', 7).each(($th) => {
+      const rect = $th[0].getBoundingClientRect();
+      expect(rect.left, `${$th.text()} left edge`).to.be.at.least(0);
+      expect(rect.right, `${$th.text()} right edge`).to.be.at.most(320);
+    });
+  });
+
   it('opens all player predictions by clicking a finished fixture score and leaves upcoming scores non-clickable', () => {
     stubTournament();
     cy.intercept('GET', '**/api/games/101/predictions', { statusCode: 200, body: gamePredictions }).as('gamePredictions');
