@@ -1,3 +1,10 @@
+## 📦 v0.4.38 — 13 Jun 2026
+
+> **Live FIFA score/status sync**
+> World Cup score sync now stores FIFA match status and live scores on each run without marking games finished until FIFA reports a final status. Knockout finalisation keeps the full-time score rule instead of using extra-time or penalty shootout scores for prediction scoring.
+
+---
+
 ## 📦 v0.4.37 — 13 Jun 2026
 
 > **Safer World Cup score settlement**
