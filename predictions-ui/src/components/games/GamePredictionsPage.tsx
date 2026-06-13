@@ -1,67 +1,33 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getGamePredictions } from '../../api/gameApi';
-import type { PredictionResponse } from '../../types';
-import { formatDateTime } from '../../utils/formatDate';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { getGame } from '../../api/gameApi';
+import type { GameResponse } from '../../types';
+import GamePredictionsDetail from './GamePredictionsDetail';
 import styles from './GamePredictionsPage.module.css';
 
 export default function GamePredictionsPage() {
-  const { gameId } = useParams<{ gameId: string }>();
-  const [predictions, setPredictions] = useState<PredictionResponse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { tournamentId, gameId } = useParams<{ tournamentId?: string; gameId: string }>();
+  const location = useLocation();
+  const [game, setGame] = useState<GameResponse | null>((location.state as { game?: GameResponse } | null)?.game ?? null);
+  const [loading, setLoading] = useState(!game);
   const navigate = useNavigate();
 
   useEffect(() => {
-    getGamePredictions(Number(gameId))
-      .then(setPredictions)
+    if (game || !tournamentId || !gameId) return;
+    getGame(Number(tournamentId), Number(gameId))
+      .then(setGame)
       .finally(() => setLoading(false));
-  }, [gameId]);
+  }, [game, gameId, tournamentId]);
 
   if (loading) return <div className={styles.loading}>Loading predictions...</div>;
-
-  const first = predictions[0];
+  if (!game) return <div className={styles.empty}>Game not found.</div>;
 
   return (
     <div>
       <button className={styles.backLink} onClick={() => navigate(-1)}>
         &larr; Back
       </button>
-
-      <div className={styles.header}>
-        <h1>Predictions</h1>
-        {first && (
-          <div className={styles.matchInfo}>
-            {first.homeTeam} vs {first.awayTeam}
-          </div>
-        )}
-      </div>
-
-      {predictions.length === 0 ? (
-        <div className={styles.empty}>No predictions for this game yet.</div>
-      ) : (
-        <div className={styles.tableWrap}>
-          <table>
-            <thead>
-              <tr>
-                <th>Player</th>
-                <th>Prediction</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {predictions.map((p) => (
-                <tr key={p.id}>
-                  <td>{p.userDisplayName}</td>
-                  <td>
-                    {p.homeGoals} - {p.awayGoals}
-                  </td>
-                  <td>{formatDateTime(p.createdAt)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <GamePredictionsDetail game={game} />
     </div>
   );
 }

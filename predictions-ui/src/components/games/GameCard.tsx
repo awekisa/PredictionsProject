@@ -18,9 +18,10 @@ interface Props {
   game: GameResponse;
   myPrediction: PredictionResponse | null;
   onPredictionPlaced: (prediction: PredictionResponse) => void;
+  onFinishedScoreClick?: (game: GameResponse) => void;
 }
 
-export default function GameCard({ game, myPrediction, onPredictionPlaced }: Props) {
+export default function GameCard({ game, myPrediction, onPredictionPlaced, onFinishedScoreClick }: Props) {
   const [homeGoals, setHomeGoals] = useState('');
   const [awayGoals, setAwayGoals] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -180,7 +181,20 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced }: Pro
           <span ref={homeNameRef} className={styles.homeTeam}>{displayName(game.homeTeam)}</span>
         </div>
         <TeamCrest teamName={game.homeTeam} fallbackUrl={game.homeCrestUrl} className={styles.homeCrest} />
-        <span className={styles.score}>{scoreDisplay}</span>
+        {game.isFinished && hasScore && onFinishedScoreClick ? (
+          <button
+            type="button"
+            className={styles.scoreButton}
+            onClick={() => onFinishedScoreClick(game)}
+            data-testid="game-score-button"
+            data-game-id={game.id}
+            aria-label={`View predictions for ${game.homeTeam} ${scoreDisplay} ${game.awayTeam}`}
+          >
+            {scoreDisplay}
+          </button>
+        ) : (
+          <span className={styles.score}>{scoreDisplay}</span>
+        )}
         <TeamCrest teamName={game.awayTeam} fallbackUrl={game.awayCrestUrl} className={styles.awayCrest} />
         <div className={`${styles.teamNameBox} ${styles.teamNameBoxAway}`}>
           <span ref={awayNameRef} className={styles.awayTeam}>{displayName(game.awayTeam)}</span>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { getUserPredictionDetails, getGlobalUserPredictionDetails } from '../../api/standingsApi';
 import type { StandingEntryResponse, UserPredictionDetailResponse } from '../../types';
 import styles from './StandingsTable.module.css';
@@ -8,146 +8,129 @@ interface Props {
   tournamentId?: number;
 }
 
-type DetailsByUser = Record<string, UserPredictionDetailResponse[]>;
-
-function predictionOutcome(points: number): 'score' | 'outcome' | 'missed' {
-  if (points === 3) return 'score';
-  if (points === 1) return 'outcome';
-  return 'missed';
+function medalClass(position: number): string {
+  if (position === 1) return styles.gold;
+  if (position === 2) return styles.silver;
+  if (position === 3) return styles.bronze;
+  return '';
 }
 
-function outcomeClass(outcome: 'score' | 'outcome' | 'missed'): string {
-  if (outcome === 'score') return styles.scoreOutcome;
-  if (outcome === 'outcome') return styles.correctOutcome;
-  return styles.missedOutcome;
-}
-
-function PredictionResultRow({ detail }: { detail: UserPredictionDetailResponse }) {
-  const outcome = predictionOutcome(detail.pointsEarned);
-
+function PlayerPredictionsDetail({
+  playerName,
+  details,
+  loading,
+  onClose,
+}: {
+  playerName: string;
+  details: UserPredictionDetailResponse[];
+  loading: boolean;
+  onClose: () => void;
+}) {
   return (
-    <div className={`${styles.detailRow} ${outcomeClass(outcome)}`} data-testid="prediction-detail-row" data-outcome={outcome}>
-      <span
-        className={styles.actualResult}
-        data-testid="actual-result"
-        aria-label={`${detail.homeTeam} ${detail.actualHome}:${detail.actualAway} ${detail.awayTeam}`}
-      >
-        <span className={styles.detailTeam}>
-          <span className={styles.detailTeamName}>
-            <span className={styles.teamFull}>{detail.homeTeam}</span>
-            {detail.homeTeamShort && <span className={styles.teamShort}>{detail.homeTeamShort}</span>}
-          </span>
-        </span>
-        <span className={styles.detailScore}>
-          {detail.actualHome}:{detail.actualAway}
-        </span>
-        <span className={styles.detailTeam}>
-          <span className={styles.detailTeamName}>
-            <span className={styles.teamFull}>{detail.awayTeam}</span>
-            {detail.awayTeamShort && <span className={styles.teamShort}>{detail.awayTeamShort}</span>}
-          </span>
-        </span>
-      </span>
-      <span className={styles.predictionMeta} data-testid="prediction-meta">
-        <span className={`${styles.detailScore} ${styles.predictionScore}`} data-testid="prediction-score">
-          {detail.predictedHome}:{detail.predictedAway}
-        </span>
-        <span data-testid="points-earned" className={styles.pointsEarned}>
-          {detail.pointsEarned}
-        </span>
-      </span>
-    </div>
+    <section className={styles.detailPanel} data-testid="player-predictions-detail">
+      <div className={styles.detailPanelHeader}>
+        <h2>{playerName} predictions</h2>
+        <button className={styles.closeButton} onClick={onClose} aria-label="Close player predictions">×</button>
+      </div>
+      {loading ? (
+        <div className={styles.panelEmpty}>Loading predictions...</div>
+      ) : details.length === 0 ? (
+        <div className={styles.panelEmpty}>No started-game predictions found.</div>
+      ) : (
+        <div className={styles.playerDetailList}>
+          {details.map((detail, index) => (
+            <div className={styles.playerDetailRow} key={`${detail.homeTeam}-${detail.awayTeam}-${index}`}>
+              <span className={styles.actualResult}>{detail.homeTeam} {detail.actualHome}:{detail.actualAway} {detail.awayTeam}</span>
+              <span>Predicted {detail.predictedHome}:{detail.predictedAway}</span>
+              <strong>{detail.pointsEarned} pts</strong>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 
 export default function StandingsTable({ standings, tournamentId }: Props) {
-  const [detailsByUser, setDetailsByUser] = useState<DetailsByUser>({});
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-
-    async function loadPredictionRows() {
-      if (standings.length === 0) {
-        setDetailsByUser({});
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const entries = await Promise.all(
-          standings.map(async (standing) => {
-            const details = tournamentId
-              ? await getUserPredictionDetails(tournamentId, standing.userDisplayName, 'total')
-              : await getGlobalUserPredictionDetails(standing.userDisplayName, 'total');
-            return [standing.userDisplayName, details] as const;
-          })
-        );
-
-        if (active) {
-          setDetailsByUser(Object.fromEntries(entries));
-        }
-      } catch {
-        if (active) {
-          setDetailsByUser({});
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadPredictionRows();
-
-    return () => {
-      active = false;
-    };
-  }, [standings, tournamentId]);
+  const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+  const [selectedDetails, setSelectedDetails] = useState<UserPredictionDetailResponse[]>([]);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   if (standings.length === 0) {
     return <div className={styles.empty}>No standings data yet.</div>;
   }
 
+  const openPlayer = async (playerName: string) => {
+    setSelectedPlayer(playerName);
+    setSelectedDetails([]);
+    setLoadingDetails(true);
+    try {
+      const details = tournamentId
+        ? await getUserPredictionDetails(tournamentId, playerName, 'total')
+        : await getGlobalUserPredictionDetails(playerName, 'total');
+      setSelectedDetails(details);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
   return (
     <>
-      <div className={styles.resultSections}>
-        {loading ? (
-          <div className={styles.panelLoading}>Loading predictions...</div>
-        ) : (
-          standings.map((standing) => {
-            const details = detailsByUser[standing.userDisplayName] ?? [];
-            return (
-              <section
+      <div className={styles.tableWrap} data-testid="prediction-leaderboard">
+        <table>
+          <thead>
+            <tr>
+              <th>Rank #</th>
+              <th>Player Name</th>
+              <th>Exact Scores</th>
+              <th>Correct Outcomes</th>
+              <th>Games with Points</th>
+              <th>Total Predicted Games</th>
+              <th>Total Points</th>
+            </tr>
+          </thead>
+          <tbody>
+            {standings.map((standing) => (
+              <tr
                 key={standing.userDisplayName}
-                className={styles.resultSection}
-                data-testid="prediction-result-section"
+                className={styles.clickableRow}
+                data-testid="prediction-leaderboard-row"
+                onClick={() => openPlayer(standing.userDisplayName)}
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openPlayer(standing.userDisplayName);
+                  }
+                }}
               >
-                <div className={styles.resultSectionHeader}>
-                  <span>{standing.userDisplayName}</span>
-                  <span>{standing.points} pts</span>
-                </div>
-                <div className={styles.panelList}>
-                  <div className={styles.detailHeader} data-testid="prediction-detail-header" aria-hidden="true">
-                    <span>Result</span>
-                    <span>Prediction</span>
-                    <span>Pts</span>
-                  </div>
-                  {details.length === 0 ? (
-                    <div className={styles.panelEmpty}>No predictions found.</div>
-                  ) : (
-                    details.map((detail, index) => <PredictionResultRow key={index} detail={detail} />)
-                  )}
-                </div>
-              </section>
-            );
-          })
-        )}
+                <td className={medalClass(standing.position)}>{standing.position}</td>
+                <td>{standing.userDisplayName}</td>
+                <td className={styles.centered}>{standing.correctScores}</td>
+                <td className={styles.centered}>{standing.correctOutcomes}</td>
+                <td className={styles.centered}>{standing.correctScores + standing.correctOutcomes}</td>
+                <td className={styles.centered}>{standing.totalPredictions}</td>
+                <td className={styles.centered}>{standing.points}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      <div className={styles.note}>
-        Scoring: Exact score = 3 pts | Correct outcome = 1 pt
-      </div>
+      <div className={styles.note}>Exact score = 3 pts | Correct outcome = 1 pt</div>
+
+      {selectedPlayer && (
+        <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
+          <div className={styles.modalPanel}>
+            <PlayerPredictionsDetail
+              playerName={selectedPlayer}
+              details={selectedDetails}
+              loading={loadingDetails}
+              onClose={() => setSelectedPlayer(null)}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -23,6 +23,7 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route path="/" element={<TournamentListPage />} />
           <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
+          <Route path="/tournaments/:tournamentId/games/:gameId/predictions" element={<GamePredictionsPage />} />
           <Route path="/games/:gameId/predictions" element={<GamePredictionsPage />} />
           <Route path="/standings" element={<GlobalStandingsPage />} />
 

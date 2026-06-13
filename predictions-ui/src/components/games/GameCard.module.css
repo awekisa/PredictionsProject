@@ -243,6 +243,22 @@
   flex-shrink: 0;
 }
 
+.scoreButton {
+  composes: score;
+  border: 1px solid var(--color-primary);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 0.12rem 0.35rem;
+}
+
+.scoreButton:hover,
+.scoreButton:focus-visible {
+  background: rgb(210 165 33 / 0.12);
+  outline: none;
+}
+
 @media (max-width: 480px) {
   .card {
     border-radius: 8px;

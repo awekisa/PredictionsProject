@@ -11,6 +11,7 @@ import type {
   StandingEntryResponse,
 } from '../../types';
 import GameCard from '../games/GameCard';
+import GamePredictionsDetail from '../games/GamePredictionsDetail';
 import TeamCrest from '../common/TeamCrest';
 import StandingsTable from '../standings/StandingsTable';
 import { localEmblemPath } from '../../utils/crestUrl';
@@ -61,6 +62,7 @@ export default function TournamentDetailPage() {
   const [activeTab, setActiveTab] = useState<'games' | 'standings'>('games');
   const [gamesLoading, setGamesLoading] = useState(true);
   const [filter, setFilter] = useState<FilterOption>(0);
+  const [selectedGame, setSelectedGame] = useState<GameResponse | null>(null);
 
   useEffect(() => {
     setGamesLoading(true);
@@ -181,6 +183,7 @@ let filtered: GameResponse[];
                         return [...prev, prediction];
                       })
                     }
+                    onFinishedScoreClick={setSelectedGame}
                   />
                 ))
               )}
@@ -202,6 +205,14 @@ let filtered: GameResponse[];
       )}
 
       {activeTab === 'standings' && <StandingsTable standings={standings} tournamentId={tournamentId} />}
+
+      {selectedGame && (
+        <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
+          <div className={styles.modalPanel}>
+            <GamePredictionsDetail game={selectedGame} onClose={() => setSelectedGame(null)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
