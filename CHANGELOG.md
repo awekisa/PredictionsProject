@@ -1,3 +1,10 @@
+## 📦 v0.4.39 — 13 Jun 2026
+
+> **Migration discovery fix**
+> Added the generated EF migration designer metadata for the FIFA match status columns so production applies the schema before reading live score/status fields.
+
+---
+
 ## 📦 v0.4.38 — 13 Jun 2026
 
 > **Live FIFA score/status sync**
