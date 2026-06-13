@@ -63,6 +63,20 @@ const playerDetails = [
     pointsEarned: 3,
     matchDate: '2026-06-14T18:00:00Z',
   },
+  {
+    homeTeam: 'Argentina',
+    awayTeam: 'Portugal',
+    homeCrestUrl: null,
+    awayCrestUrl: null,
+    homeTeamShort: 'ARG',
+    awayTeamShort: 'POR',
+    predictedHome: 1,
+    predictedAway: 0,
+    actualHome: 2,
+    actualAway: 0,
+    pointsEarned: 1,
+    matchDate: '2026-06-15T18:00:00Z',
+  },
 ];
 
 const gamePredictions = [
@@ -86,7 +100,29 @@ const gamePredictions = [
     userDisplayName: 'Alex',
     createdAt: '2026-06-13T11:00:00Z',
   },
+  {
+    id: 3,
+    gameId: 101,
+    homeTeam: 'Brazil',
+    awayTeam: 'Germany',
+    homeGoals: 0,
+    awayGoals: 2,
+    userDisplayName: 'Toni',
+    createdAt: '2026-06-13T12:00:00Z',
+  },
 ];
+
+function expectPredictionDetailOutcome(rowText: string, outcome: 'exact-score' | 'correct-outcome' | 'missed') {
+  const expectedColor = outcome === 'exact-score'
+    ? 'rgb(73, 211, 0)'
+    : outcome === 'correct-outcome'
+      ? 'rgb(210, 165, 33)'
+      : 'rgb(149, 161, 177)';
+
+  cy.contains('[data-testid="prediction-detail-row"]', rowText)
+    .should('have.attr', 'data-outcome', outcome)
+    .and('have.css', 'border-left-color', expectedColor);
+}
 
 function stubTournament() {
   cy.intercept('GET', '**/api/tournaments/1', { statusCode: 200, body: tournament });
@@ -135,8 +171,18 @@ describe('prediction standings and drill-downs', () => {
       cy.contains('Brazil 2:1 Germany').should('be.visible');
       cy.contains('Predicted 2:1').should('be.visible');
       cy.contains('3 pts').should('be.visible');
+      cy.contains('Argentina 2:0 Portugal').should('be.visible');
+      cy.contains('Predicted 1:0').should('be.visible');
+      cy.contains('1 pts').should('be.visible');
       cy.contains('France').should('not.exist');
     });
+    expectPredictionDetailOutcome('Brazil 2:1 Germany', 'exact-score');
+    expectPredictionDetailOutcome('Argentina 2:0 Portugal', 'correct-outcome');
+
+    cy.get('button[aria-label="Close player predictions"]')
+      .should('have.css', 'display', 'flex')
+      .and('have.css', 'align-items', 'center')
+      .and('have.css', 'justify-content', 'center');
   });
 
   it('keeps every standings column inside a narrow mobile viewport', () => {
@@ -175,7 +221,24 @@ describe('prediction standings and drill-downs', () => {
       cy.contains('Alex').should('be.visible');
       cy.contains('1:0').should('be.visible');
       cy.contains('1 pt').should('be.visible');
+      cy.contains('Toni').should('be.visible');
+      cy.contains('0:2').should('be.visible');
+      cy.contains('0 pts').should('be.visible');
     });
+    cy.contains('[data-testid="game-prediction-row"]', 'Mitko')
+      .should('have.attr', 'data-outcome', 'exact-score')
+      .and('have.css', 'border-left-color', 'rgb(73, 211, 0)');
+    cy.contains('[data-testid="game-prediction-row"]', 'Alex')
+      .should('have.attr', 'data-outcome', 'correct-outcome')
+      .and('have.css', 'border-left-color', 'rgb(210, 165, 33)');
+    cy.contains('[data-testid="game-prediction-row"]', 'Toni')
+      .should('have.attr', 'data-outcome', 'missed')
+      .and('have.css', 'border-left-color', 'rgb(149, 161, 177)');
+
+    cy.get('button[aria-label="Close game predictions"]')
+      .should('have.css', 'display', 'flex')
+      .and('have.css', 'align-items', 'center')
+      .and('have.css', 'justify-content', 'center');
 
     cy.get('[data-testid="game-score-button"][data-game-id="102"]').should('not.exist');
   });

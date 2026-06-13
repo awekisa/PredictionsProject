@@ -26,15 +26,26 @@
 }
 
 .closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--color-border);
   background: var(--color-bg);
   color: var(--color-text);
   border-radius: 999px;
   width: 2rem;
   height: 2rem;
+  flex: 0 0 2rem;
   cursor: pointer;
   font-size: 1.2rem;
   line-height: 1;
+  padding: 0;
+}
+
+.closeButton:hover,
+.closeButton:focus-visible {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .tableWrap {
@@ -44,6 +55,35 @@
 .tableWrap th,
 .tableWrap td {
   white-space: nowrap;
+}
+
+.tableWrap tbody tr {
+  border-left: 3px solid var(--outcome-color, #95a1b1);
+}
+
+.scoreOutcome {
+  --outcome-color: #49d300;
+  background: rgb(73 211 0 / 0.08);
+}
+
+.correctOutcome {
+  --outcome-color: #d2a521;
+  background: rgb(210 165 33 / 0.1);
+}
+
+.missedOutcome {
+  --outcome-color: #95a1b1;
+  background: rgb(149 161 177 / 0.07);
+}
+
+.predictionScore,
+.pointsEarned {
+  color: var(--outcome-color);
+  font-weight: 700;
+}
+
+.pointsEarned {
+  text-align: right;
 }
 
 .empty {

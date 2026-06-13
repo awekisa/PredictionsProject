@@ -15,6 +15,18 @@ function medalClass(position: number): string {
   return '';
 }
 
+function predictionOutcomeClass(points: number): string {
+  if (points === 3) return styles.scoreOutcome;
+  if (points === 1) return styles.correctOutcome;
+  return styles.missedOutcome;
+}
+
+function predictionOutcomeLabel(points: number): 'exact-score' | 'correct-outcome' | 'missed' {
+  if (points === 3) return 'exact-score';
+  if (points === 1) return 'correct-outcome';
+  return 'missed';
+}
+
 function PlayerPredictionsDetail({
   playerName,
   details,
@@ -39,10 +51,15 @@ function PlayerPredictionsDetail({
       ) : (
         <div className={styles.playerDetailList}>
           {details.map((detail, index) => (
-            <div className={styles.playerDetailRow} key={`${detail.homeTeam}-${detail.awayTeam}-${index}`}>
+            <div
+              className={`${styles.playerDetailRow} ${predictionOutcomeClass(detail.pointsEarned)}`}
+              data-outcome={predictionOutcomeLabel(detail.pointsEarned)}
+              data-testid="prediction-detail-row"
+              key={`${detail.homeTeam}-${detail.awayTeam}-${index}`}
+            >
               <span className={styles.actualResult}>{detail.homeTeam} {detail.actualHome}:{detail.actualAway} {detail.awayTeam}</span>
-              <span>Predicted {detail.predictedHome}:{detail.predictedAway}</span>
-              <strong>{detail.pointsEarned} pts</strong>
+              <span className={styles.predictionScore}>Predicted {detail.predictedHome}:{detail.predictedAway}</span>
+              <strong className={styles.pointsEarned}>{detail.pointsEarned} pts</strong>
             </div>
           ))}
         </div>
