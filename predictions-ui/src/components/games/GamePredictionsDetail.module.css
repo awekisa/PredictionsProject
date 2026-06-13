@@ -2,27 +2,29 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  padding: 1rem;
+  padding: 0.75rem;
   color: var(--color-text);
+  font-size: 13px;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
 }
 
 .header h2 {
   margin: 0 0 0.35rem;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
 }
 
 .header p {
   margin: 0;
   color: var(--color-text-secondary);
   font-weight: 700;
+  font-size: 0.8rem;
 }
 
 .closeButton {
@@ -52,9 +54,31 @@
   overflow-x: auto;
 }
 
+.predictionsTable {
+  width: 100%;
+  table-layout: fixed;
+  font-size: 0.78rem;
+}
+
+.predColumn {
+  width: 48px;
+}
+
+.ptsColumn {
+  width: 44px;
+}
+
 .tableWrap th,
 .tableWrap td {
   white-space: nowrap;
+  padding: 0.35rem 0.4rem;
+}
+
+.tableWrap th:nth-child(2),
+.tableWrap td:nth-child(2),
+.tableWrap th:nth-child(3),
+.tableWrap td:nth-child(3) {
+  text-align: right;
 }
 
 .tableWrap tbody tr {

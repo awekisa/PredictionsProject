@@ -108,11 +108,11 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
             <tr>
               <th data-short="#">Rank #</th>
               <th data-short="Player">Player Name</th>
-              <th data-short="Exact">Exact Scores</th>
-              <th data-short="Outcome">Correct Outcomes</th>
-              <th data-short="Pts Games">Games with Points</th>
-              <th data-short="Predicted">Total Predicted Games</th>
-              <th data-short="Points">Total Points</th>
+              <th data-short="CS">CS</th>
+              <th data-short="1X2">1X2</th>
+              <th data-short="PG">PG</th>
+              <th data-short="#TP">#TP</th>
+              <th data-short="PTS">PTS</th>
             </tr>
           </thead>
           <tbody>
@@ -144,6 +144,7 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
       </div>
 
       <div className={styles.note}>Exact score = 3 pts | Correct outcome = 1 pt</div>
+      <div className={styles.legend}>CS – Correct score | 1X2 – Correct outcome | PG – Games with points won | #TP – Total number of predictions | PTS – Total points</div>
 
       {selectedPlayer && (
         <div className={styles.modalBackdrop} role="dialog" aria-modal="true">

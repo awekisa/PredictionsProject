@@ -57,12 +57,17 @@ export default function GamePredictionsDetail({ game, onClose }: Props) {
         <div className={styles.empty}>No predictions for this game yet.</div>
       ) : (
         <div className={styles.tableWrap}>
-          <table>
+          <table className={styles.predictionsTable}>
+            <colgroup>
+              <col />
+              <col className={styles.predColumn} />
+              <col className={styles.ptsColumn} />
+            </colgroup>
             <thead>
               <tr>
                 <th>Player</th>
-                <th>Prediction</th>
-                <th>Points</th>
+                <th>Pred</th>
+                <th>Pts</th>
               </tr>
             </thead>
             <tbody>

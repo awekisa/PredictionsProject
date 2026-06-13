@@ -148,11 +148,11 @@ describe('prediction standings and drill-downs', () => {
         expect([...$ths].map((th) => th.textContent?.trim())).to.deep.equal([
           'Rank #',
           'Player Name',
-          'Exact Scores',
-          'Correct Outcomes',
-          'Games with Points',
-          'Total Predicted Games',
-          'Total Points',
+          'CS',
+          '1X2',
+          'PG',
+          '#TP',
+          'PTS',
         ]);
       });
       cy.contains('td', 'Mitko').should('be.visible');
@@ -161,6 +161,7 @@ describe('prediction standings and drill-downs', () => {
     });
 
     cy.contains('Exact score = 3 pts | Correct outcome = 1 pt').should('be.visible');
+    cy.contains('CS – Correct score | 1X2 – Correct outcome | PG – Games with points won | #TP – Total number of predictions | PTS – Total points').should('be.visible');
     cy.get('[data-testid="prediction-result-section"]').should('not.exist');
     cy.get('[data-testid="prediction-detail-row"]').should('not.exist');
 
@@ -176,6 +177,7 @@ describe('prediction standings and drill-downs', () => {
       cy.contains('1 pts').should('be.visible');
       cy.contains('France').should('not.exist');
     });
+    cy.get('[data-testid="player-predictions-detail"]').should('have.css', 'font-size', '13px');
     expectPredictionDetailOutcome('Brazil 2:1 Germany', 'exact-score');
     expectPredictionDetailOutcome('Argentina 2:0 Portugal', 'correct-outcome');
 
@@ -214,6 +216,9 @@ describe('prediction standings and drill-downs', () => {
     cy.get('[data-testid="game-score-button"][data-game-id="101"]').should('be.visible').click();
     cy.wait('@gamePredictions');
     cy.get('[data-testid="game-predictions-detail"]').within(() => {
+      cy.get('thead th').then(($ths) => {
+        expect([...$ths].map((th) => th.textContent?.trim())).to.deep.equal(['Player', 'Pred', 'Pts']);
+      });
       cy.contains('Brazil 2:1 Germany').should('be.visible');
       cy.contains('Mitko').should('be.visible');
       cy.contains('2:1').should('be.visible');
@@ -224,6 +229,13 @@ describe('prediction standings and drill-downs', () => {
       cy.contains('Toni').should('be.visible');
       cy.contains('0:2').should('be.visible');
       cy.contains('0 pts').should('be.visible');
+    });
+    cy.get('[data-testid="game-predictions-detail"]').should('have.css', 'font-size', '13px');
+    cy.get('[data-testid="game-predictions-detail"] thead th').eq(1).then(($pred) => {
+      cy.get('[data-testid="game-predictions-detail"] thead th').eq(2).then(($pts) => {
+        expect($pred[0].getBoundingClientRect().width, 'Pred column width').to.be.lessThan(56);
+        expect($pts[0].getBoundingClientRect().width, 'Pts column width').to.be.lessThan(52);
+      });
     });
     cy.contains('[data-testid="game-prediction-row"]', 'Mitko')
       .should('have.attr', 'data-outcome', 'exact-score')
