@@ -65,10 +65,12 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced, onFin
     Number(myPrediction.homeGoals) === Number(game.homeGoals) &&
     Number(myPrediction.awayGoals) === Number(game.awayGoals);
 
-  const statusLabel = game.isFinished ? 'Finished' : hasStarted ? 'Live' : 'Upcoming';
+  const isFifaLive = game.fifaMatchStatus === 3;
+  const isFifaScheduled = game.fifaMatchStatus === 1;
+  const statusLabel = game.isFinished ? 'Finished' : isFifaLive ? 'Live' : isFifaScheduled ? 'Upcoming' : hasStarted ? 'Live' : 'Upcoming';
   const statusClass = game.isFinished
     ? styles.statusFinished
-    : hasStarted
+    : isFifaLive || (!isFifaScheduled && hasStarted)
       ? styles.statusLive
       : styles.statusUpcoming;
 

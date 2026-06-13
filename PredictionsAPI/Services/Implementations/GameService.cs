@@ -97,6 +97,30 @@ public class GameService : IGameService
         return MapToResponse(game);
     }
 
+    public async Task<GameResponse?> SyncScoreAsync(int gameId, SyncGameScoreRequest request)
+    {
+        var game = await _context.Games.FindAsync(gameId);
+        if (game is null) return null;
+
+        var hasHome = request.HomeGoals.HasValue;
+        var hasAway = request.AwayGoals.HasValue;
+        if (hasHome != hasAway) return null;
+
+        if (request.IsFinished && (!hasHome || !hasAway)) return null;
+
+        game.HomeGoals = request.HomeGoals;
+        game.AwayGoals = request.AwayGoals;
+        game.IsFinished = request.IsFinished;
+        game.FifaMatchStatus = request.FifaMatchStatus;
+        game.FifaMatchTime = string.IsNullOrWhiteSpace(request.FifaMatchTime)
+            ? null
+            : request.FifaMatchTime;
+
+        await _context.SaveChangesAsync();
+
+        return MapToResponse(game);
+    }
+
     public async Task<GameResponse?> ClearResultAsync(int gameId)
     {
         var game = await _context.Games.FindAsync(gameId);
@@ -121,6 +145,8 @@ public class GameService : IGameService
         HomeGoals = g.HomeGoals,
         AwayGoals = g.AwayGoals,
         IsFinished = g.IsFinished,
+        FifaMatchStatus = g.FifaMatchStatus,
+        FifaMatchTime = g.FifaMatchTime,
         HomeCrestUrl = g.HomeCrestUrl,
         AwayCrestUrl = g.AwayCrestUrl,
         HomeTeamShort = g.HomeTeamShort,

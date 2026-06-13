@@ -248,6 +248,12 @@ namespace PredictionsAPI.Migrations
                     b.Property<int?>("ExternalFixtureId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("FifaMatchStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FifaMatchTime")
+                        .HasColumnType("text");
+
                     b.Property<string>("HomeCrestUrl")
                         .HasColumnType("text");
 

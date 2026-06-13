@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
-"""World Cup 2026 production score settlement watchdog.
+"""World Cup 2026 FIFA score/status sync.
 
-Fetches unfinished production games for tournament 26, compares after-start games to
-FIFA's official calendar endpoint, and finalises only clearly completed matches.
-Never prints credentials/tokens. Defaults to the app's approved seeded-admin path;
-PREDICTIONS_ADMIN_EMAIL/PREDICTIONS_ADMIN_PASSWORD override it when configured.
+Fetches production games for tournament 26, compares started games to FIFA's
+official calendar endpoint, and syncs FIFA match status plus the currently
+reported score on every run. `isFinished` is driven by FIFA MatchStatus == 0;
+live scores are stored with `isFinished=false` so standings/prediction scoring
+remain final-only while the Games tab can show the live score.
+
+For knockout/elimination games, prediction scoring should use the full-time
+(90-minute) score, not extra-time/penalty shootout scores. If FIFA exposes
+extra-time/penalty fields and a clear full-time score is not available, the
+script refuses to finalise and reports manual review instead of guessing.
 """
 from __future__ import annotations
 
@@ -23,7 +29,7 @@ from typing import Any
 DEFAULT_API_BASE = "https://predictionsproject.onrender.com/api"
 DEFAULT_FIFA_URL = "https://api.fifa.com/api/v3/calendar/matches?language=en&count=500&idSeason=285023"
 DEFAULT_TOURNAMENT_ID = 26
-NORMAL_FINAL_STATUSES = {0}
+FINAL_STATUSES = {0}
 SCHEDULED_STATUSES = {1}
 LIVE_STATUSES = {3}
 MANUAL_REVIEW_STATUSES = {4, 8, 9, 12}
@@ -38,6 +44,7 @@ STATUS_NAMES = {
 }
 ALIASES = {"bosnia h": "bosnia and herzegovina", "bosnia-h": "bosnia and herzegovina", "bosnia-h.": "bosnia and herzegovina", "turkey": "turkiye", "türkiye": "turkiye", "iran": "ir iran", "cape verde": "cabo verde", "ivory coast": "cote divoire", "côte d'ivoire": "cote divoire", "côte d’ivoire": "cote divoire", "korea republic": "south korea"}
 
+
 def fetch_json(url: str, *, method: str = "GET", body: dict[str, Any] | None = None, headers: dict[str, str] | None = None) -> Any:
     data = None if body is None else json.dumps(body).encode("utf-8")
     req_headers = {"Accept": "application/json"}
@@ -51,6 +58,7 @@ def fetch_json(url: str, *, method: str = "GET", body: dict[str, Any] | None = N
             return None
         return json.load(response)
 
+
 def parse_utc(value: str | None) -> dt.datetime | None:
     if not value:
         return None
@@ -60,6 +68,7 @@ def parse_utc(value: str | None) -> dt.datetime | None:
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=dt.timezone.utc)
     return parsed.astimezone(dt.timezone.utc)
+
 
 def localized_text(value: Any) -> str:
     if isinstance(value, list):
@@ -75,6 +84,7 @@ def localized_text(value: Any) -> str:
         return str(value.get("ShortClubName") or "")
     return str(value or "")
 
+
 def norm_team(name: str | None) -> str:
     value = (name or "").strip().lower().replace("’", "'")
     value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
@@ -82,31 +92,58 @@ def norm_team(name: str | None) -> str:
     value = ALIASES.get(value, value)
     return re.sub(r"[^a-z0-9]+", " ", value).strip()
 
-def calendar_score(match: dict[str, Any]) -> tuple[int, int] | tuple[str, str] | None:
-    home = match.get("HomeTeamScore")
-    away = match.get("AwayTeamScore")
-    if home is None and isinstance(match.get("Home"), dict):
-        home = match["Home"].get("Score")
-    if away is None and isinstance(match.get("Away"), dict):
-        away = match["Away"].get("Score")
+
+def score_value(match: dict[str, Any], side: str) -> Any:
+    field = f"{side}TeamScore"
+    value = match.get(field)
+    if value is None and isinstance(match.get(side), dict):
+        value = match[side].get("Score")
+    return value
+
+
+def has_extra_or_penalty_data(match: dict[str, Any]) -> bool:
+    return any(match.get(field) is not None for field in (
+        "HomeTeamPenaltyScore",
+        "AwayTeamPenaltyScore",
+        "FirstHalfExtraTime",
+        "SecondHalfExtraTime",
+    ))
+
+
+def _period_score(period: Any) -> tuple[int, int] | None:
+    if not isinstance(period, dict):
+        return None
+    home = period.get("HomeTeamScore", period.get("HomeScore"))
+    away = period.get("AwayTeamScore", period.get("AwayScore"))
     if home is None or away is None:
         return None
-    if match.get("HomeTeamPenaltyScore") is not None or match.get("AwayTeamPenaltyScore") is not None:
-        return ("manual", "penalty score present; 90-minute score not clearly separated in FIFA calendar payload")
-    if match.get("FirstHalfExtraTime") is not None or match.get("SecondHalfExtraTime") is not None:
-        return ("manual", "extra-time fields present; 90-minute score not clearly separated in FIFA calendar payload")
     return int(home), int(away)
 
 
-@dataclass(frozen=True)
-class SettlementDecision:
-    should_settle: bool
-    classification: str
-    reason: str
+def full_time_score(match: dict[str, Any]) -> tuple[int, int] | None:
+    """Return the 90-minute score when FIFA separates periods for knockouts."""
+    first = _period_score(match.get("FirstHalfTime"))
+    second = _period_score(match.get("SecondHalfTime"))
+    if first and second:
+        return first[0] + second[0], first[1] + second[1]
+    return None
+
+
+def fifa_score_for_sync(match: dict[str, Any], *, finalising: bool) -> tuple[int, int] | tuple[str, str] | None:
+    if finalising and has_extra_or_penalty_data(match):
+        ft = full_time_score(match)
+        if ft is not None:
+            return ft
+        return ("manual", "extra-time/penalty fields present; no clear 90-minute full-time score in FIFA payload")
+    home = score_value(match, "Home")
+    away = score_value(match, "Away")
+    if home is None or away is None:
+        return None
+    return int(home), int(away)
 
 
 def classify_match_status(status: Any) -> str:
-    if status in NORMAL_FINAL_STATUSES:
+    if status in FINAL_STATUSES:
         return "finished"
     if status in SCHEDULED_STATUSES:
         return "scheduled"
@@ -117,24 +154,32 @@ def classify_match_status(status: Any) -> str:
     return "unknown"
 
 
-def settlement_decision(match: dict[str, Any], start: dt.datetime, now: dt.datetime) -> SettlementDecision:
+@dataclass(frozen=True)
+class ScoreSyncDecision:
+    should_sync: bool
+    is_finished: bool
+    classification: str
+    reason: str
+    score: tuple[int, int] | None = None
+
+
+def score_sync_decision(match: dict[str, Any]) -> ScoreSyncDecision:
     status = match.get("MatchStatus")
     classification = classify_match_status(status)
-    elapsed = now - start
-
     if classification == "scheduled":
-        return SettlementDecision(False, classification, "FIFA match is scheduled/upcoming")
-    if classification == "live":
-        return SettlementDecision(False, classification, "FIFA match is live; live score must not finalise production result")
-    if classification == "manual_review":
-        return SettlementDecision(False, classification, "FIFA status requires manual result review")
-    if classification != "finished":
-        return SettlementDecision(False, classification, "FIFA status is unknown; manual review required")
-    if elapsed < dt.timedelta(minutes=115):
-        return SettlementDecision(False, classification, "FIFA final status observed but elapsed-time guard has not passed")
-    if calendar_score(match) is None:
-        return SettlementDecision(False, classification, "FIFA final status observed but score is missing")
-    return SettlementDecision(True, classification, "FIFA finished status with score after elapsed-time guard")
+        return ScoreSyncDecision(False, False, classification, "FIFA match is scheduled/upcoming")
+    if classification in {"manual_review", "unknown"}:
+        return ScoreSyncDecision(False, False, classification, "FIFA status requires manual result review")
+
+    is_finished = classification == "finished"
+    score = fifa_score_for_sync(match, finalising=is_finished)
+    if score is None:
+        return ScoreSyncDecision(False, is_finished, classification, "FIFA status is syncable but score is missing")
+    if isinstance(score[0], str):
+        return ScoreSyncDecision(False, is_finished, classification, str(score[1]))
+    home_goals = int(score[0])
+    away_goals = int(score[1])
+    return ScoreSyncDecision(True, is_finished, classification, "Sync FIFA score/status", (home_goals, away_goals))
 
 
 def main() -> int:
@@ -142,11 +187,21 @@ def main() -> int:
     parser.add_argument("--api-base", default=os.environ.get("PREDICTIONS_API_BASE", DEFAULT_API_BASE))
     parser.add_argument("--fifa-url", default=os.environ.get("FIFA_WORLD_CUP_URL", DEFAULT_FIFA_URL))
     parser.add_argument("--tournament-id", type=int, default=int(os.environ.get("PREDICTIONS_TOURNAMENT_ID", DEFAULT_TOURNAMENT_ID)))
-    parser.add_argument("--dry-run", action="store_true", help="Report intended settlements without PUTting results")
+    parser.add_argument("--dry-run", action="store_true", help="Report intended score/status syncs without PUTting changes")
+    parser.add_argument("--use-seeded-admin", action="store_true", help="Allow the approved seeded admin fallback credentials")
     args = parser.parse_args()
-    email = os.environ.get("PREDICTIONS_ADMIN_EMAIL", "admin@predictions.com")
-    password = os.environ.get("PREDICTIONS_ADMIN_PASSWORD", "Admin123!")
-    output: dict[str, Any] = {"blocker": None, "settled": [], "manual": []}
+
+    email = os.environ.get("PREDICTIONS_ADMIN_EMAIL")
+    password = os.environ.get("PREDICTIONS_ADMIN_PASSWORD")
+    if not email or not password:
+        if args.use_seeded_admin or os.environ.get("PREDICTIONS_ALLOW_SEEDED_ADMIN") == "1":
+            email = "admin@predictions.com"
+            password = "Admin123!"
+        else:
+            print(json.dumps({"blocker": "Missing PREDICTIONS_ADMIN_EMAIL/PREDICTIONS_ADMIN_PASSWORD; pass --use-seeded-admin to use approved seeded admin fallback"}))
+            return 0
+
+    output: dict[str, Any] = {"blocker": None, "synced": [], "manual": []}
     try:
         auth_response = fetch_json(f"{args.api_base}/auth/login", method="POST", body={"email": email, "password": password})
         token = auth_response["token"]
@@ -162,6 +217,7 @@ def main() -> int:
         output["blocker"] = f"{type(exc).__name__} while fetching/authenticating production or FIFA data: {str(exc)[:300]}"
         print(json.dumps(output, ensure_ascii=False))
         return 0
+
     now = dt.datetime.now(dt.timezone.utc)
     fifa_matches = fifa_response.get("Results", fifa_response if isinstance(fifa_response, list) else [])
     by_pair: dict[tuple[str, str], list[dict[str, Any]]] = {}
@@ -169,6 +225,7 @@ def main() -> int:
         key = (norm_team(localized_text(match.get("Home"))), norm_team(localized_text(match.get("Away"))))
         if key[0] and key[1]:
             by_pair.setdefault(key, []).append(match)
+
     for game in games:
         start = parse_utc(game.get("startTime"))
         if not start or now <= start:
@@ -182,41 +239,51 @@ def main() -> int:
         fifa_match = min(matches, key=lambda item: abs(((parse_utc(item.get("Date")) or start) - start).total_seconds()))
         status = fifa_match.get("MatchStatus")
         status_name = STATUS_NAMES.get(status, str(status))
-        elapsed = now - start
-        decision = settlement_decision(fifa_match, start, now)
-        if not decision.should_settle:
-            if decision.classification in {"live", "manual_review", "unknown"} and elapsed > dt.timedelta(minutes=105):
+        decision = score_sync_decision(fifa_match)
+        if not decision.should_sync:
+            if decision.classification in {"manual_review", "unknown"} or now > start:
                 output["manual"].append({"match": match_label, "productionGameId": game.get("id"), "reason": decision.reason, "fifaDataObserved": {"idMatch": fifa_match.get("IdMatch"), "matchStatus": status, "statusName": status_name, "matchTime": fifa_match.get("MatchTime"), "homeTeamScore": fifa_match.get("HomeTeamScore"), "awayTeamScore": fifa_match.get("AwayTeamScore"), "resultType": fifa_match.get("ResultType")}})
             continue
-        score = calendar_score(fifa_match)
-        if score is None:
-            output["manual"].append({"match": match_label, "productionGameId": game.get("id"), "reason": "FIFA final status but full-time score missing", "fifaDataObserved": {"idMatch": fifa_match.get("IdMatch"), "matchStatus": status, "statusName": status_name}})
-            continue
-        if isinstance(score[0], str):
-            output["manual"].append({"match": match_label, "productionGameId": game.get("id"), "reason": score[1], "fifaDataObserved": {"idMatch": fifa_match.get("IdMatch"), "matchStatus": status, "statusName": status_name, "homeTeamScore": fifa_match.get("HomeTeamScore"), "awayTeamScore": fifa_match.get("AwayTeamScore"), "homePenalty": fifa_match.get("HomeTeamPenaltyScore"), "awayPenalty": fifa_match.get("AwayTeamPenaltyScore")}})
-            continue
-        home_goals, away_goals = score
-        already_correct = game.get("isFinished") is True and game.get("homeGoals") == home_goals and game.get("awayGoals") == away_goals
+
+        home_goals, away_goals = decision.score or (None, None)
+        already_correct = (
+            game.get("homeGoals") == home_goals
+            and game.get("awayGoals") == away_goals
+            and game.get("isFinished") is decision.is_finished
+            and game.get("fifaMatchStatus") == status
+            and (game.get("fifaMatchTime") or None) == (fifa_match.get("MatchTime") or None)
+        )
         if already_correct:
             continue
-        previous_score = None
-        action = "settled"
-        if game.get("isFinished") is True:
-            previous_score = f"{game.get('homeGoals')}-{game.get('awayGoals')}"
-            action = "corrected"
+
+        payload = {
+            "homeGoals": home_goals,
+            "awayGoals": away_goals,
+            "isFinished": decision.is_finished,
+            "fifaMatchStatus": status,
+            "fifaMatchTime": fifa_match.get("MatchTime"),
+        }
+        action = "finalised" if decision.is_finished else "live_sync"
+        summary = {"match": f"{game.get('homeTeam')} {home_goals}-{away_goals} {game.get('awayTeam')}", "fifaMatchStatus": status_name, "fifaMatchTime": fifa_match.get("MatchTime"), "productionGameId": game.get("id"), "action": action, "previousProduction": {field: game.get(field) for field in ("homeGoals", "awayGoals", "isFinished", "fifaMatchStatus", "fifaMatchTime")}}
         if args.dry_run:
-            output["settled"].append({"match": f"{game.get('homeTeam')} {home_goals}-{away_goals} {game.get('awayTeam')}", "fifaMatchStatus": status_name, "fullTimeScoreUsed": f"{home_goals}-{away_goals}", "previousProductionScore": previous_score, "productionGameId": game.get("id"), "action": action, "dryRun": True})
+            summary["dryRun"] = True
+            output["synced"].append(summary)
             continue
-        fetch_json(f"{args.api_base}/admin/games/{game.get('id')}/result", method="PUT", headers=auth, body={"homeGoals": home_goals, "awayGoals": away_goals})
+
+        fetch_json(f"{args.api_base}/admin/games/{game.get('id')}/score-sync", method="PUT", headers=auth, body=payload)
         confirmed = fetch_json(f"{args.api_base}/admin/tournaments/{args.tournament_id}/games/{game.get('id')}", headers=auth)
-        if confirmed.get("homeGoals") == home_goals and confirmed.get("awayGoals") == away_goals and confirmed.get("isFinished") is True:
-            output["settled"].append({"match": f"{game.get('homeTeam')} {home_goals}-{away_goals} {game.get('awayTeam')}", "fifaMatchStatus": status_name, "fullTimeScoreUsed": f"{home_goals}-{away_goals}", "previousProductionScore": previous_score, "productionGameId": game.get("id"), "action": action, "confirmedIsFinished": True})
+        if confirmed.get("homeGoals") == home_goals and confirmed.get("awayGoals") == away_goals and confirmed.get("isFinished") is decision.is_finished and confirmed.get("fifaMatchStatus") == status:
+            summary["confirmed"] = {field: confirmed.get(field) for field in ("homeGoals", "awayGoals", "isFinished", "fifaMatchStatus", "fifaMatchTime")}
+            output["synced"].append(summary)
         else:
-            output["manual"].append({"match": match_label, "productionGameId": game.get("id"), "reason": "SetResult response did not verify on refetch", "fifaDataObserved": {"intendedScore": f"{home_goals}-{away_goals}", "confirmed": {field: confirmed.get(field) for field in ("homeGoals", "awayGoals", "isFinished")}}})
-    if not output["blocker"] and not output["settled"] and not output["manual"]:
+            output["manual"].append({"match": match_label, "productionGameId": game.get("id"), "reason": "Score sync response did not verify on refetch", "intended": payload, "confirmed": {field: confirmed.get(field) for field in ("homeGoals", "awayGoals", "isFinished", "fifaMatchStatus", "fifaMatchTime")}})
+
+    if not output["blocker"] and not output["synced"] and not output["manual"]:
         print("[SILENT]")
     else:
         print(json.dumps(output, ensure_ascii=False, indent=2))
     return 0
+
+
 if __name__ == "__main__":
     raise SystemExit(main())

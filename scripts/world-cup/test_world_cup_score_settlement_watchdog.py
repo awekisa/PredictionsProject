@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import datetime as dt
 import importlib.util
 import pathlib
 import sys
@@ -14,8 +13,8 @@ assert spec.loader is not None
 spec.loader.exec_module(watchdog)
 
 
-class FifaStatusSettlementTests(unittest.TestCase):
-    def test_status_3_with_live_score_is_not_settleable(self):
+class FifaStatusScoreSyncTests(unittest.TestCase):
+    def test_status_3_with_live_score_syncs_without_finishing(self):
         match = {
             "MatchStatus": 3,
             "MatchTime": "43'",
@@ -23,16 +22,15 @@ class FifaStatusSettlementTests(unittest.TestCase):
             "AwayTeamScore": 1,
             "ResultType": 0,
         }
-        start = dt.datetime(2026, 6, 13, 19, 0, tzinfo=dt.timezone.utc)
-        now = dt.datetime(2026, 6, 13, 21, 0, tzinfo=dt.timezone.utc)
 
-        decision = watchdog.settlement_decision(match, start, now)
+        decision = watchdog.score_sync_decision(match)
 
-        self.assertFalse(decision.should_settle)
+        self.assertTrue(decision.should_sync)
+        self.assertFalse(decision.is_finished)
         self.assertEqual(decision.classification, "live")
-        self.assertIn("live", decision.reason.lower())
+        self.assertEqual(decision.score, (0, 1))
 
-    def test_status_0_with_score_after_elapsed_guard_is_settleable(self):
+    def test_status_0_with_score_syncs_and_finishes(self):
         match = {
             "MatchStatus": 0,
             "MatchTime": "98'",
@@ -40,15 +38,15 @@ class FifaStatusSettlementTests(unittest.TestCase):
             "AwayTeamScore": 0,
             "ResultType": 1,
         }
-        start = dt.datetime(2026, 6, 11, 19, 0, tzinfo=dt.timezone.utc)
-        now = dt.datetime(2026, 6, 11, 21, 0, tzinfo=dt.timezone.utc)
 
-        decision = watchdog.settlement_decision(match, start, now)
+        decision = watchdog.score_sync_decision(match)
 
-        self.assertTrue(decision.should_settle)
+        self.assertTrue(decision.should_sync)
+        self.assertTrue(decision.is_finished)
         self.assertEqual(decision.classification, "finished")
+        self.assertEqual(decision.score, (2, 0))
 
-    def test_status_1_is_scheduled_not_settleable(self):
+    def test_status_1_is_scheduled_not_syncable_without_score(self):
         match = {
             "MatchStatus": 1,
             "MatchTime": None,
@@ -56,12 +54,11 @@ class FifaStatusSettlementTests(unittest.TestCase):
             "AwayTeamScore": None,
             "ResultType": 0,
         }
-        start = dt.datetime(2026, 6, 13, 22, 0, tzinfo=dt.timezone.utc)
-        now = dt.datetime(2026, 6, 13, 21, 0, tzinfo=dt.timezone.utc)
 
-        decision = watchdog.settlement_decision(match, start, now)
+        decision = watchdog.score_sync_decision(match)
 
-        self.assertFalse(decision.should_settle)
+        self.assertFalse(decision.should_sync)
+        self.assertFalse(decision.is_finished)
         self.assertEqual(decision.classification, "scheduled")
 
     def test_special_status_with_score_requires_manual_review(self):
@@ -72,13 +69,43 @@ class FifaStatusSettlementTests(unittest.TestCase):
             "AwayTeamScore": 3,
             "ResultType": 12,
         }
-        start = dt.datetime(2026, 6, 13, 19, 0, tzinfo=dt.timezone.utc)
-        now = dt.datetime(2026, 6, 13, 21, 0, tzinfo=dt.timezone.utc)
 
-        decision = watchdog.settlement_decision(match, start, now)
+        decision = watchdog.score_sync_decision(match)
 
-        self.assertFalse(decision.should_settle)
+        self.assertFalse(decision.should_sync)
         self.assertEqual(decision.classification, "manual_review")
+
+    def test_elimination_extra_time_final_uses_full_time_score_when_available(self):
+        match = {
+            "MatchStatus": 0,
+            "MatchTime": "120'",
+            "HomeTeamScore": 2,
+            "AwayTeamScore": 1,
+            "FirstHalfTime": {"HomeTeamScore": 0, "AwayTeamScore": 0},
+            "SecondHalfTime": {"HomeTeamScore": 1, "AwayTeamScore": 1},
+            "FirstHalfExtraTime": {"HomeTeamScore": 1, "AwayTeamScore": 0},
+        }
+
+        decision = watchdog.score_sync_decision(match)
+
+        self.assertTrue(decision.should_sync)
+        self.assertTrue(decision.is_finished)
+        self.assertEqual(decision.score, (1, 1))
+
+    def test_elimination_extra_time_final_requires_manual_review_without_full_time_score(self):
+        match = {
+            "MatchStatus": 0,
+            "MatchTime": "120'",
+            "HomeTeamScore": 2,
+            "AwayTeamScore": 1,
+            "FirstHalfExtraTime": {"HomeTeamScore": 1, "AwayTeamScore": 0},
+        }
+
+        decision = watchdog.score_sync_decision(match)
+
+        self.assertFalse(decision.should_sync)
+        self.assertTrue(decision.is_finished)
+        self.assertIn("90-minute", decision.reason)
 
 
 if __name__ == "__main__":

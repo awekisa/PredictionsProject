@@ -18,6 +18,10 @@ public class Game
 
     public bool IsFinished { get; set; }
 
+    public int? FifaMatchStatus { get; set; }
+
+    public string? FifaMatchTime { get; set; }
+
     public int? ExternalFixtureId { get; set; }
 
     public string? HomeCrestUrl { get; set; }

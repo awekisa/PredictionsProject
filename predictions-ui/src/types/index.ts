@@ -50,6 +50,8 @@ export interface GameResponse {
   homeGoals: number | null;
   awayGoals: number | null;
   isFinished: boolean;
+  fifaMatchStatus: number | null;
+  fifaMatchTime: string | null;
   homeCrestUrl: string | null;
   awayCrestUrl: string | null;
   homeTeamShort: string | null;

@@ -18,6 +18,10 @@ public class GameResponse
 
     public bool IsFinished { get; set; }
 
+    public int? FifaMatchStatus { get; set; }
+
+    public string? FifaMatchTime { get; set; }
+
     public string? HomeCrestUrl { get; set; }
 
     public string? AwayCrestUrl { get; set; }

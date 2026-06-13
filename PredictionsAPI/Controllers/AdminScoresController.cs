@@ -25,6 +25,14 @@ public class AdminScoresController : ControllerBase
         return Ok(game);
     }
 
+    [HttpPut("{gameId}/score-sync")]
+    public async Task<IActionResult> SyncScore(int gameId, [FromBody] SyncGameScoreRequest request)
+    {
+        var game = await _gameService.SyncScoreAsync(gameId, request);
+        if (game is null) return BadRequest("Game not found or score payload is invalid.");
+        return Ok(game);
+    }
+
     [HttpDelete("{gameId}/result")]
     public async Task<IActionResult> ClearResult(int gameId)
     {
