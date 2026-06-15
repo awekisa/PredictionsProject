@@ -1,3 +1,10 @@
+## 📦 v0.4.43 — 15 Jun 2026
+
+> **Started-game prediction drill-downs**
+> Game scores are now clickable after kickoff, including live games, so players can view all predictions once prediction secrecy has ended instead of waiting for the final whistle.
+
+---
+
 ## 📦 v0.4.42 — 13 Jun 2026
 
 > **Live FIFA updater script fix**
