@@ -12,7 +12,7 @@ const finishedGame = {
   tournamentId: 1,
   homeTeam: 'Brazil',
   awayTeam: 'Germany',
-  startTime: '2026-06-14T18:00:00Z',
+  startTime: '2020-06-14T18:00:00Z',
   homeGoals: 2,
   awayGoals: 1,
   isFinished: true,
@@ -20,6 +20,23 @@ const finishedGame = {
   awayCrestUrl: null,
   homeTeamShort: 'BRA',
   awayTeamShort: 'GER',
+};
+
+const liveGame = {
+  id: 103,
+  tournamentId: 1,
+  homeTeam: 'Argentina',
+  awayTeam: 'Portugal',
+  startTime: '2020-06-15T18:00:00Z',
+  homeGoals: 1,
+  awayGoals: 1,
+  isFinished: false,
+  fifaMatchStatus: 3,
+  fifaMatchTime: "64'",
+  homeCrestUrl: null,
+  awayCrestUrl: null,
+  homeTeamShort: 'ARG',
+  awayTeamShort: 'POR',
 };
 
 const futureGame = {
@@ -112,6 +129,19 @@ const gamePredictions = [
   },
 ];
 
+const liveGamePredictions = [
+  {
+    id: 4,
+    gameId: 103,
+    homeTeam: 'Argentina',
+    awayTeam: 'Portugal',
+    homeGoals: 1,
+    awayGoals: 1,
+    userDisplayName: 'Mitko',
+    createdAt: '2026-06-15T10:00:00Z',
+  },
+];
+
 function expectPredictionDetailOutcome(rowText: string, outcome: 'exact-score' | 'correct-outcome' | 'missed') {
   const expectedColor = outcome === 'exact-score'
     ? 'rgb(73, 211, 0)'
@@ -126,7 +156,7 @@ function expectPredictionDetailOutcome(rowText: string, outcome: 'exact-score' |
 
 function stubTournament() {
   cy.intercept('GET', '**/api/tournaments/1', { statusCode: 200, body: tournament });
-  cy.intercept('GET', '**/api/tournaments/1/games', { statusCode: 200, body: [finishedGame, futureGame] });
+  cy.intercept('GET', '**/api/tournaments/1/games', { statusCode: 200, body: [finishedGame, liveGame, futureGame] });
   cy.intercept('GET', '**/api/tournaments/1/my-predictions', { statusCode: 200, body: [] });
   cy.intercept('GET', '**/api/tournaments/1/standings', { statusCode: 200, body: standings });
   cy.intercept('GET', '**/api/tournaments/1/football-standings', { statusCode: 204, body: '' });
@@ -206,12 +236,23 @@ describe('prediction standings and drill-downs', () => {
     });
   });
 
-  it('opens all player predictions by clicking a finished fixture score and leaves upcoming scores non-clickable', () => {
+  it('opens all player predictions by clicking a started fixture score and leaves upcoming scores non-clickable', () => {
     stubTournament();
     cy.intercept('GET', '**/api/games/101/predictions', { statusCode: 200, body: gamePredictions }).as('gamePredictions');
+    cy.intercept('GET', '**/api/games/103/predictions', { statusCode: 200, body: liveGamePredictions }).as('liveGamePredictions');
 
     cy.visitAuthenticated('/tournaments/1');
     cy.contains('button', 'All').click();
+
+    cy.get('[data-testid="game-score-button"][data-game-id="103"]').should('be.visible').click();
+    cy.wait('@liveGamePredictions');
+    cy.get('[data-testid="game-predictions-detail"]').within(() => {
+      cy.contains('Argentina 1:1 Portugal').should('be.visible');
+      cy.contains('Mitko').should('be.visible');
+      cy.contains('1:1').should('be.visible');
+      cy.contains('3 pts').should('be.visible');
+    });
+    cy.get('button[aria-label="Close game predictions"]').click();
 
     cy.get('[data-testid="game-score-button"][data-game-id="101"]').should('be.visible').click();
     cy.wait('@gamePredictions');

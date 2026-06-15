@@ -183,7 +183,7 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced, onFin
           <span ref={homeNameRef} className={styles.homeTeam}>{displayName(game.homeTeam)}</span>
         </div>
         <TeamCrest teamName={game.homeTeam} fallbackUrl={game.homeCrestUrl} className={styles.homeCrest} />
-        {game.isFinished && hasScore && onFinishedScoreClick ? (
+        {hasStarted && hasScore && onFinishedScoreClick ? (
           <button
             type="button"
             className={styles.scoreButton}
