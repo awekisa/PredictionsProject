@@ -14,6 +14,7 @@ from typing import Any
 API_BASE = os.environ.get("PREDICTIONS_API_BASE", "https://predictionsproject.onrender.com/api")
 FIFA_URL = os.environ.get("FIFA_WORLD_CUP_URL", "https://api.fifa.com/api/v3/calendar/matches?language=en&count=500&idSeason=285023")
 TOURNAMENT_ID = int(os.environ.get("PREDICTIONS_TOURNAMENT_ID", "26"))
+CREATE_KNOCKOUT_FIXTURES = os.environ.get("PREDICTIONS_CREATE_KNOCKOUT_FIXTURES", "1") not in {"0", "false", "False"}
 NORMAL_FINAL_STATUSES = {0}
 SCHEDULED_STATUSES = {1}
 LIVE_STATUSES = {3}
@@ -95,9 +96,16 @@ def norm_team(name: str | None) -> str:
     return re.sub(r"[^a-z0-9]+", " ", value).strip()
 
 
+def stage_name(match: dict[str, Any]) -> str:
+    return localized_text(match.get("StageName"))
+
+
 def is_first_stage(match: dict[str, Any]) -> bool:
-    stage = localized_text(match.get("StageName"))
-    return stage.lower() in {"first stage", "group stage"}
+    return stage_name(match).lower() in {"first stage", "group stage"}
+
+
+def is_knockout_stage(match: dict[str, Any]) -> bool:
+    return bool(stage_name(match)) and not is_first_stage(match)
 
 
 def team_names(match: dict[str, Any]) -> tuple[str, str]:
@@ -170,6 +178,81 @@ def choose_match(game: dict[str, Any], index: dict[tuple[str, str], list[dict[st
     return candidates[0]
 
 
+def has_existing_game_for_match(games: list[dict[str, Any]], match: dict[str, Any]) -> bool:
+    home, away = team_names(match)
+    match_start = parse_utc(match.get("Date"))
+    if not match_start:
+        return False
+    match_key = (norm_team(home), norm_team(away))
+    for game in games:
+        game_start = parse_utc(game.get("startTime"))
+        if not game_start:
+            continue
+        game_key = (norm_team(game.get("homeTeam")), norm_team(game.get("awayTeam")))
+        if game_key == match_key and abs((game_start - match_start).total_seconds()) <= 300:
+            return True
+    return False
+
+
+def knockout_fixture_candidate(match: dict[str, Any]) -> dict[str, Any] | None:
+    if not is_knockout_stage(match):
+        return None
+    home, away = team_names(match)
+    start = parse_utc(match.get("Date"))
+    if not start:
+        return None
+    if not home.strip() or not away.strip() or is_placeholder(home) or is_placeholder(away):
+        return None
+    return {
+        "homeTeam": home,
+        "awayTeam": away,
+        "startTime": iso_z(start),
+        "stage": stage_name(match),
+        "fifaMatchId": match.get("IdMatch"),
+    }
+
+
+def create_missing_knockout_fixtures(
+    games: list[dict[str, Any]],
+    fifa_matches: list[dict[str, Any]],
+    *,
+    headers: dict[str, str],
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    result: dict[str, Any] = {"created": [], "wouldCreate": [], "skippedExisting": 0, "skippedUndetermined": 0}
+    current_games = list(games)
+    for match in sorted(fifa_matches, key=lambda m: m.get("Date") or ""):
+        if not is_knockout_stage(match):
+            continue
+        candidate = knockout_fixture_candidate(match)
+        if candidate is None:
+            result["skippedUndetermined"] += 1
+            continue
+        if has_existing_game_for_match(current_games, match):
+            result["skippedExisting"] += 1
+            continue
+        body = {"homeTeam": candidate["homeTeam"], "awayTeam": candidate["awayTeam"], "startTime": candidate["startTime"]}
+        if dry_run:
+            result["wouldCreate"].append(candidate)
+            continue
+        created = fetch_json(f"{API_BASE}/admin/tournaments/{TOURNAMENT_ID}/games", method="POST", headers=headers, body=body)
+        created_start = parse_utc(created.get("startTime")) if isinstance(created, dict) else None
+        expected_start = parse_utc(candidate["startTime"])
+        if (
+            isinstance(created, dict)
+            and norm_team(created.get("homeTeam")) == norm_team(candidate["homeTeam"])
+            and norm_team(created.get("awayTeam")) == norm_team(candidate["awayTeam"])
+            and created_start == expected_start
+        ):
+            item = dict(candidate)
+            item["productionGameId"] = created.get("id")
+            result["created"].append(item)
+            current_games.append(created)
+        else:
+            raise RuntimeError(f"Knockout fixture create did not verify for {candidate['homeTeam']} vs {candidate['awayTeam']}")
+    return result
+
+
 def compare(games: list[dict[str, Any]], fifa_index: dict[tuple[str, str], list[dict[str, Any]]], *, now: dt.datetime) -> dict[str, Any]:
     diffs = []
     missing = []
@@ -209,7 +292,7 @@ def compare(games: list[dict[str, Any]], fifa_index: dict[tuple[str, str], list[
     return {"checked": len(games), "matched": matched, "missing": missing, "diffs": diffs, "manual": manual}
 
 def main() -> int:
-    report: dict[str, Any] = {"source": FIFA_URL, "productionTournamentId": TOURNAMENT_ID, "blocker": None, "timeUpdates": [], "scoreFinalisations": [], "manualReview": []}
+    report: dict[str, Any] = {"source": FIFA_URL, "productionTournamentId": TOURNAMENT_ID, "blocker": None, "knockoutFixtureCreates": [], "knockoutFixtureWouldCreate": [], "knockoutFixtureSkipped": {}, "timeUpdates": [], "scoreFinalisations": [], "manualReview": []}
     try:
         headers = auth_headers()
         raw_fifa = fetch_json(FIFA_URL)
@@ -228,6 +311,23 @@ def main() -> int:
         return 0
 
     now = dt.datetime.now(dt.timezone.utc).replace(microsecond=0)
+    if CREATE_KNOCKOUT_FIXTURES:
+        try:
+            knockout = create_missing_knockout_fixtures(games, all_fifa, headers=headers)
+            report["knockoutFixtureCreates"] = knockout["created"]
+            report["knockoutFixtureWouldCreate"] = knockout["wouldCreate"]
+            report["knockoutFixtureSkipped"] = {"existing": knockout["skippedExisting"], "undetermined": knockout["skippedUndetermined"]}
+            if knockout["created"]:
+                games = fetch_json(f"{API_BASE}/admin/tournaments/{TOURNAMENT_ID}/games", headers=headers)
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode(errors="replace")[:300]
+            report["blocker"] = f"HTTP {exc.code} while creating/verifying knockout fixtures: {detail}"
+            print(json.dumps(report, ensure_ascii=False, indent=2))
+            return 0
+        except Exception as exc:
+            report["blocker"] = f"{type(exc).__name__} while creating/verifying knockout fixtures: {str(exc)[:300]}"
+            print(json.dumps(report, ensure_ascii=False, indent=2))
+            return 0
     before = compare(games, fifa_index, now=now)
     report["productionGamesChecked"] = before["checked"]
     report["fifaFirstStageMatches"] = len(first_stage_fifa)
@@ -304,7 +404,7 @@ def main() -> int:
     report["remainingDiffs"] = after["diffs"]
     report["manualReview"].extend(after["manual"])
 
-    if not report["timeUpdates"] and not report["scoreFinalisations"] and not report["manualReview"] and not report["remainingDiffs"]:
+    if not report["knockoutFixtureCreates"] and not report["knockoutFixtureWouldCreate"] and not report["timeUpdates"] and not report["scoreFinalisations"] and not report["manualReview"] and not report["remainingDiffs"]:
         print("[SILENT]")
     else:
         print(json.dumps(report, ensure_ascii=False, indent=2))
