@@ -17,6 +17,7 @@ const FLAG_COUNTRY_CODES: Record<string, string> = {
   'bosnia and herzegovina': 'ba',
   'brazil': 'br',
   'canada': 'ca',
+  'cabo verde': 'cv',
   'cape verde': 'cv',
   'colombia': 'co',
   'congo dr': 'cd',

@@ -10,6 +10,7 @@ const worldCupFlagCases = [
   ['Bosnia-H.', 'ba'],
   ['Brazil', 'br'],
   ['Canada', 'ca'],
+  ['Cabo Verde', 'cv'],
   ['Cape Verde', 'cv'],
   ['Colombia', 'co'],
   ['Congo DR', 'cd'],
