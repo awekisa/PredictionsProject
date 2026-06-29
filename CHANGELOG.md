@@ -1,3 +1,10 @@
+## 📦 v0.4.44 — 28 Jun 2026
+
+> **Cabo Verde World Cup flag fix**
+> World Cup fixtures now use FIFA's current Cabo Verde display name consistently, and the UI maps Cabo Verde to the local Cape Verde flag asset.
+
+---
+
 ## 📦 v0.4.43 — 15 Jun 2026
 
 > **Started-game prediction drill-downs**
