@@ -28,6 +28,11 @@ STATUS_NAMES = {
     9: "awarded_or_forfeit",
     12: "final_like_unverified",
 }
+# FIFA occasionally moves knockout kickoffs after users have already predicted
+# placeholder/manual rows. Treat same-team knockout fixtures within this window as
+# the same production game, then let the later compare/time-update pass align the
+# stored kickoff. Without this, the creator repeatedly adds a duplicate empty row.
+KNOCKOUT_EXISTING_GAME_TIME_TOLERANCE = dt.timedelta(hours=6)
 ALIASES = {
     "bosnia h": "bosnia and herzegovina", "bosnia-h": "bosnia and herzegovina", "bosnia-h.": "bosnia and herzegovina",
     "turkey": "turkiye", "türkiye": "turkiye", "turkiye": "turkiye",
@@ -189,7 +194,7 @@ def has_existing_game_for_match(games: list[dict[str, Any]], match: dict[str, An
         if not game_start:
             continue
         game_key = (norm_team(game.get("homeTeam")), norm_team(game.get("awayTeam")))
-        if game_key == match_key and abs((game_start - match_start).total_seconds()) <= 300:
+        if game_key == match_key and abs(game_start - match_start) <= KNOCKOUT_EXISTING_GAME_TIME_TOLERANCE:
             return True
     return False
 

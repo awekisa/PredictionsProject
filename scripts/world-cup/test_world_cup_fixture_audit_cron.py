@@ -114,6 +114,28 @@ class KnockoutFixtureCreationTests(unittest.TestCase):
         self.assertEqual(len(result["wouldCreate"]), 1)
         self.assertEqual(result["wouldCreate"][0]["fifaMatchId"], 2)
 
+    def test_existing_knockout_fixture_with_small_time_drift_prevents_duplicate_creation(self):
+        existing_games = [
+            {"id": 2383, "homeTeam": "Mexico", "awayTeam": "Ecuador", "startTime": "2026-07-01T01:00:00Z"},
+        ]
+        matches = [
+            {
+                "IdMatch": 99,
+                "StageName": text("Round of 32"),
+                "Date": "2026-07-01T02:00:00Z",
+                "Home": team("Mexico"),
+                "Away": team("Ecuador"),
+            },
+        ]
+
+        with patch.object(cron, "fetch_json") as fetch_json:
+            result = cron.create_missing_knockout_fixtures(existing_games, matches, headers={})
+
+        fetch_json.assert_not_called()
+        self.assertEqual(result["skippedExisting"], 1)
+        self.assertEqual(result["created"], [])
+        self.assertEqual(result["wouldCreate"], [])
+
 
 if __name__ == "__main__":
     unittest.main()
