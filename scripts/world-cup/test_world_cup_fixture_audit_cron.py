@@ -136,6 +136,18 @@ class KnockoutFixtureCreationTests(unittest.TestCase):
         self.assertEqual(result["created"], [])
         self.assertEqual(result["wouldCreate"], [])
 
+    def test_calendar_score_requires_manual_review_for_extra_time_result_type_without_full_time_score(self):
+        score = cron.calendar_score({
+            "MatchStatus": 0,
+            "MatchTime": "132'",
+            "HomeTeamScore": 3,
+            "AwayTeamScore": 2,
+            "ResultType": 3,
+        })
+
+        self.assertEqual(score[0], "manual")
+        self.assertIn("90-minute", score[1])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -32,6 +32,7 @@ FINAL_STATUSES = {0}
 SCHEDULED_STATUSES = {1}
 LIVE_STATUSES = {3}
 MANUAL_REVIEW_STATUSES = {4, 8, 9, 12}
+EXTRA_TIME_OR_PENALTY_RESULT_TYPES = {2, 3}
 MIN_FINAL_ELAPSED_MINUTES = 115
 STATUS_NAMES = {
     0: "finished",
@@ -107,7 +108,7 @@ def has_extra_or_penalty_data(match: dict[str, Any]) -> bool:
         "AwayTeamPenaltyScore",
         "FirstHalfExtraTime",
         "SecondHalfExtraTime",
-    ))
+    )) or match.get("ResultType") in EXTRA_TIME_OR_PENALTY_RESULT_TYPES
 
 
 def _period_score(period: Any) -> tuple[int, int] | None:
@@ -241,7 +242,7 @@ def main() -> int:
         status_name = STATUS_NAMES.get(status, str(status))
         decision = score_sync_decision(fifa_match)
         if not decision.should_sync:
-            if decision.classification in {"manual_review", "unknown"}:
+            if decision.classification != "scheduled":
                 output["manual"].append({"match": match_label, "productionGameId": game.get("id"), "reason": decision.reason, "fifaDataObserved": {"idMatch": fifa_match.get("IdMatch"), "matchStatus": status, "statusName": status_name, "matchTime": fifa_match.get("MatchTime"), "homeTeamScore": fifa_match.get("HomeTeamScore"), "awayTeamScore": fifa_match.get("AwayTeamScore"), "resultType": fifa_match.get("ResultType")}})
             continue
 

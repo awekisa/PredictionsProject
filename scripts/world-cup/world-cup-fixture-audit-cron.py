@@ -19,6 +19,7 @@ NORMAL_FINAL_STATUSES = {0}
 SCHEDULED_STATUSES = {1}
 LIVE_STATUSES = {3}
 MANUAL_REVIEW_STATUSES = {4, 8, 9, 12}
+EXTRA_TIME_OR_PENALTY_RESULT_TYPES = {2, 3}
 STATUS_NAMES = {
     0: "finished",
     1: "scheduled",
@@ -130,6 +131,8 @@ def calendar_score(match: dict[str, Any]) -> tuple[int, int] | tuple[str, str] |
         return ("manual", "penalty score present; 90-minute score not clearly separated in FIFA calendar payload")
     if match.get("FirstHalfExtraTime") is not None or match.get("SecondHalfExtraTime") is not None:
         return ("manual", "extra-time fields present; 90-minute score not clearly separated in FIFA calendar payload")
+    if match.get("ResultType") in EXTRA_TIME_OR_PENALTY_RESULT_TYPES:
+        return ("manual", "extra-time/penalty result type present; 90-minute score not clearly separated in FIFA calendar payload")
     return int(home), int(away)
 
 

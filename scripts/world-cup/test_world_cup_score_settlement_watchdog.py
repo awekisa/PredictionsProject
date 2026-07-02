@@ -107,6 +107,21 @@ class FifaStatusScoreSyncTests(unittest.TestCase):
         self.assertTrue(decision.is_finished)
         self.assertIn("90-minute", decision.reason)
 
+    def test_elimination_result_type_extra_time_requires_manual_review_without_full_time_score(self):
+        match = {
+            "MatchStatus": 0,
+            "MatchTime": "132'",
+            "HomeTeamScore": 3,
+            "AwayTeamScore": 2,
+            "ResultType": 3,
+        }
+
+        decision = watchdog.score_sync_decision(match)
+
+        self.assertFalse(decision.should_sync)
+        self.assertTrue(decision.is_finished)
+        self.assertIn("90-minute", decision.reason)
+
 
 if __name__ == "__main__":
     unittest.main()
