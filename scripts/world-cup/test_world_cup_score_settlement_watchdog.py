@@ -122,6 +122,38 @@ class FifaStatusScoreSyncTests(unittest.TestCase):
         self.assertTrue(decision.is_finished)
         self.assertIn("90-minute", decision.reason)
 
+    def test_timeline_full_time_score_ignores_extra_time_goal(self):
+        match = {
+            "Home": {"IdTeam": "43935"},
+            "Away": {"IdTeam": "43879"},
+        }
+        timeline = {
+            "Event": [
+                {"Type": 0, "Period": 3, "MatchMinute": "24'", "IdTeam": "43879"},
+                {"Type": 0, "Period": 5, "MatchMinute": "51'", "IdTeam": "43879"},
+                {"Type": 0, "Period": 5, "MatchMinute": "86'", "IdTeam": "43935"},
+                {"Type": 0, "Period": 5, "MatchMinute": "89'", "IdTeam": "43935"},
+                {"Type": 41, "Period": 9, "MatchMinute": "120'+5'", "IdTeam": "43935"},
+            ]
+        }
+
+        self.assertEqual(watchdog.timeline_full_time_score(match, timeline), (2, 2))
+
+    def test_elimination_result_type_extra_time_uses_timeline_full_time_score(self):
+        match = {
+            "MatchStatus": 0,
+            "MatchTime": "132'",
+            "HomeTeamScore": 3,
+            "AwayTeamScore": 2,
+            "ResultType": 3,
+        }
+
+        decision = watchdog.score_sync_decision(match, timeline_score=(2, 2))
+
+        self.assertTrue(decision.should_sync)
+        self.assertTrue(decision.is_finished)
+        self.assertEqual(decision.score, (2, 2))
+
 
 if __name__ == "__main__":
     unittest.main()

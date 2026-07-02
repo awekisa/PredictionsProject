@@ -27,6 +27,7 @@ from typing import Any
 
 DEFAULT_API_BASE = "https://predictionsproject.onrender.com/api"
 DEFAULT_FIFA_URL = "https://api.fifa.com/api/v3/calendar/matches?language=en&count=500&idSeason=285023"
+DEFAULT_TIMELINE_URL_TEMPLATE = "https://api.fifa.com/api/v3/timelines/{match_id}?language=en"
 DEFAULT_TOURNAMENT_ID = 26
 FINAL_STATUSES = {0}
 SCHEDULED_STATUSES = {1}
@@ -130,12 +131,57 @@ def full_time_score(match: dict[str, Any]) -> tuple[int, int] | None:
     return None
 
 
-def fifa_score_for_sync(match: dict[str, Any], *, finalising: bool) -> tuple[int, int] | tuple[str, str] | None:
+def _team_id(team: Any) -> str | None:
+    if not isinstance(team, dict):
+        return None
+    value = team.get("IdTeam") or team.get("Id")
+    return str(value) if value is not None else None
+
+
+def _is_goal_event(event: dict[str, Any]) -> bool:
+    # FIFA timeline Type 0 is normal goal; Type 41 is penalty goal. Penalty goals
+    # during normal time count for the 90-minute score, while penalty shootout
+    # events use different periods and are ignored below.
+    if event.get("Type") in {0, 41}:
+        return True
+    description = localized_text(event.get("EventDescription")).lower()
+    return "scores!!" in description or "successfully converts the penalty" in description
+
+
+def timeline_full_time_score(match: dict[str, Any], timeline: dict[str, Any]) -> tuple[int, int] | None:
+    """Derive the regular-time score from FIFA timeline goal events.
+
+    FIFA calendar sometimes exposes only the after-extra-time score with
+    ResultType=2/3 and null period-score fields. Timeline periods 3 and 5 are
+    first/second half; periods 7 and 9 are extra time and must not settle picks.
+    """
+    home_id = _team_id(match.get("Home"))
+    away_id = _team_id(match.get("Away"))
+    if not home_id or not away_id:
+        return None
+    home_goals = 0
+    away_goals = 0
+    for event in timeline.get("Event", []):
+        if not isinstance(event, dict):
+            continue
+        if event.get("Period") not in {3, 5} or not _is_goal_event(event):
+            continue
+        event_team_id = str(event.get("IdTeam")) if event.get("IdTeam") is not None else None
+        if event_team_id == home_id:
+            home_goals += 1
+        elif event_team_id == away_id:
+            away_goals += 1
+    return home_goals, away_goals
+
+
+def fifa_score_for_sync(match: dict[str, Any], *, finalising: bool, timeline_score: tuple[int, int] | None = None) -> tuple[int, int] | tuple[str, str] | None:
     if finalising and has_extra_or_penalty_data(match):
         ft = full_time_score(match)
         if ft is not None:
             return ft
-        return ("manual", "extra-time/penalty fields present; no clear 90-minute full-time score in FIFA payload")
+        if timeline_score is not None:
+            return timeline_score
+        return ("manual", "extra-time/penalty fields present; no clear 90-minute full-time score in FIFA payload or timeline")
     home = score_value(match, "Home")
     away = score_value(match, "Away")
     if home is None or away is None:
@@ -164,7 +210,7 @@ class ScoreSyncDecision:
     score: tuple[int, int] | None = None
 
 
-def score_sync_decision(match: dict[str, Any]) -> ScoreSyncDecision:
+def score_sync_decision(match: dict[str, Any], *, timeline_score: tuple[int, int] | None = None) -> ScoreSyncDecision:
     status = match.get("MatchStatus")
     classification = classify_match_status(status)
     if classification == "scheduled":
@@ -173,7 +219,7 @@ def score_sync_decision(match: dict[str, Any]) -> ScoreSyncDecision:
         return ScoreSyncDecision(False, False, classification, "FIFA status requires manual result review")
 
     is_finished = classification == "finished"
-    score = fifa_score_for_sync(match, finalising=is_finished)
+    score = fifa_score_for_sync(match, finalising=is_finished, timeline_score=timeline_score)
     if score is None:
         return ScoreSyncDecision(False, is_finished, classification, "FIFA status is syncable but score is missing")
     if isinstance(score[0], str):
@@ -187,6 +233,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--api-base", default=os.environ.get("PREDICTIONS_API_BASE", DEFAULT_API_BASE))
     parser.add_argument("--fifa-url", default=os.environ.get("FIFA_WORLD_CUP_URL", DEFAULT_FIFA_URL))
+    parser.add_argument("--timeline-url-template", default=os.environ.get("FIFA_TIMELINE_URL_TEMPLATE", DEFAULT_TIMELINE_URL_TEMPLATE))
     parser.add_argument("--tournament-id", type=int, default=int(os.environ.get("PREDICTIONS_TOURNAMENT_ID", DEFAULT_TOURNAMENT_ID)))
     parser.add_argument("--dry-run", action="store_true", help="Report intended score/status syncs without PUTting changes")
     parser.add_argument("--use-seeded-admin", action="store_true", help="Allow the approved seeded admin fallback credentials")
@@ -227,6 +274,8 @@ def main() -> int:
         if key[0] and key[1]:
             by_pair.setdefault(key, []).append(match)
 
+    timeline_cache: dict[str, dict[str, Any] | None] = {}
+
     for game in games:
         start = parse_utc(game.get("startTime"))
         if not start or now <= start:
@@ -240,19 +289,36 @@ def main() -> int:
         fifa_match = min(matches, key=lambda item: abs(((parse_utc(item.get("Date")) or start) - start).total_seconds()))
         status = fifa_match.get("MatchStatus")
         status_name = STATUS_NAMES.get(status, str(status))
-        decision = score_sync_decision(fifa_match)
+        timeline_score = None
+        timeline_score_source = None
+        if classify_match_status(status) == "finished" and has_extra_or_penalty_data(fifa_match) and full_time_score(fifa_match) is None:
+            match_id = fifa_match.get("IdMatch")
+            if match_id:
+                match_id_text = str(match_id)
+                if match_id_text not in timeline_cache:
+                    try:
+                        timeline_cache[match_id_text] = fetch_json(args.timeline_url_template.format(match_id=match_id_text))
+                    except Exception:
+                        timeline_cache[match_id_text] = None
+                timeline = timeline_cache.get(match_id_text)
+                if isinstance(timeline, dict):
+                    timeline_score = timeline_full_time_score(fifa_match, timeline)
+                    if timeline_score is not None:
+                        timeline_score_source = f"FIFA timeline {match_id_text} regular-time goals"
+        decision = score_sync_decision(fifa_match, timeline_score=timeline_score)
         if not decision.should_sync:
             if decision.classification != "scheduled":
                 output["manual"].append({"match": match_label, "productionGameId": game.get("id"), "reason": decision.reason, "fifaDataObserved": {"idMatch": fifa_match.get("IdMatch"), "matchStatus": status, "statusName": status_name, "matchTime": fifa_match.get("MatchTime"), "homeTeamScore": fifa_match.get("HomeTeamScore"), "awayTeamScore": fifa_match.get("AwayTeamScore"), "resultType": fifa_match.get("ResultType")}})
             continue
 
         home_goals, away_goals = decision.score or (None, None)
+        sync_match_time = "FT" if decision.is_finished and has_extra_or_penalty_data(fifa_match) else fifa_match.get("MatchTime")
         already_correct = (
             game.get("homeGoals") == home_goals
             and game.get("awayGoals") == away_goals
             and game.get("isFinished") is decision.is_finished
             and game.get("fifaMatchStatus") == status
-            and (game.get("fifaMatchTime") or None) == (fifa_match.get("MatchTime") or None)
+            and (game.get("fifaMatchTime") or None) == (sync_match_time or None)
         )
         if already_correct:
             continue
@@ -262,10 +328,12 @@ def main() -> int:
             "awayGoals": away_goals,
             "isFinished": decision.is_finished,
             "fifaMatchStatus": status,
-            "fifaMatchTime": fifa_match.get("MatchTime"),
+            "fifaMatchTime": sync_match_time,
         }
         action = "finalised" if decision.is_finished else "live_sync"
-        summary = {"match": f"{game.get('homeTeam')} {home_goals}-{away_goals} {game.get('awayTeam')}", "fifaMatchStatus": status_name, "fifaMatchTime": fifa_match.get("MatchTime"), "productionGameId": game.get("id"), "action": action, "previousProduction": {field: game.get(field) for field in ("homeGoals", "awayGoals", "isFinished", "fifaMatchStatus", "fifaMatchTime")}}
+        summary = {"match": f"{game.get('homeTeam')} {home_goals}-{away_goals} {game.get('awayTeam')}", "fifaMatchStatus": status_name, "fifaMatchTime": sync_match_time, "productionGameId": game.get("id"), "action": action, "previousProduction": {field: game.get(field) for field in ("homeGoals", "awayGoals", "isFinished", "fifaMatchStatus", "fifaMatchTime")}}
+        if timeline_score_source:
+            summary["scoreSource"] = timeline_score_source
         if args.dry_run:
             summary["dryRun"] = True
             output["synced"].append(summary)
