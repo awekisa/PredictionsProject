@@ -12,6 +12,8 @@ public class Game
 
     public DateTime StartTime { get; set; }
 
+    public DateTime? PredictionDeadline { get; set; }
+
     public int? HomeGoals { get; set; }
 
     public int? AwayGoals { get; set; }

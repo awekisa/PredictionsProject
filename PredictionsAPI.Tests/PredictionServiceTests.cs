@@ -57,6 +57,33 @@ public class PredictionServiceTests
     }
 
     [Fact]
+    public async Task PlacePrediction_AfterOriginalDeadlineButMovedStartTime_ReturnsNull()
+    {
+        var db = DbContextFactory.Create(nameof(PlacePrediction_AfterOriginalDeadlineButMovedStartTime_ReturnsNull));
+        var user = DbContextFactory.MakeUser("u1", "Alice");
+        var tournament = DbContextFactory.MakeTournament(1);
+        var game = DbContextFactory.MakeGame(
+            1,
+            1,
+            DateTime.UtcNow.AddHours(2),
+            predictionDeadline: DateTime.UtcNow.AddMinutes(-10));
+
+        db.Users.Add(user);
+        db.Tournaments.Add(tournament);
+        db.Games.Add(game);
+        await db.SaveChangesAsync();
+
+        var service = new PredictionService(db);
+        var result = await service.PlacePredictionAsync(1, "u1", new PlacePredictionRequest
+        {
+            HomeGoals = 2,
+            AwayGoals = 1
+        });
+
+        result.Should().BeNull();
+    }
+
+    [Fact]
     public async Task PlacePrediction_GameNotFound_ReturnsNull()
     {
         var db = DbContextFactory.Create(nameof(PlacePrediction_GameNotFound_ReturnsNull));

@@ -47,6 +47,7 @@ export interface GameResponse {
   homeTeam: string;
   awayTeam: string;
   startTime: string;
+  predictionDeadline?: string;
   homeGoals: number | null;
   awayGoals: number | null;
   isFinished: boolean;
