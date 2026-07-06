@@ -1,3 +1,10 @@
+## 📦 v0.4.46 — 06 Jul 2026
+
+> **Mexico - England prediction repair**
+> Added the missed Beastiality FC 1:1 prediction for Mexico - England via a guarded production data migration, without reopening fixture deadlines.
+
+---
+
 ## 📦 v0.4.45 — 06 Jul 2026
 
 > **Moved-game prediction deadline fix**
