@@ -1,10 +1,14 @@
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using PredictionsAPI.Data;
 
 #nullable disable
 
 namespace PredictionsAPI.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20260706130000_AddBeastialityFcMexicoEnglandPrediction")]
     public partial class AddBeastialityFcMexicoEnglandPrediction : Migration
     {
         private const int MexicoEnglandGameId = 2398;
