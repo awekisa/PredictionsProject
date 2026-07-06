@@ -1,3 +1,10 @@
+## 📦 v0.4.47 — 06 Jul 2026
+
+> **Prediction repair migration discovery fix**
+> Added explicit EF migration metadata so the Beastiality FC Mexico - England prediction repair migration is discovered and applied during backend startup.
+
+---
+
 ## 📦 v0.4.46 — 06 Jul 2026
 
 > **Mexico - England prediction repair**
