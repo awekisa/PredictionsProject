@@ -20,7 +20,7 @@ public class PredictionService : IPredictionService
         var game = await _context.Games.FindAsync(gameId);
         if (game is null) return null;
 
-        if (DateTime.UtcNow >= EnsureUtc(game.StartTime))
+        if (DateTime.UtcNow >= PredictionDeadlineFor(game))
             return null;
 
         var existing = await _context.Predictions
@@ -116,6 +116,8 @@ public class PredictionService : IPredictionService
             CreatedAt = prediction.CreatedAt
         };
     }
+
+    private static DateTime PredictionDeadlineFor(Game game) => EnsureUtc(game.PredictionDeadline ?? game.StartTime);
 
     private static DateTime EnsureUtc(DateTime value) => value.Kind switch
     {

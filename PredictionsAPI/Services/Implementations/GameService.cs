@@ -37,12 +37,14 @@ public class GameService : IGameService
         var tournamentExists = await _context.Tournaments.AnyAsync(t => t.Id == tournamentId);
         if (!tournamentExists) return null;
 
+        var startTime = ToUtcDateTime(request.StartTime);
         var game = new Game
         {
             TournamentId = tournamentId,
             HomeTeam = request.HomeTeam,
             AwayTeam = request.AwayTeam,
-            StartTime = ToUtcDateTime(request.StartTime)
+            StartTime = startTime,
+            PredictionDeadline = startTime
         };
 
         _context.Games.Add(game);
@@ -58,9 +60,12 @@ public class GameService : IGameService
 
         if (game is null) return null;
 
+        var previousDeadline = PredictionDeadlineFor(game);
+        var newStartTime = ToUtcDateTime(request.StartTime);
         game.HomeTeam = request.HomeTeam;
         game.AwayTeam = request.AwayTeam;
-        game.StartTime = ToUtcDateTime(request.StartTime);
+        game.StartTime = newStartTime;
+        game.PredictionDeadline = EarlierOf(previousDeadline, newStartTime);
 
         await _context.SaveChangesAsync();
 
@@ -142,6 +147,7 @@ public class GameService : IGameService
         HomeTeam = g.HomeTeam,
         AwayTeam = g.AwayTeam,
         StartTime = EnsureUtc(g.StartTime),
+        PredictionDeadline = PredictionDeadlineFor(g),
         HomeGoals = g.HomeGoals,
         AwayGoals = g.AwayGoals,
         IsFinished = g.IsFinished,
@@ -154,6 +160,10 @@ public class GameService : IGameService
     };
 
     private static DateTime ToUtcDateTime(DateTimeOffset startTime) => startTime.ToUniversalTime().UtcDateTime;
+
+    private static DateTime PredictionDeadlineFor(Game game) => EnsureUtc(game.PredictionDeadline ?? game.StartTime);
+
+    private static DateTime EarlierOf(DateTime first, DateTime second) => first <= second ? first : second;
 
     private static DateTime EnsureUtc(DateTime value) => value.Kind switch
     {

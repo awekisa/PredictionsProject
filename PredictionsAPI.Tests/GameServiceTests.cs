@@ -51,6 +51,51 @@ public class GameServiceTests
     }
 
     [Fact]
+    public async Task UpdateAsync_MovingGameLaterKeepsOriginalPredictionDeadline()
+    {
+        var db = DbContextFactory.Create(nameof(UpdateAsync_MovingGameLaterKeepsOriginalPredictionDeadline));
+        db.Tournaments.Add(DbContextFactory.MakeTournament(1));
+        var originalStart = new DateTime(2026, 6, 11, 19, 0, 0, DateTimeKind.Utc);
+        db.Games.Add(DbContextFactory.MakeGame(1, 1, originalStart, predictionDeadline: originalStart));
+        await db.SaveChangesAsync();
+
+        var service = new GameService(db);
+        var result = await service.UpdateAsync(1, 1, new UpdateGameRequest
+        {
+            HomeTeam = "Home FC",
+            AwayTeam = "Away FC",
+            StartTime = new DateTimeOffset(2026, 6, 11, 23, 0, 0, TimeSpan.FromHours(3))
+        });
+
+        result!.StartTime.Should().Be(new DateTime(2026, 6, 11, 20, 0, 0, DateTimeKind.Utc));
+        result.PredictionDeadline.Should().Be(originalStart);
+        db.Games.Single().PredictionDeadline.Should().Be(originalStart);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_MovingGameEarlierMovesPredictionDeadlineEarlier()
+    {
+        var db = DbContextFactory.Create(nameof(UpdateAsync_MovingGameEarlierMovesPredictionDeadlineEarlier));
+        db.Tournaments.Add(DbContextFactory.MakeTournament(1));
+        var originalStart = new DateTime(2026, 6, 11, 19, 0, 0, DateTimeKind.Utc);
+        db.Games.Add(DbContextFactory.MakeGame(1, 1, originalStart, predictionDeadline: originalStart));
+        await db.SaveChangesAsync();
+
+        var service = new GameService(db);
+        var result = await service.UpdateAsync(1, 1, new UpdateGameRequest
+        {
+            HomeTeam = "Home FC",
+            AwayTeam = "Away FC",
+            StartTime = new DateTimeOffset(2026, 6, 11, 20, 0, 0, TimeSpan.FromHours(3))
+        });
+
+        var movedEarlierStart = new DateTime(2026, 6, 11, 17, 0, 0, DateTimeKind.Utc);
+        result!.StartTime.Should().Be(movedEarlierStart);
+        result.PredictionDeadline.Should().Be(movedEarlierStart);
+        db.Games.Single().PredictionDeadline.Should().Be(movedEarlierStart);
+    }
+
+    [Fact]
     public async Task SetResultAsync_UsesUtcDeadlineComparison()
     {
         var db = DbContextFactory.Create(nameof(SetResultAsync_UsesUtcDeadlineComparison));

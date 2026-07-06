@@ -56,6 +56,7 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced, onFin
   const now = new Date();
   const startTime = parseApiDateTime(game.startTime);
   const hasStarted = isStarted(game.startTime, now);
+  const predictionsLocked = isStarted(game.predictionDeadline ?? game.startTime, now);
   const hasScore = game.homeGoals !== null && game.awayGoals !== null;
 
   const isCorrectPrediction =
@@ -111,14 +112,14 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced, onFin
       <div className={styles.topRow}>
         <div className={styles.actionArea}>
           {/* Upcoming: no prediction yet */}
-          {!hasStarted && !myPrediction && !showInputs && (
+          {!predictionsLocked && !myPrediction && !showInputs && (
             <button className={styles.predictBadge} onClick={openPredict} data-cy="predict-btn">
               Predict
             </button>
           )}
 
           {/* Upcoming: input form open */}
-          {!hasStarted && showInputs && (
+          {!predictionsLocked && showInputs && (
             <form className={styles.inputForm} onSubmit={handleSubmit}>
               <input
                 className={styles.scoreInput}
@@ -146,7 +147,7 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced, onFin
           )}
 
           {/* Upcoming: prediction set, not editing */}
-          {!hasStarted && myPrediction && !showInputs && (
+          {!predictionsLocked && myPrediction && !showInputs && (
             <button className={styles.predictedBadge} onClick={openEdit}>
               Predicted&nbsp; {myPrediction.homeGoals}:{myPrediction.awayGoals}
               <svg className={styles.editIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -156,19 +157,19 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced, onFin
           )}
 
           {/* Started: correct prediction */}
-          {hasStarted && isCorrectPrediction && (
+          {predictionsLocked && isCorrectPrediction && (
             <span className={styles.predictedCorrectBadge}>Predicted!</span>
           )}
 
           {/* Started: prediction exists but not correct (or game not finished yet) */}
-          {hasStarted && myPrediction && !isCorrectPrediction && (
+          {predictionsLocked && myPrediction && !isCorrectPrediction && (
             <span className={styles.predictedBadge}>
               Predicted&nbsp; {myPrediction.homeGoals}:{myPrediction.awayGoals}
             </span>
           )}
 
           {/* Started: no prediction */}
-          {hasStarted && !myPrediction && (
+          {predictionsLocked && !myPrediction && (
             <span className={styles.noPredictionBadge}>No Prediction</span>
           )}
         </div>

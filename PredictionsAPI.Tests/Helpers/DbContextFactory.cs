@@ -39,7 +39,7 @@ public static class DbContextFactory
     }
 
     public static Game MakeGame(int id, int tournamentId, DateTime startTime,
-        int? homeGoals = null, int? awayGoals = null)
+        int? homeGoals = null, int? awayGoals = null, DateTime? predictionDeadline = null)
     {
         return new Game
         {
@@ -48,6 +48,7 @@ public static class DbContextFactory
             HomeTeam = "Home FC",
             AwayTeam = "Away FC",
             StartTime = startTime,
+            PredictionDeadline = predictionDeadline,
             HomeGoals = homeGoals,
             AwayGoals = awayGoals,
             IsFinished = homeGoals.HasValue && awayGoals.HasValue

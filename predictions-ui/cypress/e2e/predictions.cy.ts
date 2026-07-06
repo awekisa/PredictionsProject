@@ -17,6 +17,14 @@ const finishedGame = {
   homeGoals: 2, awayGoals: 1, status: 'Final',
 };
 
+const movedLaterAfterOriginalStartGame = {
+  id: 3, tournamentId: 1,
+  homeTeam: 'England', awayTeam: 'Spain',
+  startTime: futureTime,
+  predictionDeadline: pastTime,
+  homeGoals: null, awayGoals: null, status: 'Upcoming',
+};
+
 function visitTournament(games: object[]) {
   cy.intercept('GET', '**/api/tournaments/1', { statusCode: 200, body: tournament });
   cy.intercept('GET', '**/api/tournaments/1/games', { statusCode: 200, body: games });
@@ -76,5 +84,16 @@ describe('Predictions - finished game', () => {
     visitTournament([finishedGame]);
 
     cy.get('input[type="number"]').should('not.exist');
+  });
+});
+
+describe('Predictions - moved game after original start', () => {
+  it('does not show prediction controls once the original deadline has passed', () => {
+    visitTournament([movedLaterAfterOriginalStartGame]);
+
+    cy.contains('England').should('exist');
+    cy.contains('Spain').should('exist');
+    cy.get('[data-cy="predict-btn"]').should('not.exist');
+    cy.contains('No Prediction').should('exist');
   });
 });
