@@ -1,3 +1,10 @@
+## 📦 v0.4.45 — 06 Jul 2026
+
+> **Moved-game prediction deadline fix**
+> Predictions now lock at each fixture's original prediction deadline, so games moved later after kickoff do not reopen for late predictions while earlier moves still advance the lock time.
+
+---
+
 ## 📦 v0.4.44 — 28 Jun 2026
 
 > **Cabo Verde World Cup flag fix**
