@@ -5,6 +5,7 @@ using ModelContextProtocol.Protocol;
 using ModelContextProtocol.AspNetCore;
 using ModelContextProtocol.Server;
 using PredictionsAPI.Security;
+using PredictionsAPI.Data;
 
 namespace PredictionsAPI.Mcp;
 
@@ -18,24 +19,33 @@ public static class McpHosting
         services.AddMcpServer(options => options.ServerInfo = new() { Name = "Predictions", Version = "1.0.0" })
             .WithHttpTransport(options => options.SessionMode = HttpServerSessionMode.Stateless)
             .WithTools<PredictionTools>()
+            .WithTools<AdminTools>()
             .WithRequestFilters(filters => filters.AddCallToolFilter(next => async (context, ct) =>
             {
                 var services = context.Services!;
-                var mutation = context.Params.Name == "save_my_prediction";
+                var tool = context.MatchedPrimitive as McpServerTool;
+                var operation = tool?.Metadata.OfType<McpOperationAttribute>().SingleOrDefault();
+                var mutation = operation?.Mutates == true;
+                object? target = null;
                 var result = "failed";
                 try
                 {
-                    var scope = mutation ? McpScopes.PredictionsWrite : McpScopes.AppRead;
+                    if (tool is null || operation is null) return Error("Unknown tool.");
+                    var scope = operation.Scope;
+                    target = await AuditTargetAsync(operation.TargetArgument, context.Params.Arguments, services, lookupUser: false);
                     var auth = await services.GetRequiredService<IAuthorizationService>()
                         .AuthorizeAsync(context.User!, null, McpScopes.Policy(scope));
                     if (!auth.Succeeded)
                     {
                         result = "denied";
-                        return Error($"This connection requires the {scope} scope.");
+                        return Error($"This connection requires the {scope} scope" + (McpScopes.IsAdmin(scope) ? " and a current Admin role." : "."));
                     }
-                    if (context.MatchedPrimitive is not McpServerTool tool) return Error("Unknown tool.");
-                    ValidateArguments(tool.ProtocolTool.InputSchema, context.Params.Arguments);
+                    target ??= await AuditTargetAsync(operation.TargetArgument, context.Params.Arguments, services);
+                    McpArgumentValidation.Validate(tool.ProtocolTool.InputSchema, context.Params.Arguments);
+
                     var response = await next(context, ct);
+                    if (mutation && response.IsError != true && context.Params.Name is "admin_create_tournament" or "admin_create_game")
+                        target = response.StructuredContent?.GetProperty("id").ToString();
                     result = response.IsError == true ? "failed" : "succeeded";
                     return response;
                 }
@@ -58,12 +68,11 @@ public static class McpHosting
                 {
                     if (mutation)
                     {
-                        int? target = context.Params.Arguments?.TryGetValue("gameId", out var id) == true && id.ValueKind == JsonValueKind.Number && id.TryGetInt32(out var value) ? value : null;
                         var http = services.GetRequiredService<IHttpContextAccessor>().HttpContext;
                         services.GetRequiredService<ILoggerFactory>().CreateLogger("Predictions.Mcp.Audit").LogInformation(
                             "MCP mutation ActorId={ActorId} TokenId={TokenId} Tool={Tool} TargetId={TargetId} Timestamp={Timestamp} Result={Result} CorrelationId={CorrelationId}",
                             context.User?.FindFirstValue(ClaimTypes.NameIdentifier), context.User?.FindFirstValue(McpAuthentication.TokenIdClaim),
-                            "save_my_prediction", target, services.GetRequiredService<TimeProvider>().GetUtcNow(), result, http?.TraceIdentifier);
+                            tool!.ProtocolTool.Name, target, services.GetRequiredService<TimeProvider>().GetUtcNow(), result, http?.TraceIdentifier);
                     }
                 }
             }));
@@ -77,6 +86,11 @@ public static class McpHosting
         {
             context.Response.Headers.CacheControl = "no-store";
             var config = context.RequestServices.GetRequiredService<IConfiguration>();
+            if (!config.GetValue("Mcp:Enabled", true))
+            {
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                return;
+            }
             var allowed = config.GetSection("Mcp:AllowedOrigins").Get<string[]>()
                 ?? config["CorsOrigins"]?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
                 ?? ["http://localhost:5173"];
@@ -98,27 +112,17 @@ public static class McpHosting
         IsError = true, Content = [new TextContentBlock { Text = message }]
     };
 
-    private static void ValidateArguments(JsonElement schema, IDictionary<string, JsonElement>? arguments)
+    private static async Task<object?> AuditTargetAsync(string? path, IDictionary<string, JsonElement>? arguments, IServiceProvider services, bool lookupUser = true)
     {
-        arguments ??= new Dictionary<string, JsonElement>();
-        if (schema.TryGetProperty("required", out var required))
-            foreach (var key in required.EnumerateArray())
-                if (!arguments.ContainsKey(key.GetString()!)) throw new ToolInputException($"Missing required argument: {key.GetString()}.");
-        var properties = schema.GetProperty("properties");
-        foreach (var (name, value) in arguments)
-        {
-            if (!properties.TryGetProperty(name, out _)) throw new ToolInputException("Unknown argument. Use only the arguments in the tool schema.");
-            if (name is "userDisplayName" or "type")
-            {
-                if (value.ValueKind != JsonValueKind.String) throw new ToolInputException($"{name} must be a string.");
-                continue;
-            }
-            if (name == "tournamentId" && value.ValueKind == JsonValueKind.Null &&
-                (required.ValueKind != JsonValueKind.Array || !required.EnumerateArray().Any(x => x.GetString() == name))) continue;
-            if (value.ValueKind != JsonValueKind.Number || !value.TryGetInt32(out var number))
-                throw new ToolInputException($"{name} must be an integer.");
-            if (name == "limit" ? number is < 1 or > 100 : name is "gameId" or "tournamentId" ? number <= 0 : number < 0)
-                throw new ToolInputException(name == "limit" ? "limit must be between 1 and 100." : $"{name} is outside the allowed range.");
-        }
+        if (path is null || arguments is null) return null;
+        var parts = path.Split('.');
+        if (!arguments.TryGetValue(parts[0], out var value)) return null;
+        foreach (var part in parts.Skip(1))
+            if (value.ValueKind != JsonValueKind.Object || !value.TryGetProperty(part, out value)) return null;
+        if (value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out var id)) return id;
+        // Only log real account IDs, never an arbitrary supplied string on a missing target.
+        if (lookupUser && path == "userId" && value.ValueKind == JsonValueKind.String)
+            return (await services.GetRequiredService<AppDbContext>().Users.FindAsync(value.GetString()))?.Id;
+        return null;
     }
 }

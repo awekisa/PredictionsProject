@@ -6,15 +6,14 @@ Integration tests use the same SDK client with both **2025-11-25** (initialize /
 initialized handshake) and **2026-07-28** (server discovery) protocol revisions.
 The server uses the SDK's stateless mode: every HTTP request authenticates its
 bearer token, there is no session affinity, and a session ID grants no access.
-Only the twelve tools below are registered. REST continues to require browser JWTs.
+The twelve user tools below and the eighteen [admin tools](mcp.md) are registered. REST continues to require browser JWTs.
 
 Once this change is deployed, connect directly to the API at
 `https://predictionsproject.onrender.com/mcp`, **not** the Vercel frontend and
 not `/api/mcp`. Create a scoped token in Account settings → Agent connections
 and send `Authorization: Bearer <token>` on every request. Keep tokens in the
 client's secret/environment configuration, not prompts, source files or URLs.
-The server does not publish OAuth discovery. Admin tools and end-to-end Codex /
-Hermes setup verification belong to SME-101.
+The server does not publish OAuth discovery. See [the connection guide](mcp.md) for admin tools, Codex/Hermes setup and verification.
 
 ## Tools and permissions
 

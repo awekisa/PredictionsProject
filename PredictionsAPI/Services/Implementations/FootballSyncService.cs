@@ -102,9 +102,9 @@ public class FootballSyncService : IFootballSyncService
         {
             await _context.SaveChangesAsync();
         }
-        catch (DbUpdateException ex)
+        catch (DbUpdateException)
         {
-            _logger.LogError(ex, "Database error saving imported league {LeagueId} ({GamesCount} games)",
+            _logger.LogError("Database error saving imported league {LeagueId} ({GamesCount} games)",
                 request.LeagueId, gamesImported);
             throw;
         }
@@ -211,9 +211,9 @@ public class FootballSyncService : IFootballSyncService
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateException ex)
+            catch (DbUpdateException)
             {
-                _logger.LogError(ex, "Database error saving fixture backfill for tournament {TournamentId}", tournamentId);
+                _logger.LogError("Database error saving fixture backfill for tournament {TournamentId}", tournamentId);
                 throw;
             }
         }
@@ -339,9 +339,9 @@ public class FootballSyncService : IFootballSyncService
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateException ex)
+            catch (DbUpdateException)
             {
-                _logger.LogError(ex, "Database error saving score sync for tournament {TournamentId}", tournamentId);
+                _logger.LogError("Database error saving score sync for tournament {TournamentId}", tournamentId);
                 throw;
             }
         }
