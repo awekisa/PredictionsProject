@@ -11,6 +11,20 @@ jobs:
   backend-tests:
     name: Backend Tests
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: integration-test-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      MCP_TEST_POSTGRES: Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=integration-test-only
 
     steps:
       - uses: actions/checkout@v4
@@ -65,4 +79,3 @@ jobs:
           npx cypress run --browser chrome
         env:
           VITE_API_URL: http://localhost:5039/api
-
