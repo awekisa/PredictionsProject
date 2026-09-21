@@ -13,6 +13,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Tournament> Tournaments => Set<Tournament>();
     public DbSet<Game> Games => Set<Game>();
     public DbSet<Prediction> Predictions => Set<Prediction>();
+    public DbSet<McpAccessToken> McpAccessTokens => Set<McpAccessToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { changePassword, updateUsername } from '../../api/authApi';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './AccountDrawer.module.css';
+import AgentConnections from './AgentConnections';
 
 interface Props {
   open: boolean;
@@ -101,6 +102,7 @@ export default function AccountDrawer({ open, onClose }: Props) {
             <div className={styles.secHead}>Security</div>
             <PasswordForm />
           </section>
+          <AgentConnections />
         </div>
       </aside>
     </>

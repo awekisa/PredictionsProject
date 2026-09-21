@@ -12,6 +12,7 @@ nul
 # Frontend
 predictions-ui/node_modules/
 predictions-ui/dist/
+predictions-ui/cypress/screenshots/
 
 # Environment / secrets
 predictions-ui/.env

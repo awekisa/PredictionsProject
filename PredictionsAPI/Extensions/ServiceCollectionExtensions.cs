@@ -9,6 +9,7 @@ using PredictionsAPI.FootballApi;
 using PredictionsAPI.Services;
 using PredictionsAPI.Services.Implementations;
 using PredictionsAPI.Services.Interfaces;
+using PredictionsAPI.Security;
 
 namespace PredictionsAPI.Extensions;
 
@@ -56,6 +57,7 @@ public static class ServiceCollectionExtensions
         });
 
         // Services
+        services.AddMcpAccessTokens();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ITournamentService, TournamentService>();
         services.AddScoped<IGameService, GameService>();
