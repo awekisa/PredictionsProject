@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using PredictionsAPI.Data;
+using PredictionsAPI.Mcp;
 using PredictionsAPI.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,6 +40,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddPredictionsServices(builder.Configuration);
+builder.Services.AddPredictionsMcp();
 
 var corsOrigins = builder.Configuration["CorsOrigins"]?.Split(',') ?? ["http://localhost:5173"];
 builder.Services.AddCors(options =>
@@ -67,11 +69,13 @@ await app.Services.SeedRolesAndAdminAsync(builder.Configuration);
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UsePredictionsMcpOriginValidation();
 app.UseCors("ReactDev");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapPredictionsMcp();
 
 app.Run();

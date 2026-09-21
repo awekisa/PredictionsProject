@@ -9,10 +9,12 @@ namespace PredictionsAPI.Services.Implementations;
 public class PredictionService : IPredictionService
 {
     private readonly AppDbContext _context;
+    private readonly TimeProvider _timeProvider;
 
-    public PredictionService(AppDbContext context)
+    public PredictionService(AppDbContext context, TimeProvider? timeProvider = null)
     {
         _context = context;
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     public async Task<PredictionResponse?> PlacePredictionAsync(int gameId, string userId, PlacePredictionRequest request)
@@ -20,7 +22,7 @@ public class PredictionService : IPredictionService
         var game = await _context.Games.FindAsync(gameId);
         if (game is null) return null;
 
-        if (DateTime.UtcNow >= PredictionDeadlineFor(game))
+        if (_timeProvider.GetUtcNow().UtcDateTime >= PredictionDeadlineFor(game))
             return null;
 
         var existing = await _context.Predictions
@@ -39,7 +41,7 @@ public class PredictionService : IPredictionService
                 UserId = userId,
                 HomeGoals = request.HomeGoals,
                 AwayGoals = request.AwayGoals,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = _timeProvider.GetUtcNow().UtcDateTime
             };
             _context.Predictions.Add(existing);
         }
@@ -75,7 +77,7 @@ public class PredictionService : IPredictionService
         var game = await _context.Games.FindAsync(gameId);
         if (game is null) return new List<PredictionResponse>();
 
-        if (DateTime.UtcNow < EnsureUtc(game.StartTime))
+        if (_timeProvider.GetUtcNow().UtcDateTime < EnsureUtc(game.StartTime))
             return new List<PredictionResponse>();
 
         return await _context.Predictions
