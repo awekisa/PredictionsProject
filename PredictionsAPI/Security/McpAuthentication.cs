@@ -37,7 +37,7 @@ public class McpAccessTokenHandler(
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        // Opt-in scheme for the future MCP endpoint only; never a fallback for REST JWTs.
+        // Opt-in scheme for the MCP endpoint only; never a fallback for REST JWTs.
         if (!Request.Path.StartsWithSegments("/mcp")) return AuthenticateResult.NoResult();
         if (!AuthenticationHeaderValue.TryParse(Request.Headers.Authorization, out var header) ||
             !string.Equals(header.Scheme, "Bearer", StringComparison.OrdinalIgnoreCase) || string.IsNullOrEmpty(header.Parameter))

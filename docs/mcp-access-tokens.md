@@ -6,10 +6,9 @@ select permissions. Save the token when created: it is shown only once. Closing
 the section or drawer discards the in-memory display; it is never stored in
 browser local/session storage. If lost, revoke it and create another.
 
-This change is the credential foundation (SME-99). It **does not expose an MCP
-endpoint yet**. SME-100 adds the transport and user tools; SME-101 adds admin
-tools and tested client setup instructions. No agent can use the application
-through MCP until those follow-up changes are available.
+The API now exposes authenticated user tools at `/mcp` (SME-100). See the
+[MCP server guide](mcp-server.md) for transport, tools, pagination and an SDK
+connection example. SME-101 adds admin tools and tested Codex/Hermes setup.
 
 | Scope | Allows | Default |
 | --- | --- | --- |
@@ -33,7 +32,7 @@ containing the raw token. The database stores SHA-256 hashes of credentials with
 cascades token deletion. Never enable request/response body logging or telemetry
 capture on these credential endpoints, and never log Authorization headers.
 
-The future MCP endpoint must explicitly use `McpAuthentication.Scheme` and
+The MCP endpoint explicitly uses `McpAuthentication.Scheme` and
 `McpScopes.Policy(scope)` for each protected operation. The MCP scheme only
 authenticates `/mcp` and its subpaths and is never the default REST scheme.
 Do not use a plain authenticated-user check, a cached role, or a retained
