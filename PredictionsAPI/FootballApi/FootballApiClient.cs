@@ -32,8 +32,8 @@ public class FootballApiClient
         if (!response.IsSuccessStatusCode)
         {
             var msg = TryExtractMessage(content) ?? content;
-            _logger.LogError("football-data.org GetCompetitions failed: HTTP {StatusCode} – {Message}",
-                (int)response.StatusCode, msg);
+            _logger.LogError("football-data.org GetCompetitions failed: HTTP {StatusCode}",
+                (int)response.StatusCode);
             throw new InvalidOperationException($"football-data.org error: {msg}");
         }
 
@@ -54,9 +54,8 @@ public class FootballApiClient
 
         if (!response.IsSuccessStatusCode)
         {
-            var msg = TryExtractMessage(content) ?? content;
-            _logger.LogWarning("football-data.org GetCompetition failed: HTTP {StatusCode} – {Message}",
-                (int)response.StatusCode, msg);
+            _logger.LogWarning("football-data.org GetCompetition failed: HTTP {StatusCode}",
+                (int)response.StatusCode);
             return null;
         }
 
@@ -75,8 +74,8 @@ public class FootballApiClient
         if (!response.IsSuccessStatusCode)
         {
             var msg = TryExtractMessage(content) ?? content;
-            _logger.LogError("football-data.org GetMatches failed: HTTP {StatusCode} – {Message}",
-                (int)response.StatusCode, msg);
+            _logger.LogError("football-data.org GetMatches failed: HTTP {StatusCode}",
+                (int)response.StatusCode);
             throw new InvalidOperationException($"football-data.org error: {msg}");
         }
 
@@ -85,8 +84,8 @@ public class FootballApiClient
 
         if (results.Count == 0)
             _logger.LogWarning(
-                "football-data.org GetMatches returned 0 matches for competition {CompetitionId} season {Season}. Raw: {Body}",
-                competitionId, season, content);
+                "football-data.org GetMatches returned 0 matches for competition {CompetitionId} season {Season}",
+                competitionId, season);
         else
             _logger.LogInformation("football-data.org: GetMatches returned {Count} match(es)", results.Count);
 
@@ -104,9 +103,8 @@ public class FootballApiClient
 
         if (!response.IsSuccessStatusCode)
         {
-            var msg = TryExtractMessage(content) ?? content;
-            _logger.LogWarning("football-data.org GetStandings failed: HTTP {StatusCode} – {Message}",
-                (int)response.StatusCode, msg);
+            _logger.LogWarning("football-data.org GetStandings failed: HTTP {StatusCode}",
+                (int)response.StatusCode);
             return [];
         }
 
@@ -123,13 +121,12 @@ public class FootballApiClient
 
         if (total.Count == 0 && all.Count > 0)
             _logger.LogWarning(
-                "football-data.org GetStandings: no TOTAL entries found. Types present: {Types}. Raw: {Body}",
-                string.Join(", ", all.Select(s => s.Type).Distinct()),
-                content[..Math.Min(500, content.Length)]);
+                "football-data.org GetStandings: no TOTAL entries found. Types present: {Types}",
+                string.Join(", ", all.Select(s => s.Type).Distinct()));
         else if (total.Count == 0)
             _logger.LogWarning(
-                "football-data.org GetStandings: 0 standings returned for competition {CompetitionId} season {Season}. Raw: {Body}",
-                competitionId, season, content[..Math.Min(500, content.Length)]);
+                "football-data.org GetStandings: 0 standings returned for competition {CompetitionId} season {Season}",
+                competitionId, season);
 
         return total;
     }

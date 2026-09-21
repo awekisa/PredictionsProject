@@ -28,7 +28,7 @@ using PredictionsAPI.Tests.Helpers;
 
 namespace PredictionsAPI.Tests;
 
-public class McpProtocolTests
+public partial class McpProtocolTests
 {
     [Theory]
     [InlineData("2025-11-25")]
@@ -39,13 +39,13 @@ public class McpProtocolTests
         await using var client = await host.Connect("alice", [McpScopes.AppRead, McpScopes.PredictionsWrite], version);
         client.NegotiatedProtocolVersion.Should().Be(version);
         var tools = await client.ListToolsAsync();
-        tools.Select(t => t.Name).Should().BeEquivalentTo(new[] { "get_current_user", "list_tournaments", "get_tournament", "list_games", "get_game", "get_my_predictions", "get_game_predictions", "get_tournament_standings", "get_global_standings", "get_user_prediction_details", "get_football_standings", "save_my_prediction" });
+        tools.Select(t => t.Name).Should().BeEquivalentTo(new[] { "get_current_user", "list_tournaments", "get_tournament", "list_games", "get_game", "get_my_predictions", "get_game_predictions", "get_tournament_standings", "get_global_standings", "get_user_prediction_details", "get_football_standings", "save_my_prediction" }.Concat(AdminToolNames));
         foreach (var tool in tools)
         {
             tool.Description.Should().NotBeNullOrEmpty();
             tool.ProtocolTool.InputSchema.GetProperty("type").GetString().Should().Be("object");
             tool.ProtocolTool.OutputSchema.Should().NotBeNull();
-            tool.ProtocolTool.Annotations!.ReadOnlyHint.Should().Be(tool.Name != "save_my_prediction");
+            tool.ProtocolTool.Annotations!.ReadOnlyHint.Should().Be(tool.Name != "save_my_prediction" && (!tool.Name.StartsWith("admin_") || AdminReadNames.Contains(tool.Name)));
         }
         var save = tools.Single(t => t.Name == "save_my_prediction");
         save.ProtocolTool.Annotations!.IdempotentHint.Should().BeTrue();

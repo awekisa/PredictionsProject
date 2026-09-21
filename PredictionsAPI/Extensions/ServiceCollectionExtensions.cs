@@ -71,7 +71,7 @@ public static class ServiceCollectionExtensions
         {
             client.BaseAddress = new Uri(configuration["FootballApi:BaseUrl"]!);
             client.DefaultRequestHeaders.Add("X-Auth-Token", configuration["FootballApi:ApiKey"]);
-        });
+        }).RedactLoggedHeaders(_ => true);
         services.AddScoped<IFootballSyncService, FootballSyncService>();
         services.AddHostedService<ScoreSyncBackgroundService>();
 

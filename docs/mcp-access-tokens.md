@@ -8,7 +8,7 @@ browser local/session storage. If lost, revoke it and create another.
 
 The API now exposes authenticated user tools at `/mcp` (SME-100). See the
 [MCP server guide](mcp-server.md) for transport, tools, pagination and an SDK
-connection example. SME-101 adds admin tools and tested Codex/Hermes setup.
+connection example. See the [connection guide](mcp.md) for admin tools and tested Codex/Hermes setup.
 
 | Scope | Allows | Default |
 | --- | --- | --- |
