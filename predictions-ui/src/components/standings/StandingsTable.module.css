@@ -32,15 +32,15 @@
 }
 
 .rankColumn {
-  width: 8%;
+  width: 7%;
 }
 
 .playerColumn {
-  width: 24%;
+  width: 27%;
 }
 
 .metricColumn {
-  width: 13.6%;
+  width: 11%;
 }
 
 .leaderboardTable th:first-child,
@@ -426,12 +426,12 @@
 
   .leaderboardTable th::after {
     content: attr(data-short);
-    font-size: clamp(0.46rem, 2.45vw, 0.62rem);
+    font-size: clamp(0.65rem, 2.45vw, 0.72rem);
     line-height: 1.15;
   }
 
   .leaderboardTable td {
-    font-size: clamp(0.55rem, 2.55vw, 0.7rem);
+    font-size: clamp(0.6875rem, 2.55vw, 0.75rem);
   }
 }
 

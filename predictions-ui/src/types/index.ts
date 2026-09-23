@@ -103,6 +103,7 @@ export interface PlacePredictionRequest {
 }
 
 export interface StandingEntryResponse {
+  bonusPoints: number;
   position: number;
   userDisplayName: string;
   points: number;

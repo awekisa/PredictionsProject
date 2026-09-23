@@ -6,6 +6,8 @@ public class StandingEntryResponse
 
     public string UserDisplayName { get; set; } = string.Empty;
 
+    public int BonusPoints { get; set; }
+
     public int Points { get; set; }
 
     public int CorrectScores { get; set; }
