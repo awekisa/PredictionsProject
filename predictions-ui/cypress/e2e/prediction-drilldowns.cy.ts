@@ -59,6 +59,7 @@ const standings = [
     position: 1,
     userDisplayName: 'Mitko',
     points: 4,
+    bonusPoints: 0,
     correctOutcomes: 1,
     correctScores: 1,
     totalPredictions: 3,
@@ -182,6 +183,7 @@ describe('prediction standings and drill-downs', () => {
           '1X2',
           'PG',
           '#TP',
+          'Bonus',
           'PTS',
         ]);
       });
@@ -190,8 +192,8 @@ describe('prediction standings and drill-downs', () => {
       cy.contains('td', '4').should('be.visible');
     });
 
-    cy.contains('Exact score = 3 pts | Correct outcome = 1 pt').should('be.visible');
-    cy.contains('CS – Correct score | 1X2 – Correct outcome | PG – Games with points won | #TP – Total number of predictions | PTS – Total points').should('be.visible');
+    cy.contains('Exact score = 3 pts | Correct outcome (excluding exact scores) = 1 pt').should('be.visible');
+    cy.contains('CS – Correct score | 1X2 – Correct outcome | PG – Games with points won | #TP – Total number of predictions | BON – Bonus points | PTS – Total points including bonus').should('be.visible');
     cy.get('[data-testid="prediction-result-section"]').should('not.exist');
     cy.get('[data-testid="prediction-detail-row"]').should('not.exist');
 
@@ -229,7 +231,7 @@ describe('prediction standings and drill-downs', () => {
       expect(el.scrollWidth, 'leaderboard width').to.be.at.most(el.clientWidth + 1);
     });
 
-    cy.get('[data-testid="prediction-leaderboard"] thead th').should('have.length', 7).each(($th) => {
+    cy.get('[data-testid="prediction-leaderboard"] thead th').should('have.length', 8).each(($th) => {
       const rect = $th[0].getBoundingClientRect();
       expect(rect.left, `${$th.text()} left edge`).to.be.at.least(0);
       expect(rect.right, `${$th.text()} right edge`).to.be.at.most(320);
@@ -295,4 +297,67 @@ describe('prediction standings and drill-downs', () => {
 
     cy.get('[data-testid="game-score-button"][data-game-id="102"]').should('not.exist');
   });
+});
+
+for (const view of ['tournament', 'global'] as const) {
+  for (const theme of ['light', 'dark']) {
+    for (const width of [320, 1280]) {
+      it(`shows outcome bonuses in ${view} standings at ${width}px in ${theme} theme`, () => {
+        cy.viewport(width, 900);
+        stubTournament();
+        const rows = [
+          { position: 1, userDisplayName: 'Fifteen Outcomes', correctScores: 2, correctOutcomes: 15, totalPredictions: 20, bonusPoints: 6, points: 27 },
+          { position: 2, userDisplayName: 'Four Outcomes', correctScores: 0, correctOutcomes: 4, totalPredictions: 4, bonusPoints: 0, points: 4 },
+        ];
+        const endpoint = view === 'tournament' ? '/tournaments/1/standings' : '/standings/global';
+        cy.intercept('GET', `**/api${endpoint}`, rows).as('bonusStandings');
+        cy.intercept('GET', `**/api${endpoint}/Fifteen%20Outcomes/predictions?type=total`, playerDetails).as('bonusDetails');
+        cy.visitAuthenticated(view === 'tournament' ? '/tournaments/1' : '/standings');
+        cy.window().then((win) => win.localStorage.setItem('theme', theme));
+        cy.reload();
+        cy.get('html').should('have.attr', 'data-theme', theme);
+        if (view === 'tournament') cy.contains('button', 'Prediction Standings').click();
+        cy.get('[data-testid="prediction-leaderboard"] thead th').then(($headers) => {
+          expect([...$headers].map(h => h.textContent)).to.deep.equal(['Rank #', 'Player Name', 'CS', '1X2', 'PG', '#TP', 'Bonus', 'PTS']);
+        });
+        cy.get('[data-testid="prediction-leaderboard-row"]').first().find('td').then(($cells) => {
+          expect([...$cells].map(c => c.textContent)).to.deep.equal(['1', 'Fifteen Outcomes', '2', '15', '17', '20', '6', '27']);
+        });
+        cy.get('[data-testid="prediction-leaderboard-row"]').last().find('td').eq(6).should('have.text', '0');
+        cy.contains('Every 5 correct outcomes = +2 bonus pts').should('be.visible');
+        cy.contains('PTS – Total points including bonus').should('be.visible');
+        cy.get('[data-testid="prediction-leaderboard"]').then(($table) => {
+          expect($table[0].scrollWidth).to.be.at.most($table[0].clientWidth + 1);
+          expect($table[0].getBoundingClientRect().right).to.be.at.most(width);
+        });
+        cy.get('[data-testid="prediction-leaderboard-row"] td:not(:nth-child(2))').each(($cell) => {
+          // Detect clipped numbers, not just an overflow hidden by the wrapper.
+          const cell = $cell[0];
+          const range = cell.ownerDocument.createRange();
+          range.selectNodeContents(cell);
+          const text = range.getBoundingClientRect();
+          const bounds = cell.getBoundingClientRect();
+          expect(text.left).to.be.at.least(bounds.left);
+          expect(text.right).to.be.at.most(bounds.right);
+        });
+        cy.get('[data-testid="prediction-leaderboard"]').screenshot(`bonus-${view}-${theme}-${width}`);
+        cy.get('[data-testid="prediction-leaderboard-row"]').first().focus().type('{enter}');
+        cy.wait('@bonusDetails');
+        cy.get('[data-testid="player-predictions-detail"]').should('be.visible').within(() => {
+          cy.contains('3 pts').should('be.visible');
+          cy.contains('1 pts').should('be.visible');
+          cy.contains('6 pts').should('not.exist');
+        });
+      });
+    }
+  }
+}
+
+it('renders zero bonus for older standings payloads', () => {
+  cy.intercept('GET', '**/api/standings/global', [
+    { position: 1, userDisplayName: 'Legacy', correctScores: 0, correctOutcomes: 1, totalPredictions: 1, points: 1 },
+  ]);
+  cy.visitAuthenticated('/standings');
+  cy.get('[data-testid="prediction-leaderboard-row"] td').eq(6).should('have.text', '0');
+  cy.get('[data-testid="prediction-leaderboard-row"] td').eq(7).should('have.text', '1');
 });

@@ -103,6 +103,7 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
             <col className={styles.metricColumn} />
             <col className={styles.metricColumn} />
             <col className={styles.metricColumn} />
+            <col className={styles.metricColumn} />
           </colgroup>
           <thead>
             <tr>
@@ -112,6 +113,7 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
               <th data-short="1X2">1X2</th>
               <th data-short="PG">PG</th>
               <th data-short="#TP">#TP</th>
+              <th data-short="BON">Bonus</th>
               <th data-short="PTS">PTS</th>
             </tr>
           </thead>
@@ -136,6 +138,7 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
                 <td className={styles.centered}>{standing.correctOutcomes}</td>
                 <td className={styles.centered}>{standing.correctScores + standing.correctOutcomes}</td>
                 <td className={styles.centered}>{standing.totalPredictions}</td>
+                <td className={styles.centered}>{standing.bonusPoints ?? 0}</td>
                 <td className={styles.centered}>{standing.points}</td>
               </tr>
             ))}
@@ -143,8 +146,8 @@ export default function StandingsTable({ standings, tournamentId }: Props) {
         </table>
       </div>
 
-      <div className={styles.note}>Exact score = 3 pts | Correct outcome = 1 pt</div>
-      <div className={styles.legend}>CS – Correct score | 1X2 – Correct outcome | PG – Games with points won | #TP – Total number of predictions | PTS – Total points</div>
+      <div className={styles.note}>Exact score = 3 pts | Correct outcome (excluding exact scores) = 1 pt | Every 5 correct outcomes = +2 bonus pts</div>
+      <div className={styles.legend}>CS – Correct score | 1X2 – Correct outcome | PG – Games with points won | #TP – Total number of predictions | BON – Bonus points | PTS – Total points including bonus</div>
 
       {selectedPlayer && (
         <div className={styles.modalBackdrop} role="dialog" aria-modal="true">

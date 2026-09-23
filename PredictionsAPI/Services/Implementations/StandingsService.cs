@@ -65,10 +65,13 @@ public class StandingsService : IStandingsService
                     }
                 }
 
+                int bonusPoints = (correctOutcomes / 5) * 2;
+
                 return new
                 {
                     group.Key.DisplayName,
-                    Points = points,
+                    Points = points + bonusPoints,
+                    BonusPoints = bonusPoints,
                     CorrectScores = correctScores,
                     CorrectOutcomes = correctOutcomes,
                     TotalPredictions = totalPredictions
@@ -87,6 +90,7 @@ public class StandingsService : IStandingsService
                 Position = i + 1,
                 UserDisplayName = userStats[i].DisplayName,
                 Points = userStats[i].Points,
+                BonusPoints = userStats[i].BonusPoints,
                 CorrectScores = userStats[i].CorrectScores,
                 CorrectOutcomes = userStats[i].CorrectOutcomes,
                 TotalPredictions = userStats[i].TotalPredictions
@@ -213,10 +217,13 @@ public class StandingsService : IStandingsService
                     }
                 }
 
+                int bonusPoints = (correctOutcomes / 5) * 2;
+
                 return new
                 {
                     group.Key.DisplayName,
-                    Points = points,
+                    Points = points + bonusPoints,
+                    BonusPoints = bonusPoints,
                     CorrectScores = correctScores,
                     CorrectOutcomes = correctOutcomes,
                     TotalPredictions = totalPredictions
@@ -235,6 +242,7 @@ public class StandingsService : IStandingsService
                 Position = i + 1,
                 UserDisplayName = userStats[i].DisplayName,
                 Points = userStats[i].Points,
+                BonusPoints = userStats[i].BonusPoints,
                 CorrectScores = userStats[i].CorrectScores,
                 CorrectOutcomes = userStats[i].CorrectOutcomes,
                 TotalPredictions = userStats[i].TotalPredictions
