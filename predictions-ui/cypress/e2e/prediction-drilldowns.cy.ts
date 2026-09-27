@@ -164,6 +164,86 @@ function stubTournament() {
 }
 
 describe('prediction standings and drill-downs', () => {
+  it('reveals scoreless predictions at kickoff without a refresh or a score update', () => {
+    cy.clock(Date.parse('2026-09-27T18:00:00Z'), ['Date', 'setInterval', 'clearInterval']);
+    stubTournament();
+    cy.intercept('GET', '**/api/tournaments/1/games', [{
+      ...liveGame,
+      startTime: '2026-09-27T18:00:02Z',
+      predictionDeadline: '2026-09-27T17:55:00Z',
+      homeGoals: null,
+      awayGoals: null,
+    }]);
+    cy.intercept('GET', '**/api/games/103/predictions', liveGamePredictions).as('kickoffPredictions');
+    cy.visitAuthenticated('/tournaments/1');
+    cy.contains('button', 'All').click();
+    cy.contains('No Prediction').should('be.visible');
+    // Even a provider Live flag and an earlier deadline must not reveal predictions early.
+    cy.get('[data-testid="game-score-button"]').should('not.exist');
+    cy.get('@kickoffPredictions.all').should('have.length', 0);
+    cy.tick(1999);
+    cy.get('[data-testid="game-score-button"]').should('not.exist');
+    cy.tick(1);
+    cy.get('[data-testid="game-score-button"]')
+      .should('have.text', 'vs')
+      .and('have.attr', 'aria-label', 'View predictions for Argentina vs Portugal')
+      .click();
+    cy.get('[data-testid="game-predictions-detail"]').should('be.visible');
+    cy.wait('@kickoffPredictions');
+    cy.get('[data-testid="game-predictions-detail"]').within(() => {
+      cy.contains('Argentina vs Portugal').should('be.visible');
+      cy.contains('[data-testid="game-prediction-row"]', 'Mitko')
+        .should('have.attr', 'data-outcome', 'pending');
+      cy.contains('1:1').should('be.visible');
+      cy.get('[aria-label="Points pending"]').should('have.text', '—');
+      cy.contains('0 pts').should('not.exist');
+    });
+  });
+
+  for (const scores of [{ homeGoals: null, awayGoals: null }, { homeGoals: 0, awayGoals: null }, { homeGoals: null, awayGoals: 0 }]) {
+    it(`opens pending predictions on mobile with scores ${JSON.stringify(scores)}`, () => {
+      cy.viewport(320, 720);
+      stubTournament();
+      cy.intercept('GET', '**/api/tournaments/1/games', [{ ...liveGame, ...scores }]);
+      cy.intercept('GET', '**/api/games/103/predictions', liveGamePredictions);
+      cy.visitAuthenticated('/tournaments/1');
+      cy.contains('button', 'All').click();
+      cy.get('[data-testid="game-score-button"]').should('have.text', 'vs').click();
+      cy.get('[data-testid="game-prediction-row"]')
+        .should('have.attr', 'data-outcome', 'pending')
+        .and('have.css', 'background-color', 'rgba(0, 0, 0, 0)');
+      cy.get('[aria-label="Points pending"]').should('have.text', '—');
+    });
+  }
+
+  it('keeps loading and empty states available for a scoreless live game', () => {
+    stubTournament();
+    cy.intercept('GET', '**/api/tournaments/1/games', [{ ...liveGame, homeGoals: null, awayGoals: null }]);
+    let releaseResponse!: () => void;
+    const responseGate = new Promise<void>((resolve) => { releaseResponse = resolve; });
+    // Reply explicitly after observing the loading state.
+    cy.intercept('GET', '**/api/games/103/predictions', (req) => responseGate.then(() => req.reply([])));
+    cy.visitAuthenticated('/tournaments/1');
+    cy.contains('button', 'All').click();
+    cy.get('[data-testid="game-score-button"]').click();
+    cy.contains('Loading predictions...').should('be.visible').then(() => releaseResponse());
+    cy.contains('No predictions for this game yet.').should('be.visible');
+  });
+
+  it('treats a recorded live 0:0 as a real score', () => {
+    stubTournament();
+    cy.intercept('GET', '**/api/tournaments/1/games', [{ ...liveGame, homeGoals: 0, awayGoals: 0 }]);
+    cy.intercept('GET', '**/api/games/103/predictions', [{ ...liveGamePredictions[0], homeGoals: 0, awayGoals: 0 }]);
+    cy.visitAuthenticated('/tournaments/1');
+    cy.contains('button', 'All').click();
+    cy.get('[data-testid="game-score-button"]').should('have.text', '0 : 0').focus();
+    cy.focused().should('have.attr', 'data-testid', 'game-score-button')
+      .and('have.prop', 'tagName', 'BUTTON').click();
+    cy.get('[data-testid="game-prediction-row"]').should('have.attr', 'data-outcome', 'exact-score');
+    cy.contains('3 pts').should('be.visible');
+    cy.get('[aria-label="Points pending"]').should('not.exist');
+  });
+
   it('shows a leaderboard-only standings table and opens player predictions from a row click', () => {
     stubTournament();
     cy.intercept('GET', '**/api/tournaments/1/standings/Mitko/predictions?type=total', {
