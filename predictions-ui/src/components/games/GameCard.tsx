@@ -28,6 +28,17 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced, onFin
   const [showInputs, setShowInputs] = useState(false);
   const homeNameRef = useRef<HTMLSpanElement>(null);
   const awayNameRef = useRef<HTMLSpanElement>(null);
+  const [, refreshClock] = useState(0);
+
+  useEffect(() => {
+    if (isStarted(game.startTime)) return;
+    // Keep kickoff-dependent controls current even when no score update arrives.
+    const timer = window.setInterval(() => {
+      refreshClock((tick) => tick + 1);
+      if (isStarted(game.startTime)) window.clearInterval(timer);
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [game.startTime]);
 
   useEffect(() => {
     const MAX_WIDTH = 80;
@@ -184,7 +195,7 @@ export default function GameCard({ game, myPrediction, onPredictionPlaced, onFin
           <span ref={homeNameRef} className={styles.homeTeam}>{displayName(game.homeTeam)}</span>
         </div>
         <TeamCrest teamName={game.homeTeam} fallbackUrl={game.homeCrestUrl} className={styles.homeCrest} />
-        {hasStarted && hasScore && onFinishedScoreClick ? (
+        {hasStarted && onFinishedScoreClick ? (
           <button
             type="button"
             className={styles.scoreButton}

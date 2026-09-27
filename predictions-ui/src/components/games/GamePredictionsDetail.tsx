@@ -39,7 +39,8 @@ export default function GamePredictionsDetail({ game, onClose }: Props) {
     };
   }, [game.id]);
 
-  const actual = game.homeGoals !== null && game.awayGoals !== null ? `${game.homeGoals}:${game.awayGoals}` : 'vs';
+  const hasScore = game.homeGoals !== null && game.awayGoals !== null;
+  const actual = hasScore ? `${game.homeGoals}:${game.awayGoals}` : 'vs';
 
   return (
     <section className={styles.panel} data-testid="game-predictions-detail">
@@ -81,13 +82,15 @@ export default function GamePredictionsDetail({ game, onClose }: Props) {
                 return (
                   <tr
                     key={prediction.id}
-                    className={outcomeClass(points)}
-                    data-outcome={outcomeLabel(points)}
+                    className={hasScore ? outcomeClass(points) : styles.pendingOutcome}
+                    data-outcome={hasScore ? outcomeLabel(points) : 'pending'}
                     data-testid="game-prediction-row"
                   >
                     <td>{prediction.userDisplayName}</td>
                     <td className={styles.predictionScore}>{prediction.homeGoals}:{prediction.awayGoals}</td>
-                    <td className={styles.pointsEarned}>{points} pts</td>
+                    <td className={styles.pointsEarned} aria-label={hasScore ? undefined : 'Points pending'}>
+                      {hasScore ? `${points} pts` : '—'}
+                    </td>
                   </tr>
                 );
               })}
