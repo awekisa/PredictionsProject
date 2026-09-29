@@ -15,6 +15,10 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Prediction> Predictions => Set<Prediction>();
     public DbSet<McpAccessToken> McpAccessTokens => Set<McpAccessToken>();
 
+    public DbSet<McpOAuthClient> McpOAuthClients => Set<McpOAuthClient>();
+    public DbSet<McpOAuthRequest> McpOAuthRequests => Set<McpOAuthRequest>();
+    public DbSet<McpOAuthRefreshToken> McpOAuthRefreshTokens => Set<McpOAuthRefreshToken>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

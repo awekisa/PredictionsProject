@@ -4,6 +4,7 @@ export type AgentScope = 'app:read' | 'predictions:write' | 'admin:read' | 'admi
 
 export interface AgentConnection {
   id: string;
+  isOAuth?: boolean;
   name: string;
   scopes: AgentScope[];
   createdAt: string;

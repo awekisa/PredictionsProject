@@ -7,11 +7,13 @@ using PredictionsAPI.Data;
 using PredictionsAPI.DTOs.Auth;
 using PredictionsAPI.Entities;
 using PredictionsAPI.Security;
+using PredictionsAPI.OAuth;
+using Microsoft.Extensions.Options;
 using PredictionsAPI.Services.Interfaces;
 
 namespace PredictionsAPI.Services.Implementations;
 
-public class McpAccessTokenService(AppDbContext db, TimeProvider clock) : IMcpAccessTokenService
+public class McpAccessTokenService(AppDbContext db, TimeProvider clock, IOptions<McpOAuthOptions>? oauth = null) : IMcpAccessTokenService
 {
     private const string Prefix = "pred_mcp_";
 
@@ -54,6 +56,14 @@ public class McpAccessTokenService(AppDbContext db, TimeProvider clock) : IMcpAc
     {
         var token = await db.McpAccessTokens.SingleOrDefaultAsync(t => t.Id == tokenId && t.UserId == userId, cancellationToken);
         if (token is null || !await db.Users.AnyAsync(u => u.Id == userId, cancellationToken)) return false;
+        if (db.Database.IsRelational())
+        {
+            await db.McpAccessTokens.Where(t => t.Id == tokenId && t.UserId == userId)
+                .ExecuteUpdateAsync(s => s.SetProperty(t => t.RevokedAt, t => t.RevokedAt ?? clock.GetUtcNow())
+                    .SetProperty(t => t.Version, Guid.NewGuid()), cancellationToken);
+            return true;
+        }
+        token.Version = Guid.NewGuid();
         token.RevokedAt ??= clock.GetUtcNow();
         await db.SaveChangesAsync(cancellationToken);
         return true;
@@ -100,7 +110,9 @@ public class McpAccessTokenService(AppDbContext db, TimeProvider clock) : IMcpAc
             (!McpScopes.IsAdmin(scope) || await IsAdminAsync(userId!, cancellationToken));
     }
 
-    private bool IsActive(McpAccessToken? token) => token is not null && token.RevokedAt is null && token.ExpiresAt > clock.GetUtcNow();
+    private bool IsActive(McpAccessToken? token) => token is not null && token.RevokedAt is null && token.ExpiresAt > clock.GetUtcNow() &&
+        (token.OAuthClientId is null || (token.AccessTokenExpiresAt > clock.GetUtcNow() &&
+            token.Resource == (oauth?.Value ?? new McpOAuthOptions()).Resource));
     private static string Hash(string credential) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(credential)));
     private Task<List<string>> GetRolesAsync(string userId, CancellationToken cancellationToken) =>
         db.UserRoles.AsNoTracking().Where(ur => ur.UserId == userId)
@@ -110,5 +122,5 @@ public class McpAccessTokenService(AppDbContext db, TimeProvider clock) : IMcpAc
             .Join(db.Roles, ur => ur.RoleId, r => r.Id, (_, r) => r.NormalizedName)
             .AnyAsync(name => name == "ADMIN", cancellationToken);
     private static McpAccessTokenResponse ToResponse(McpAccessToken t) =>
-        new(t.Id, t.Name, t.Scopes, t.CreatedAt, t.ExpiresAt, t.LastUsedAt, t.RevokedAt);
+        new(t.Id, t.Name, t.Scopes, t.CreatedAt, t.ExpiresAt, t.LastUsedAt, t.RevokedAt, t.OAuthClientId is not null);
 }

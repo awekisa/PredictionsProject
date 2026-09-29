@@ -26,6 +26,75 @@ Removing Admin blocks subsequent admin calls even with an existing connection.
 Deletion of the owner invalidates its connections. There are no role, password,
 token-management, SQL or arbitrary HTTP tools.
 
+## Claude (custom connector)
+
+After the reviewed release, add `https://predictionsproject.onrender.com/mcp`
+under **Customize → Connectors → Add custom connector** in Claude. Leave the
+advanced client credentials empty. Sign in with your normal Predictions account,
+review the client and return hostname, select permissions, and allow the connection.
+Only current administrators see requested admin permissions. Start with `app:read`;
+write scopes stay unchecked until you select them. Ask Claude to call
+`get_current_user` and confirm the account and granted scopes.
+
+Claude can use its hosted Client ID Metadata Document or Dynamic Client
+Registration. Both use authorization code + S256 PKCE. The callback is exactly
+`https://claude.ai/api/mcp/auth_callback`, confirmed against
+[Anthropic's authentication documentation](https://claude.com/docs/connectors/building/authentication).
+Claude Code's loopback callbacks are outside this hosted-connector change.
+
+OAuth connections appear in **Account settings → Agent connections**, labeled
+**OAuth sign-in**, with client name, permissions, created date and last used date.
+Revoke there to invalidate both access and refresh tokens. Access lasts one hour;
+refresh tokens rotate, with a fixed 90-day connection lifetime. Reusing an old
+refresh token revokes that connection. Reconnect to grant different permissions
+or after expiry. Refresh never adds a permission.
+
+Claude's connector traffic comes from Anthropic's cloud. No-Origin calls and the
+exact `https://claude.ai` Origin are accepted; arbitrary Origins remain blocked.
+Anthropic does not document a guaranteed Origin value, so actual client headers
+still need confirmation in the post-release smoke test (record only Origin and
+status, never credentials). A Claude organization's separate network/proxy allowlist
+is managed by its administrator, outside this repository.
+
+### Server configuration and implementation
+
+- `Mcp__OAuth__Issuer`: canonical API origin, default `https://predictionsproject.onrender.com`.
+- `Mcp__OAuth__WebsiteOrigin`: consent website origin, default `https://predictions-project.vercel.app`.
+- `Mcp__OAuth__AllowedRedirectUris__0`: exact HTTPS callback above; any additional callbacks must be explicitly configured. Wildcards, fragments and user information are rejected.
+
+Origins have no trailing slash. For disposable local testing, set the issuer and
+website origin to their respective localhost ports. Keep the deployed frontend's
+`VITE_API_URL` pointing to the matching API and its origin in `CorsOrigins`.
+No client credentials belong in frontend configuration.
+
+The existing C# MCP SDK 2.2.0 supplies RFC 9728 metadata and the 401 challenge.
+Both `/.well-known/oauth-protected-resource` and its `/mcp` suffix work; the
+resource is the canonical issuer plus `/mcp`. The API also exposes RFC 8414 metadata
+at `/.well-known/oauth-authorization-server`, `/oauth/register`, `/oauth/authorize`
+and `/oauth/token`. Issuer/audience values never come from untrusted Host headers,
+including behind the TLS-terminating proxy. `resource` is required for authorization,
+code exchange and refresh. Only the MCP endpoint accepts the issued access tokens.
+
+Registration supports public (`none`) and confidential (`client_secret_post`,
+`client_secret_basic`) clients. Confidential secrets are returned once and hashed
+at rest. Client metadata is fetched only over public HTTPS on port 443, without
+redirects or proxies, with DNS/socket checks, a five-second timeout and a 64 KiB
+limit. Additional advertised metadata grant types do not enable additional grants.
+Authorization requests expire after ten minutes, approved codes after two minutes.
+Codes, refresh credentials and access credentials are stored only as hashes.
+Concurrent exchanges and revocation use database concurrency checks and atomic
+transactions. Existing account/role/scope checks govern both connection types.
+
+OAuth endpoints have a shared 120-request/minute limit per API process. PostgreSQL
+stores registrations, pending requests and consumed refresh hashes; monitor table
+growth and retain consumed hashes for the connection lifetime to detect replay.
+`Mcp__Enabled=false` disables OAuth endpoints and metadata along with `/mcp`.
+Do not log authorization parameters, token bodies, passwords or credentials.
+
+Protocol references: [current MCP authorization](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization),
+[C# SDK authentication implementation at v2.2.0](https://github.com/modelcontextprotocol/csharp-sdk/tree/v2.2.0/src/ModelContextProtocol.AspNetCore/Authentication),
+and [Claude's live client metadata](https://claude.ai/oauth/mcp-oauth-client-metadata).
+
 ## Codex
 
 [Official Codex MCP configuration](https://learn.chatgpt.com/docs/extend/mcp?surface=cli)
@@ -107,7 +176,7 @@ Tool annotations describe risks but do not grant permission or replace approval.
 
 ## Expiry, rotation and revocation
 
-Tokens expire after the selected 7, 30 or 90 days. To rotate, create a new token
+Manually created tokens expire after the selected 7, 30 or 90 days. To rotate, create a new token
 with the same required scopes, replace that client's secret environment value,
 restart/reconnect and verify identity, then revoke the old connection. Revoke a
 lost token immediately in Agent connections. A revoked/expired token fails the
@@ -123,7 +192,7 @@ other tokens and never authenticate normal website REST routes.
 | HTTP 403 before a tool runs | A supplied Origin is not allowed. Native clients normally omit Origin; browser clients need an exact configured Origin and CORS permission. |
 | Unavailable server, 404 or timeout | Check the backend endpoint, deployed release and `Mcp__Enabled`. A sleeping host may need startup time. Inspect status-only server logs; don't automatically retry writes. |
 | Tools missing/stale | Refresh/restart the client; check client include/exclude filters and server release. This version advertises 30 tools. Knowing a tool name does not bypass permissions. |
-| OAuth login fails | This server uses account-created bearer tokens; do not run an OAuth login flow. |
+| OAuth login fails | Confirm the OAuth-capable release is deployed, metadata is reachable, issuer/website origins match, and the callback is exact. Restart an expired consent request from Claude. Codex/Hermes manual token configurations do not need an OAuth login. |
 | Football provider failure | Check the configured provider credentials/quota through the website or status tool. Errors intentionally omit provider response bodies. |
 
 ## Release and emergency disable
@@ -138,7 +207,7 @@ Render terminates public HTTPS and forwards to the Docker API on port 8080; see
 [Render's documented proxy behavior](https://render.com/docs/web-services#connecting-from-the-public-internet).
 Use HTTPS directly. No affinity or long-lived GET/SSE session is required. Set
 `Mcp__AllowedOrigins__0` to exact allowed browser origins or retain `CorsOrigins`.
-Native no-Origin calls are allowed. Every MCP response has `Cache-Control: no-store`.
+Native no-Origin calls and the exact Claude Origin are allowed. Every MCP response has `Cache-Control: no-store`.
 
 To disable only MCP, set **`Mcp__Enabled=false`** in the API environment and restart
 or redeploy the service. `/mcp` then returns 404; website JWT routes keep working.
@@ -178,3 +247,26 @@ provider-error redaction and the disable switch; frontend production build;
 identity/discovery/read smoke. Local client tests do not establish production
 proxy compatibility or a completed release. Do not mark this release step complete
 until those results are recorded.
+
+## OAuth verification record (SME-106, 2026-09-29)
+
+Local .NET 9 tests: 135 passed, none skipped, with disposable PostgreSQL databases.
+Coverage includes metadata/challenge, PKCE and redirect rejection, public/confidential
+registration, CIMD metadata validation, code/refresh expiry and replay, concurrent
+exchanges, refresh racing revocation, scope/role checks, owner cascade, manual tokens,
+and real SDK tool discovery and calls. The frontend production build and changed-file
+lint pass; the complete Electron Cypress suite passes 55 tests, including four OAuth
+journeys. Global lint reports seven pre-existing errors in unchanged files.
+
+The configured Codex connection still returned the expected account/scopes using its
+existing production token; that is a compatibility baseline, not a test of unreleased
+code. `hermes mcp test predictions` reports that the server is absent from the current
+Hermes configuration; no profile or client configuration was changed to manufacture
+a pass. Claude's public client metadata and documented callback were checked, but no
+production OAuth flow or actual Claude Origin capture was performed.
+
+**Human gate:** review this authentication change and the unprotected branch checks
+before merging. After a separately approved tagged release, verify Claude sign-in,
+selected scopes, tools, refresh and revocation against the released HTTPS endpoint;
+repeat the existing Codex/Hermes read-only client checks. Do not equate local tests
+with those pending acceptance checks.

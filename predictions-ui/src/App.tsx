@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import AdminRoute from './components/common/AdminRoute';
 import AppLayout from './components/layout/AppLayout';
+import OAuthConsentPage from './components/account/OAuthConsentPage';
 import LoginPage from './components/auth/LoginPage';
 import RegisterPage from './components/auth/RegisterPage';
 import TournamentListPage from './components/tournaments/TournamentListPage';
@@ -16,6 +17,7 @@ import AdminUsersPage from './components/admin/AdminUsersPage';
 export default function App() {
   return (
     <Routes>
+      <Route path="/oauth/consent" element={<OAuthConsentPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 

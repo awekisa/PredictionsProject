@@ -95,7 +95,7 @@ public static class McpHosting
                 ?? config["CorsOrigins"]?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
                 ?? ["http://localhost:5173"];
             if (context.Request.Headers.TryGetValue("Origin", out var origin) &&
-                (origin.Count != 1 || !allowed.Contains(origin[0], StringComparer.Ordinal)))
+                (origin.Count != 1 || (!allowed.Contains(origin[0], StringComparer.Ordinal) && origin[0] != "https://claude.ai")))
             {
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 return;

@@ -19,7 +19,7 @@ public static class McpAuthentication
     {
         services.TryAddSingleton(TimeProvider.System);
         services.AddScoped<IMcpAccessTokenService, McpAccessTokenService>();
-        services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, McpAccessTokenHandler>(Scheme, _ => { });
+        services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, McpAccessTokenHandler>(Scheme, o => o.ForwardChallenge = PredictionsAPI.OAuth.McpOAuthHosting.ChallengeScheme);
         services.AddScoped<IAuthorizationHandler, McpScopeHandler>();
         services.AddAuthorization(options =>
         {

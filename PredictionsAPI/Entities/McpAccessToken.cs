@@ -11,6 +11,10 @@ public class McpAccessToken
     [JsonIgnore]
     public string TokenHash { get; set; } = string.Empty;
     public string[] Scopes { get; set; } = [];
+    public string? OAuthClientId { get; set; }
+    public string? Resource { get; set; }
+    public DateTimeOffset? AccessTokenExpiresAt { get; set; }
+    public Guid Version { get; set; } = Guid.NewGuid();
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset ExpiresAt { get; set; }
     public DateTimeOffset? LastUsedAt { get; set; }

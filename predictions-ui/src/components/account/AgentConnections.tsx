@@ -5,12 +5,7 @@ import {
 } from '../../api/agentConnectionsApi';
 import styles from './AccountDrawer.module.css';
 
-const permissions: { scope: AgentScope; label: string; description: string }[] = [
-  { scope: 'app:read', label: 'View app information', description: 'Read tournaments, fixtures, standings and permitted predictions.' },
-  { scope: 'predictions:write', label: 'Save my predictions', description: 'Create or update your predictions before the deadline.' },
-  { scope: 'admin:read', label: 'View admin information', description: 'Read user, prediction and football-provider administration data.' },
-  { scope: 'admin:write', label: 'Manage the app', description: 'Create, change or delete tournaments, games, results, users and predictions, and run football imports or syncs.' },
-];
+import { permissions } from './agentPermissions';
 
 function statusOf(connection: AgentConnection): string {
   if (connection.revokedAt) return 'Revoked';
@@ -145,6 +140,7 @@ function ConnectionManager() {
         {connections.map((connection) => <li key={connection.id} className={styles.connectionCard}>
           <div className={styles.connectionTitle}><strong>{connection.name}</strong><span>{statusOf(connection)}</span></div>
           <dl className={styles.connectionMeta}>
+            <dt>Connection type</dt><dd>{connection.isOAuth ? 'OAuth sign-in' : 'Manual access token'}</dd>
             <dt>Permissions</dt><dd>{connection.scopes.map((scope) => permissions.find((item) => item.scope === scope)?.label ?? scope).join(', ')}</dd>
             <dt>Created</dt><dd>{dateLabel(connection.createdAt)}</dd>
             <dt>Expires</dt><dd>{dateLabel(connection.expiresAt)}</dd>
@@ -152,7 +148,7 @@ function ConnectionManager() {
             {connection.revokedAt && <><dt>Revoked</dt><dd>{dateLabel(connection.revokedAt)}</dd></>}
           </dl>
           {!connection.revokedAt && <button type="button" disabled={revoking !== null} aria-label={`Revoke ${connection.name}`} onClick={() => revoke(connection)}>
-            {revoking === connection.id ? 'Revoking…' : 'Revoke token'}
+            {revoking === connection.id ? 'Revoking…' : 'Revoke connection'}
           </button>}
         </li>)}
       </ul>}
