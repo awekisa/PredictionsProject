@@ -1,0 +1,5 @@
+.container { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; background: var(--color-bg); }
+.card { width: 100%; max-width: 560px; padding: 2rem; background: var(--color-surface); border-radius: var(--radius); box-shadow: var(--shadow-md); display: flex; flex-direction: column; gap: 1rem; }
+.card h1 { font-size: 1.5rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 1rem; }
+.identifier { overflow-wrap: anywhere; font-size: .85rem; margin-top: .5rem; }

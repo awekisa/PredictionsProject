@@ -62,7 +62,7 @@ public class McpPostgresTests
                 await db.Users.Where(u => u.Id == "alice").ExecuteDeleteAsync();
                 (await db.McpAccessTokens.AnyAsync()).Should().BeFalse();
                 (await service.AuthenticateAsync(credential)).Should().BeNull();
-                var previousMigration = (await db.Database.GetAppliedMigrationsAsync()).Reverse().Skip(1).First();
+                var previousMigration = (await db.Database.GetAppliedMigrationsAsync()).TakeWhile(m => !m.EndsWith("AddMcpAccessTokens")).Last();
                 await db.GetService<IMigrator>().MigrateAsync(previousMigration);
                 (await db.Database.GetAppliedMigrationsAsync()).Should().NotContain(m => m.EndsWith("AddMcpAccessTokens"));
                 await db.Database.MigrateAsync();

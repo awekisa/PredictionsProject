@@ -18,6 +18,8 @@ using PredictionsAPI.DTOs.Auth;
 using PredictionsAPI.Entities;
 using PredictionsAPI.Extensions;
 using PredictionsAPI.Security;
+using PredictionsAPI.OAuth;
+using PredictionsAPI.Mcp;
 using PredictionsAPI.Tests.Helpers;
 
 namespace PredictionsAPI.Tests;
@@ -101,14 +103,14 @@ public class McpAuthenticationIntegrationTests
         (await client.PostAsJsonAsync("/api/auth/me/agent-connections", new { name = "Stale", scopes = new[] { "admin:read" } })).StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    private static async Task<string> LoginAsync(HttpClient client, string name)
+    internal static async Task<string> LoginAsync(HttpClient client, string name)
     {
         var response = await client.PostAsJsonAsync("/api/auth/login", new { email = $"{name}@test.com", password = "TestPass123!" });
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<AuthResponse>())!.Token;
     }
 
-    private static async Task<TestServer> CreateServerAsync(CapturedLogs? logs = null)
+    internal static async Task<TestServer> CreateServerAsync(CapturedLogs? logs = null, Action<IServiceCollection>? configure = null)
     {
         var name = Guid.NewGuid().ToString();
         var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -124,18 +126,24 @@ public class McpAuthenticationIntegrationTests
             if (logs is not null) services.AddLogging(builder => builder.AddProvider(logs));
             services.AddSingleton<IConfiguration>(config);
             services.AddPredictionsServices(config);
+            services.AddPredictionsMcp();
             services.RemoveAll<AppDbContext>();
             services.AddScoped(_ => DbContextFactory.Create(name));
             services.RemoveAll<IHostedService>();
             services.AddControllers().AddApplicationPart(typeof(AuthController).Assembly);
+            configure?.Invoke(services);
         }).Configure(app =>
         {
             app.UseRouting();
+            app.UseRateLimiter();
+            app.UseMcpOAuth();
+            app.UsePredictionsMcpOriginValidation();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapPredictionsMcp();
                 endpoints.MapGet("/rest", () => "ok").RequireAuthorization();
                 endpoints.MapGet("/mcp/read", () => "ok").RequireAuthorization(McpScopes.Policy(McpScopes.AppRead));
                 endpoints.MapGet("/mcp/admin", () => "ok").RequireAuthorization(McpScopes.Policy(McpScopes.AdminRead));
@@ -155,7 +163,7 @@ public class McpAuthenticationIntegrationTests
         return server;
     }
 
-    private sealed class CapturedLogs : ILoggerProvider
+    internal sealed class CapturedLogs : ILoggerProvider
     {
         public ConcurrentQueue<string> Messages { get; } = new();
         public ILogger CreateLogger(string categoryName) => new CaptureLogger(Messages);

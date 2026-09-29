@@ -14,7 +14,7 @@ public class CreateMcpAccessTokenRequest
 
 public record McpAccessTokenResponse(
     Guid Id, string Name, string[] Scopes, DateTimeOffset CreatedAt,
-    DateTimeOffset ExpiresAt, DateTimeOffset? LastUsedAt, DateTimeOffset? RevokedAt);
+    DateTimeOffset ExpiresAt, DateTimeOffset? LastUsedAt, DateTimeOffset? RevokedAt, bool IsOAuth = false);
 
 // Keep the credential out of generated ToString() output as well as list responses.
 public class CreatedMcpAccessTokenResponse

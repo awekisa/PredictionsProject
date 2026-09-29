@@ -10,6 +10,7 @@ using PredictionsAPI.Services;
 using PredictionsAPI.Services.Implementations;
 using PredictionsAPI.Services.Interfaces;
 using PredictionsAPI.Security;
+using PredictionsAPI.OAuth;
 
 namespace PredictionsAPI.Extensions;
 
@@ -58,6 +59,7 @@ public static class ServiceCollectionExtensions
 
         // Services
         services.AddMcpAccessTokens();
+        services.AddMcpOAuth(configuration);
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ITournamentService, TournamentService>();
         services.AddScoped<IGameService, GameService>();

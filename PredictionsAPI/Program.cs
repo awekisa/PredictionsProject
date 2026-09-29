@@ -3,6 +3,7 @@ using Microsoft.OpenApi.Models;
 using PredictionsAPI.Data;
 using PredictionsAPI.Mcp;
 using PredictionsAPI.Extensions;
+using PredictionsAPI.OAuth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,6 +73,9 @@ app.UseSwaggerUI();
 app.UsePredictionsMcpOriginValidation();
 app.UseCors("ReactDev");
 
+app.UseRouting();
+app.UseRateLimiter();
+app.UseMcpOAuth();
 app.UseAuthentication();
 app.UseAuthorization();
 

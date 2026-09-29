@@ -8,6 +8,9 @@ public class McpAccessTokenConfiguration : IEntityTypeConfiguration<McpAccessTok
 {
     public void Configure(EntityTypeBuilder<McpAccessToken> builder)
     {
+        builder.Property(t => t.OAuthClientId).HasMaxLength(2048);
+        builder.Property(t => t.Resource).HasMaxLength(2048);
+        builder.Property(t => t.Version).IsConcurrencyToken();
         builder.HasKey(t => t.Id);
         builder.Property(t => t.Name).HasMaxLength(100).IsRequired();
         builder.Property(t => t.TokenHash).HasMaxLength(64).IsRequired();
